@@ -21,15 +21,18 @@ const STORAGE_KEYS = {
 // DADOS PADRÃO
 // ========================================
 const DEFAULT_ADMIN = {
-    email: 'whybson@hotmail.com.br',
-    password: 'senha', // Mudar em produção
+    phone: '81992974918',
+    password: 'jodono',
     name: 'dono'
 };
 
 const DEFAULT_SETTINGS = {
     storeName: 'JóBurguers',
     storeAddress: 'Rua Pasárgada, Bairro: Três Marias - Carpina, PE',
-    storePhone: (81) 98933-4497',
+    // storePhone must be a string to avoid JS syntax errors
+    storePhone: '+55 (81) 98933-4497',
+    // Normalized WhatsApp number for direct links (country + area + number)
+    storeWhatsApp: '5581989334497',
     storeHours: 'Seg-Sex-Sab-Dom 6:30h às 22h',
     pointsPerReal: 0.1,
     bonusRegistration: 50,
@@ -157,9 +160,9 @@ function updateAdmin(adminData) {
     localStorage.setItem(STORAGE_KEYS.ADMIN, JSON.stringify(adminData));
 }
 
-function validateAdminLogin(email, password) {
+function validateAdminLogin(phone, password) {
     const admin = getAdmin();
-    return admin.email === email && admin.password === password;
+    return admin.phone === phone && admin.password === password;
 }
 
 // ========================================

@@ -5,6 +5,7 @@
 import {
     initializeStorage,
     validateAdminLogin,
+    getAdmin,
     getClientByPhone,
     addClient,
     setCurrentSession,
@@ -35,50 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    setupTabs();
-    setupClientLogin();
-    setupAdminLogin();
+    setupUnifiedLogin();
     setupClientRegister();
 });
 
 // ========================================
-// SISTEMA DE ABAS
+// LOGIN UNIFICADO (AUTO-DETECÇÃO)
 // ========================================
 
-function setupTabs() {
-    const tabs = document.querySelectorAll('.login-tab');
-    const forms = {
-        cliente: document.getElementById('clientLoginForm'),
-        admin: document.getElementById('adminLoginForm')
-    };
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabName = tab.dataset.tab;
-
-            // Atualizar abas
-            tabs.forEach(t => t.classList.remove('login-tab--active'));
-            tab.classList.add('login-tab--active');
-
-            // Atualizar formulários
-            Object.entries(forms).forEach(([name, form]) => {
-                if (form) {
-                    form.classList.toggle('login-form--active', name === tabName);
-                }
-            });
-        });
-    });
-}
-
-// ========================================
-// LOGIN DE CLIENTE
-// ========================================
-
-function setupClientLogin() {
-    const form = document.getElementById('clientLoginForm');
-    const phoneInput = document.getElementById('clientPhone');
-    const passwordInput = document.getElementById('clientPassword');
-    const errorDiv = document.getElementById('clientError');
+function setupUnifiedLogin() {
+    const form = document.getElementById('unifiedLoginForm');
+    const inputField = document.getElementById('unifiedInput');
+    const passwordInput = document.getElementById('unifiedPassword');
+    const errorDiv = document.getElementById('unifiedError');
     const registerLink = document.getElementById('goToRegister');
     const registerForm = document.getElementById('clientRegisterForm');
 
@@ -97,83 +67,77 @@ function setupClientLogin() {
         e.preventDefault();
         errorDiv.style.display = 'none';
 
-        const phone = phoneInput.value.trim();
+        const input = inputField.value.trim();
         const password = passwordInput.value.trim();
 
         // Validações
-        if (!phone || !password) {
+        if (!input || !password) {
             showError('Preencha todos os campos', errorDiv);
             return;
         }
 
-        if (!validatePhone(phone)) {
-            showError('Telefone inválido', errorDiv);
-            return;
+        // Detectar tipo de login: verifica se é o telefone do admin
+        const admin = getAdmin ? getAdmin() : null;
+        if (admin && input === admin.phone) {
+            // Login de Admin
+            handleAdminLogin(input, password, errorDiv);
+        } else {
+            // Login de Cliente
+            handleClientLogin(input, password, errorDiv);
         }
-
-        // Buscar cliente
-        const client = getClientByPhone(phone);
-        if (!client) {
-            showError('Telefone não encontrado. Crie uma conta!', errorDiv);
-            return;
-        }
-
-        // Verificar senha (que é o telefone confirmado)
-        const normalizedPhone = sanitizePhone(phone);
-        const normalizedPassword = sanitizePhone(password);
-
-        if (normalizedPhone !== normalizedPassword) {
-            showError('Senha incorreta', errorDiv);
-            return;
-        }
-
-        // Login bem-sucedido
-        setCurrentSession('cliente', client.id);
-        showNotification('Login realizado com sucesso! 🎉', 'success');
-        setTimeout(() => {
-            window.location.href = 'cliente.html';
-        }, 500);
     });
 }
 
-// ========================================
-// LOGIN DE ADMIN
-// ========================================
+/**
+ * Processa login de administrador
+ */
+function handleAdminLogin(phone, password, errorDiv) {
+    // Validar credenciais
+    if (!validateAdminLogin(phone, password)) {
+        showError('Telefone ou senha incorretos', errorDiv);
+        return;
+    }
 
-function setupAdminLogin() {
-    const form = document.getElementById('adminLoginForm');
-    const emailInput = document.getElementById('adminEmail');
-    const passwordInput = document.getElementById('adminPassword');
-    const errorDiv = document.getElementById('adminError');
+    // Login bem-sucedido
+    setCurrentSession('admin', 1);
+    showNotification('Login de administrador realizado! 👨‍💼', 'success');
+    setTimeout(() => {
+        window.location.href = 'admin.html';
+    }, 500);
+}
 
-    if (!form) return;
+/**
+ * Processa login de cliente
+ */
+function handleClientLogin(phone, password, errorDiv) {
+    // Validar formato do telefone
+    if (!validatePhone(phone)) {
+        showError('Telefone inválido. Formato: (XX) 9 XXXX-XXXX', errorDiv);
+        return;
+    }
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        errorDiv.style.display = 'none';
+    // Buscar cliente
+    const client = getClientByPhone(phone);
+    if (!client) {
+        showError('Telefone não encontrado. Crie uma conta!', errorDiv);
+        return;
+    }
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
+    // Verificar senha (que é o telefone confirmado)
+    const normalizedPhone = sanitizePhone(phone);
+    const normalizedPassword = sanitizePhone(password);
 
-        // Validações
-        if (!email || !password) {
-            showError('Preencha todos os campos', errorDiv);
-            return;
-        }
+    if (normalizedPhone !== normalizedPassword) {
+        showError('Senha incorreta', errorDiv);
+        return;
+    }
 
-        // Validar credenciais
-        if (!validateAdminLogin(email, password)) {
-            showError('Email ou senha incorretos', errorDiv);
-            return;
-        }
-
-        // Login bem-sucedido
-        setCurrentSession('admin', 1);
-        showNotification('Login de administrador realizado! 👨‍💼', 'success');
-        setTimeout(() => {
-            window.location.href = 'admin.html';
-        }, 500);
-    });
+    // Login bem-sucedido
+    setCurrentSession('cliente', client.id);
+    showNotification('Login realizado com sucesso! 🎉', 'success');
+    setTimeout(() => {
+        window.location.href = 'cliente.html';
+    }, 500);
 }
 
 // ========================================
@@ -182,7 +146,7 @@ function setupAdminLogin() {
 
 function setupClientRegister() {
     const form = document.getElementById('clientRegisterForm');
-    const loginForm = document.getElementById('clientLoginForm');
+    const loginForm = document.getElementById('unifiedLoginForm');
     const nameInput = document.getElementById('registerName');
     const phoneInput = document.getElementById('registerPhone');
     const confirmPhoneInput = document.getElementById('registerConfirmPhone');

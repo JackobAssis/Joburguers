@@ -6,7 +6,8 @@ import {
     initializeStorage,
     getProductById,
     getAllProducts,
-    getCurrentSession
+    getCurrentSession,
+    getSettings
 } from './storage.js';
 import {
     formatCurrency,
@@ -68,13 +69,23 @@ function loadProductDetails() {
         availStatus.classList.add('availability--unavailable');
     }
 
-    // WhatsApp
+    // WhatsApp - usar número a partir das configurações
     const whatsappBtn = document.getElementById('whatsappBtn');
+    const settings = getSettings();
+    const waNumber = settings && settings.storeWhatsApp ? settings.storeWhatsApp : '5585999999999';
     whatsappBtn.addEventListener('click', () => {
-        const phone = '5585999999999'; // Alterar com número real
         const message = `Olá! Quero fazer um pedido do produto: ${product.name} (${formatCurrency(product.price)})`;
-        openWhatsApp(phone, message);
+        openWhatsApp(waNumber, message);
     });
+
+    // Preencher botão flutuante (se existir)
+    const floating = document.querySelector('.whatsapp-btn');
+    if (floating) {
+        const defaultText = floating.dataset.waText || `Olá! Quero fazer um pedido`;
+        const text = defaultText.endsWith(':') ? `${defaultText} ${product.name}` : `${defaultText} ${product.name}`;
+        const url = `https://wa.me/${sanitizePhone(waNumber)}?text=${encodeURIComponent(text)}`;
+        floating.setAttribute('href', url);
+    }
 
     // Ingredientes
     if (product.ingredients && product.ingredients.length > 0) {

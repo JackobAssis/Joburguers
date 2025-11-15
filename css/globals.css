@@ -49,13 +49,13 @@ p {
 }
 
 a {
-    color: #ff9500;
+    color: #FFD700;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #ffb028;
+    color: #FF6B35;
 }
 
 /* Buttons */
@@ -74,14 +74,15 @@ a:hover {
 }
 
 .btn--primary {
-    background-color: #ff9500;
-    color: #000;
+    background-color: #FF6B35;
+    color: #fff;
 }
 
 .btn--primary:hover {
-    background-color: #ffb028;
+    background-color: #FFD700;
+    color: #0f0f0f;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 149, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
 }
 
 .btn--secondary {

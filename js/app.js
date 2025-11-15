@@ -9,7 +9,8 @@ import {
     getProductsByCategory,
     getActivePromotions,
     getCurrentSession,
-    clearSession
+    clearSession,
+    getSettings
 } from './storage.js';
 import { 
     formatCurrency, 
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPromotions();
     setupScrollToTop();
     checkSession();
+    setupWhatsAppLinks();
 });
 
 // ========================================
@@ -254,3 +256,23 @@ function setupScrollToTop() {
 // ========================================
 
 export { renderProducts, getCategoryLabel };
+
+// ========================================
+// WHATSAPP LINKS DINÂMICOS
+// ========================================
+function setupWhatsAppLinks() {
+    try {
+        const settings = getSettings();
+        const wa = settings && settings.storeWhatsApp ? settings.storeWhatsApp : null;
+        if (!wa) return;
+
+        document.querySelectorAll('.whatsapp-btn').forEach(btn => {
+            const text = btn.dataset.waText || 'Olá! Quero fazer um pedido';
+            const href = `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
+            btn.setAttribute('href', href);
+        });
+    } catch (e) {
+        // não bloquear a aplicação
+        console.error('Erro ao configurar links WhatsApp:', e);
+    }
+}

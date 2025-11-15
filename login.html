@@ -12,33 +12,27 @@
         <div class="login-card">
             <h1 class="login-card__title">🍔 Joburguers</h1>
             
-            <!-- Abas de Login -->
-            <div class="login-tabs">
-                <button class="login-tab login-tab--active" data-tab="cliente">Cliente</button>
-                <button class="login-tab" data-tab="admin">Administrador</button>
-            </div>
-
-            <!-- Formulário Cliente -->
-            <form id="clientLoginForm" class="login-form login-form--active">
-                <h2>Login Cliente</h2>
+            <!-- Formulário de Login Unificado -->
+            <form id="unifiedLoginForm" class="login-form login-form--active">
+                <h2>Fazer Login</h2>
+                <p class="login-subtitle">Digite seu telefone (admin ou cliente)</p>
                 
                 <div class="form-group">
-                    <label for="clientPhone">Telefone</label>
+                    <label for="unifiedInput">Telefone</label>
                     <input 
-                        type="tel" 
-                        id="clientPhone" 
-                        placeholder="(85) 9 9999-9999"
-                        pattern="[0-9\-\(\)\s]+"
+                        type="text" 
+                        id="unifiedInput" 
+                        placeholder="apenas números (ex: 81992974918)"
                         required
                     >
                 </div>
 
                 <div class="form-group">
-                    <label for="clientPassword">Senha</label>
+                    <label for="unifiedPassword">Senha</label>
                     <input 
                         type="password" 
-                        id="clientPassword" 
-                        placeholder="Confirme seu telefone"
+                        id="unifiedPassword" 
+                        placeholder="Sua senha"
                         required
                     >
                 </div>
@@ -47,39 +41,10 @@
                 
                 <p class="login-info">
                     Não tem uma conta? 
-                    <a href="#" id="goToRegister">Criar nova conta</a>
+                    <a href="#" id="goToRegister">Criar nova conta de cliente</a>
                 </p>
 
-                <div id="clientError" class="alert alert--error" style="display: none;"></div>
-            </form>
-
-            <!-- Formulário Admin -->
-            <form id="adminLoginForm" class="login-form">
-                <h2>Login Administrador</h2>
-                
-                <div class="form-group">
-                    <label for="adminEmail">Email</label>
-                    <input 
-                        type="email" 
-                        id="adminEmail" 
-                        placeholder="admin@joburguers.com"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="adminPassword">Senha</label>
-                    <input 
-                        type="password" 
-                        id="adminPassword" 
-                        placeholder="Sua senha"
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="btn btn--primary btn--full">Entrar</button>
-
-                <div id="adminError" class="alert alert--error" style="display: none;"></div>
+                <div id="unifiedError" class="alert alert--error" style="display: none;"></div>
             </form>
 
             <!-- Formulário de Registro Cliente -->
