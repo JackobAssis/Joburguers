@@ -31,7 +31,8 @@
     gap: 2rem;
     align-items: center;
     position: absolute;
-    left: 1.5rem;
+    right: 1.5rem; /* mover os botões para o lado direito */
+    left: auto;
 }
 
 .header__link {
