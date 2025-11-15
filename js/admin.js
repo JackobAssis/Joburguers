@@ -632,7 +632,7 @@ function setupRedeemSection() {
 }
 
 function loadRedeemsTable() {
-    const tbody = document.getElementById('reedemsTableBody');
+    const tbody = document.getElementById('redeemsTableBody');
     const redeems = getAllRedeems();
 
     tbody.innerHTML = redeems.map(redeem => `
