@@ -187,14 +187,43 @@ function setupProductsSection() {
     }
 
     // Salvar produto
-    form.addEventListener('submit', (e) => {
+    async function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Verificar se foi feito upload de arquivo
+        const fileInput = document.getElementById('productImageFile');
+        let imageValue = document.getElementById('productImage').value || '';
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+                const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+                imageValue = dataUrl; // sobrescreve com data URL
+            } catch (err) {
+                console.warn('Falha ao processar arquivo de imagem:', err);
+                showNotification('Erro ao ler imagem enviada. Tente novamente.', 'error');
+                return;
+            }
+        }
+
+        // Se ainda não tiver imagem, usar placeholder
+        if (!imageValue) {
+            imageValue = 'https://via.placeholder.com/400x300?text=Sem+Imagem';
+        }
 
         const productData = {
             name: document.getElementById('productName').value,
             category: document.getElementById('productCategory').value,
             price: parseFloat(document.getElementById('productPrice').value),
-            image: document.getElementById('productImage').value,
+            image: imageValue,
             description: document.getElementById('productDescription').value,
             ingredients: document.getElementById('productIngredients').value
                 .split(',')
@@ -211,6 +240,9 @@ function setupProductsSection() {
             addProduct(productData);
             showNotification('✓ Produto criado!', 'success');
         }
+
+        // Resetar input de arquivo para evitar reuso não intencional
+        if (fileInput) fileInput.value = '';
 
         modal.style.display = 'none';
         loadProductsTable();
@@ -301,6 +333,9 @@ window.editProduct = function(productId) {
     document.getElementById('productCategory').value = product.category;
     document.getElementById('productPrice').value = product.price;
     document.getElementById('productImage').value = product.image;
+    // Limpar possível input de arquivo (não pré-carregamos arquivos por segurança)
+    const fileInput = document.getElementById('productImageFile');
+    if (fileInput) fileInput.value = '';
     document.getElementById('productDescription').value = product.description;
     document.getElementById('productIngredients').value = (product.ingredients || []).join(', ');
     document.getElementById('productAvailable').checked = product.available;

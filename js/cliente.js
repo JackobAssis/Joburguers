@@ -18,10 +18,10 @@ import {
 import {
     formatCurrency,
     formatDate,
-    getLevelLabel,
     showNotification,
     showConfirmDialog
 } from './utils.js';
+import { getLevelLabel } from './storage.js';
 
 // ========================================
 // INICIALIZAÇÃO
