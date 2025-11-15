@@ -8,10 +8,13 @@
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <!-- Estilos da seção Promoções (adicionado pelo assistente) -->
+    <link rel="stylesheet" href="promocoes.css">
 </head>
 <body>
     
-    <a href="login.html" class="header__link header__link--login">Login</a>
+    <header class="site-header">
+        <a href="login.html" class="header__link header__link--login">Login</a>
 
         <!-- Menu Mobile -->
         <nav class="header__mobile-menu" id="mobileMenu">
@@ -53,21 +56,22 @@
     <!-- Divider -->
     <div class="section-divider section-divider--large"></div>
 
-    <!-- Seção Promoções -->
-    <section id="promocoes" class="promocoes">
-        <div class="promocoes__container">
-            <h2 class="promocoes__title">Promoções 🎉</h2>
-            
-            <div id="promotionsGrid" class="promotions-grid">
-                <!-- Promoções serão carregadas aqui -->
-            </div>
+        <!-- Seção Promoções (integrada pelo assistente) -->
+        <section id="promocoes" aria-labelledby="promocoes-title">
+            <div class="container">
+                <h2 id="promocoes-title">Promoções</h2>
+                <p class="subtitle">Aproveite nossas ofertas e confira os posts recentes.</p>
 
-            <!-- Mensagem de Vazio -->
-            <div id="emptyPromotions" class="empty-state" style="display: none;">
-                <p>Volte em breve para conferir nossas promoções!</p>
+                <!-- Grid onde os cards serão injetados pelo JS -->
+                <div id="promocoes-grid" class="promocoes-grid">
+                    <div class="empty">As promoções serão carregadas aqui. Se nada aparecer, verifique se o JavaScript está ativo.</div>
+                </div>
+
+                <div class="actions">
+                    <button id="promocoes-reload" class="btn-small">Recarregar promoções</button>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
     <!-- Botão Voltar ao Topo -->
     <button id="scrollTopBtn" class="scroll-top-btn" style="display: none;">↑</button>
@@ -93,7 +97,21 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script type="module" src="js/app.js"></script>
+        <!-- Scripts -->
+        <script type="module" src="js/app.js"></script>
+        <!-- Script da seção de Promoções -->
+        <script src="promocoes.js"></script>
+        <script>
+            // Lista de exemplo — substitua pelos links reais das publicações do Instagram
+            window.promocoesLinks = [
+                "https://www.instagram.com/p/POST1/",
+                "https://www.instagram.com/p/POST2/",
+                "https://www.instagram.com/p/POST3/"
+            ];
+            // Chama a função que injeta os embeds (a função foi definida em promocoes.js)
+            if (typeof renderPromocoes === 'function') {
+                renderPromocoes(window.promocoesLinks, 'promocoes-grid');
+            }
+        </script>
 </body>
 </html>

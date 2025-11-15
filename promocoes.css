@@ -1,0 +1,85 @@
+/* promocoes.css
+   Estilos para a seção "Promoções" - tema escuro, elegante e responsivo.
+   Integração: importe este arquivo no <head> da sua página ou concatene ao CSS principal.
+*/
+
+/* Reset mínimo para esta seção (não afetar outros elementos globais) */
+#promocoes { color: #e9eef6; background: transparent; padding: 28px 12px; }
+#promocoes .container { max-width: 1100px; margin: 0 auto; }
+
+#promocoes h2 {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-size: 1.6rem;
+  margin: 0 0 6px 0;
+  color: #f6f9ff;
+  letter-spacing: 0.2px;
+}
+#promocoes .subtitle {
+  color: #bfc9d6; margin: 0 0 18px 0; font-size: 0.95rem;
+}
+
+/* Grid responsivo: 2 colunas em desktop, 1 coluna em mobile */
+.promocoes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 720px) {
+  .promocoes-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+}
+
+/* Card visual */
+.promo-card {
+  background: rgba(18, 20, 24, 0.6); /* translúcido escuro */
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 18px rgba(2,6,12,0.6);
+  border-radius: 12px;
+  padding: 12px;
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.promo-card:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(2,6,12,0.72); }
+
+/* Força o embed a ter largura responsiva dentro do card */
+.promo-card .instagram-media {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Se o Instagram colocar um iframe, garantir responsividade */
+.promo-card iframe {
+  max-width: 100% !important; width: 100% !important; height: auto !important;
+  aspect-ratio: 1 / 1.1; /* ajuda no layout, o embed ajustará */
+  border-radius: 8px;
+}
+
+/* Mensagem vazia */
+.promocoes-grid .empty {
+  color: #9aa4b6; padding: 24px; text-align: center; background: rgba(255,255,255,0.02);
+  border-radius: 10px; border: 1px dashed rgba(255,255,255,0.02);
+}
+
+/* Ações (botões) */
+.actions { margin-top: 12px; }
+.btn-small {
+  background: linear-gradient(180deg, #2a2f36, #16181b); color: #e8eef6; border: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.95rem;
+}
+.btn-small:hover { filter: brightness(1.06); }
+
+/* ---------- Sugestão de correção do bug do cabeçalho ----------
+   Pode existir um gap entre os botões do topo e a logo por estilos conflitantes.
+   Esta regra é deliberadamente seletiva e pode ser importada no CSS principal
+   ou adaptada aos seletores reais do seu cabeçalho.
+*/
+.site-header, header, .topbar { display: flex; align-items: center; }
+.site-header .brand, header .brand, .topbar .brand { display:flex; align-items:center; gap:12px; }
+.site-header nav, header nav, .topbar nav { margin-left: auto; }
+
+/* Se o seu projeto usar outras classes, adapte .brand / nav para os seletores corretos.
+   Essas regras reduzem o gap inesperado, alinhando verticalmente e usando gap controlado.
+*/

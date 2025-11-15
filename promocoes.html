@@ -1,0 +1,36 @@
+<!--
+Seção: Promoções
+Arquivo: promocoes.html
+Como usar: incluir o conteúdo desta section na página do seu cardápio (copiar/colar) e linkar o CSS e o JS conforme mostrado abaixo.
+Exemplo de inclusão (no <head>):
+  <link rel="stylesheet" href="/promocoes.css">
+No final do <body> antes do fechamento:
+  <script src="/promocoes.js"></script>
+  <script>
+    const promocoes = [
+      "https://www.instagram.com/p/POST1/",
+      "https://www.instagram.com/p/POST2/",
+      "https://www.instagram.com/p/POST3/",
+      "https://www.instagram.com/p/POST4/"
+    ];
+    renderPromocoes(promocoes); // injeta os cards
+  </script>
+-->
+
+<section id="promocoes" aria-labelledby="promocoes-title">
+  <div class="container">
+    <h2 id="promocoes-title">Promoções</h2>
+    <p class="subtitle">Aproveite nossas ofertas e confira os posts recentes.</p>
+
+    <!-- Grid onde os cards serão injetados pelo JS -->
+    <div id="promocoes-grid" class="promocoes-grid">
+      <!-- Se não houver JS, exibir mensagem amigável -->
+      <div class="empty">As promoções serão carregadas aqui. Se nada aparecer, verifique se o JavaScript está ativo.</div>
+    </div>
+
+    <!-- botão opcional para recarregar (útil durante testes) -->
+    <div class="actions">
+      <button id="promocoes-reload" class="btn-small">Recarregar promoções</button>
+    </div>
+  </div>
+</section>
