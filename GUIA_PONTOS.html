@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia do Sistema de Pontos - JóBurguers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 4px solid #FFD700;
+            padding-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #FF6B35;
+            font-weight: 600;
+        }
+
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background-color: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #FF6B35;
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #FFD700;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .card ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #b0b0b0;
+        }
+
+        .card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background-color: rgba(255, 215, 0, 0.1);
+            padding: 1rem;
+            border-left: 4px solid #FFD700;
+            border-radius: 4px;
+            margin: 1rem 0;
+            color: #FFD700;
+        }
+
+        .warning {
+            background-color: rgba(255, 107, 53, 0.1);
+            padding: 1rem;
+            border-left: 4px solid #FF6B35;
+            border-radius: 4px;
+            margin: 1rem 0;
+            color: #FF6B35;
+        }
+
+        .info {
+            background-color: rgba(100, 200, 255, 0.1);
+            padding: 1rem;
+            border-left: 4px solid #64c8ff;
+            border-radius: 4px;
+            margin: 1rem 0;
+            color: #64c8ff;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .step {
+            background-color: #1a1a1a;
+            border: 2px solid #FF6B35;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #FFD700, #FF6B35);
+            color: #0f0f0f;
+            border-radius: 50%;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .step h3 {
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            font-size: 0.95rem;
+        }
+
+        .code-block {
+            background-color: #0f0f0f;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #FFD700;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #0f0f0f;
+            color: #FFD700;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #FF6B35;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #404040;
+            color: #b0b0b0;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 107, 53, 0.05);
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .tip {
+            background-color: #1a1a1a;
+            border: 1px solid #FFD700;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .tip h4 {
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tip p {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #404040;
+            color: #808080;
+        }
+
+        .button-example {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700, #FF6B35);
+            color: #0f0f0f;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #FF6B35;
+            color: #fff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .emoji-large {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .sections {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎁 Guia do Sistema de Pontos</h1>
+            <p>JóBurguers - Gerenciamento de Programa de Fidelização</p>
+        </header>
+
+        <!-- Introdução -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2>📚 O que é o Sistema de Pontos?</h2>
+            <p>
+                O sistema de pontos JóBurguers é um programa de fidelização que permite aos clientes acumular 
+                pontos a cada compra e resgatá-los por prêmios e descontos. É uma excelente forma de aumentar 
+                a retenção de clientes e estimular compras repetidas!
+            </p>
+            <div class="highlight">
+                💡 <strong>Objetivo:</strong> Criar uma experiência de compra recompensadora para os clientes
+            </div>
+        </div>
+
+        <!-- Seção 1: Como Funciona -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            ⚙️ Como Funciona o Sistema
+        </h2>
+
+        <div class="sections">
+            <!-- Fluxo de Pontos -->
+            <div class="card">
+                <h2>🎯 Fluxo de Pontos</h2>
+                <ul>
+                    <li><strong>Cliente faz compra:</strong> R$ 100</li>
+                    <li><strong>Sistema calcula:</strong> 100 × 0.1 = 10 pontos</li>
+                    <li><strong>Pontos creditados:</strong> Na conta do cliente</li>
+                    <li><strong>Cliente visualiza:</strong> Seu saldo total</li>
+                    <li><strong>Cliente resgata:</strong> Quando atingir meta</li>
+                </ul>
+                <div class="info">
+                    📊 Taxa padrão: <strong>0.1 ponto por Real</strong> (configurável)
+                </div>
+            </div>
+
+            <!-- Níveis de Clientes -->
+            <div class="card">
+                <h2>📈 Níveis de Fidelização</h2>
+                <p>Clientes progridem conforme acumulam pontos:</p>
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <tr style="background-color: rgba(255, 215, 0, 0.1);">
+                        <td><strong>🥉 Bronze</strong></td>
+                        <td>0 pts</td>
+                    </tr>
+                    <tr style="background-color: rgba(255, 215, 0, 0.1);">
+                        <td><strong>🥈 Prata</strong></td>
+                        <td>100 pts</td>
+                    </tr>
+                    <tr style="background-color: rgba(255, 107, 53, 0.1);">
+                        <td><strong>🥇 Ouro</strong></td>
+                        <td>300 pts</td>
+                    </tr>
+                    <tr style="background-color: rgba(255, 107, 53, 0.1);">
+                        <td><strong>💎 Platina</strong></td>
+                        <td>500 pts</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Bônus -->
+            <div class="card">
+                <h2>🎉 Bônus Especiais</h2>
+                <ul>
+                    <li><strong>Bônus Cadastro:</strong> 50 pontos ao registrar</li>
+                    <li><strong>Bônus Referência:</strong> 50 pontos ao indicar amigo</li>
+                    <li><strong>Promoções:</strong> Pontos extra em ofertas especiais</li>
+                    <li><strong>Aniversário:</strong> Prêmios especiais (futuro)</li>
+                </ul>
+                <div class="highlight">
+                    💝 Incentivar o cadastro de novos clientes é crucial!
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Gerenciando Pontos no Admin -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            🎮 Gerenciando Pontos no Admin
+        </h2>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Acessar Admin</h3>
+                <p>Faça login com suas credenciais de administrador</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Ir para Clientes</h3>
+                <p>Clique em "👥 Clientes" na barra lateral</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Selecionar Cliente</h3>
+                <p>Encontre o cliente na lista usando busca</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Gerenciar Pontos</h3>
+                <p>Clique no botão "Pontos" para adicionar/remover</p>
+            </div>
+        </div>
+
+        <!-- Seção 3: Operações Comuns -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            🔧 Operações Comuns
+        </h2>
+
+        <div class="sections">
+            <!-- Adicionar Pontos -->
+            <div class="card">
+                <h2>➕ Adicionar Pontos</h2>
+                <p><strong>Quando usar:</strong></p>
+                <ul>
+                    <li>Registrar compra manual no sistema</li>
+                    <li>Aplicar bônus ao cliente</li>
+                    <li>Corrigir erro anterior</li>
+                    <li>Promoção especial</li>
+                </ul>
+                <div class="warning">
+                    ⚠️ Sempre justifique a adição de pontos no histórico!
+                </div>
+            </div>
+
+            <!-- Remover Pontos -->
+            <div class="card">
+                <h2>➖ Remover Pontos</h2>
+                <p><strong>Quando usar:</strong></p>
+                <ul>
+                    <li>Cliente resgatou um prêmio</li>
+                    <li>Cancelou uma compra</li>
+                    <li>Reclamação procedente (reembolso em pontos)</li>
+                    <li>Corrigir erro anterior</li>
+                </ul>
+                <div class="warning">
+                    ⚠️ Isso afeta o nível do cliente! Cuidado ao remover.
+                </div>
+            </div>
+
+            <!-- Visualizar Histórico -->
+            <div class="card">
+                <h2>📊 Visualizar Histórico</h2>
+                <p><strong>O que você vê:</strong></p>
+                <ul>
+                    <li>Todas as transações do cliente</li>
+                    <li>Data e hora de cada operação</li>
+                    <li>Tipo de transação (compra, bônus, resgate)</li>
+                    <li>Saldo após cada movimento</li>
+                    <li>Nível atual do cliente</li>
+                </ul>
+                <div class="info">
+                    📋 Útil para auditoria e suporte ao cliente
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Resgates -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            🎁 Sistema de Resgates
+        </h2>
+
+        <div class="card">
+            <h2>Como Criar Resgates</h2>
+            <p>Resgates são os prêmios que clientes podem obter com seus pontos.</p>
+            
+            <h3 style="color: #FFD700; margin-top: 1.5rem;">Passo a Passo:</h3>
+            <ol style="margin-left: 1.5rem;">
+                <li>Vá para <strong>Promoções → Resgates</strong></li>
+                <li>Clique em <strong>"+ Novo Resgate"</strong></li>
+                <li>Preencha os dados:
+                    <ul style="margin-top: 0.5rem;">
+                        <li><strong>Nome:</strong> "Hambúrguer Grátis"</li>
+                        <li><strong>Pontos:</strong> 100 (custo para resgatar)</li>
+                        <li><strong>Valor:</strong> R$ 25.00 ou %20 desconto</li>
+                        <li><strong>Tipo:</strong> Percentual ou Valor fixo</li>
+                    </ul>
+                </li>
+                <li>Clique em <strong>Salvar</strong></li>
+            </ol>
+
+            <div class="highlight">
+                💡 <strong>Dica:</strong> Crie resgates atraentes mas que gerem lucro! 
+                <br>Ex: 100 pontos (R$ 10 de gasto) por 10% desconto (R$ 2-3)
+            </div>
+        </div>
+
+        <!-- Seção 5: Configurações -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            ⚙️ Configurações do Sistema
+        </h2>
+
+        <div class="card">
+            <h2>Personalizando o Programa</h2>
+            <p>Vá para <strong>Configurações</strong> para ajustar:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Configuração</th>
+                            <th>Padrão</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Pontos por Real</strong></td>
+                            <td>0.1</td>
+                            <td>Quanto de pontos cada real de compra gera</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bônus Cadastro</strong></td>
+                            <td>50</td>
+                            <td>Pontos iniciais ao novo cliente registrar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bônus Indicação</strong></td>
+                            <td>50</td>
+                            <td>Pontos quando cliente indica amigo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nível Prata</strong></td>
+                            <td>100</td>
+                            <td>Pontos necessários para alcançar Prata</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nível Ouro</strong></td>
+                            <td>300</td>
+                            <td>Pontos necessários para alcançar Ouro</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nível Platina</strong></td>
+                            <td>500</td>
+                            <td>Pontos necessários para alcançar Platina</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning">
+                ⚠️ <strong>Cuidado!</strong> Mudar estas configurações afeta todos os clientes!
+                <br>Faça backup antes de alterações importantes.
+            </div>
+        </div>
+
+        <!-- Seção 6: Dicas Pro -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            💎 Dicas Profissionais
+        </h2>
+
+        <div class="tips-grid">
+            <div class="tip">
+                <h4>💰 Maximize Compras</h4>
+                <p>Comunique o programa nos menus e nas compras. Quanto mais clientes soubem, mais usam pontos.</p>
+            </div>
+
+            <div class="tip">
+                <h4>🎯 Resgates Atraentes</h4>
+                <p>Ofereça resgates que os clientes realmente querem: combos, bebidas grátis, descontos exclusivos.</p>
+            </div>
+
+            <div class="tip">
+                <h4>📊 Analise Dados</h4>
+                <p>Veja quais resgates são mais populares e ajuste a estratégia com base nos dados.</p>
+            </div>
+
+            <div class="tip">
+                <h4>🔄 Ciclo de Compra</h4>
+                <p>Use pontos para incentivar clientes a voltarem: "50 pontos para mais uma compra!"</p>
+            </div>
+
+            <div class="tip">
+                <h4>👥 Segmentação</h4>
+                <p>Clientes Platina merecem tratamento especial: resgates exclusivos, atendimento VIP.</p>
+            </div>
+
+            <div class="tip">
+                <h4>📱 Comunicação</h4>
+                <p>Avise clientes quando atingem novo nível ou quando pontos estão perto de vencer.</p>
+            </div>
+
+            <div class="tip">
+                <h4>🎁 Bônus Sazonais</h4>
+                <p>Adicione pontos extra em datas especiais: Black Friday, aniversário, festividades.</p>
+            </div>
+
+            <div class="tip">
+                <h4>📈 Crescimento</h4>
+                <p>Comece com taxa baixa (0.1) e aumente conforme a demanda. Clientes adoram pontos fáceis!</p>
+            </div>
+        </div>
+
+        <!-- Seção 7: Erros Comuns -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            ⚠️ Erros Comuns a Evitar
+        </h2>
+
+        <div class="sections">
+            <div class="card">
+                <h2>❌ Resgates Muito Caros</h2>
+                <p>Se exigir 500 pontos (R$ 50) por um desconto de R$ 5, ninguém vai usar.</p>
+                <div class="warning">
+                    ✅ Melhor: 50-100 pontos por descontos atrativos
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Sem Comunicação</h2>
+                <p>Muitos clientes não sabem que o programa existe ou como funciona.</p>
+                <div class="warning">
+                    ✅ Melhor: Informar no checkout, cardápio e embalagem
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Taxa Muito Alta</h2>
+                <p>1 ponto por real pode parecer muito generoso, mas infla o sistema rapidamente.</p>
+                <div class="warning">
+                    ✅ Melhor: Começar com 0.1-0.2 e ajustar depois
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Sem Auditoria</h2>
+                <p>Não acompanhar movimentos pode levar a erros ou fraude.</p>
+                <div class="warning">
+                    ✅ Melhor: Revisar histórico regularmente
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Nenhum Resgate</h2>
+                <p>Se não houver resgates atrativos, clientes acumulam pontos sem usar.</p>
+                <div class="warning">
+                    ✅ Melhor: Sempre ter 3-5 resgates disponíveis
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>❌ Ignorar Clientes VIP</h2>
+                <p>Platina gastou muito mais! Merecem benefícios extras.</p>
+                <div class="warning">
+                    ✅ Melhor: Oferecer resgates exclusivos para cada nível
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 8: Exemplos Práticos -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            📚 Exemplos Práticos
+        </h2>
+
+        <div class="card">
+            <h2>Cenário 1: Novo Cliente</h2>
+            <div class="code-block">
+1. Cliente se registra → Recebe 50 pontos bônus
+2. Faz primeira compra de R$ 200
+   → Ganha 200 × 0.1 = 20 pontos
+3. Total: 50 + 20 = 70 pontos
+4. Busca por resgates disponíveis
+5. Vê: "-50 pts: 15% de desconto"
+6. Resgata → Fica com 20 pontos restantes
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Cenário 2: Cliente Fiel (Platina)</h2>
+            <div class="code-block">
+1. Cliente tem 600 pontos (Platina)
+2. Faz compra habitual de R$ 150
+   → Ganha 150 × 0.1 = 15 pontos = 615 total
+3. Você cria resgate especial:
+   "Cliente Platina: -100 pts = 25% desconto"
+4. Cliente resgata → 515 pontos restantes
+5. Próxima compra: 515 + 15 = 530 pontos
+6. Objetivo: Manter cliente satisfeito e voltando!
+            </div>
+        </div>
+
+        <!-- Seção 9: FAQ -->
+        <h2 style="color: #FFD700; margin: 2rem 0; font-size: 2rem; border-bottom: 2px solid #FF6B35; padding-bottom: 1rem;">
+            ❓ Perguntas Frequentes
+        </h2>
+
+        <div class="sections">
+            <div class="card">
+                <h2>P: Posso adicionar pontos manualmente?</h2>
+                <p><strong>R:</strong> Sim! No painel de clientes, clique em "Pontos" ao lado do cliente.</p>
+            </div>
+
+            <div class="card">
+                <h2>P: Cliente perdeu seus pontos?</h2>
+                <p><strong>R:</strong> Verifique no histórico se houve resgate. Se for erro, pode readicionar os pontos.</p>
+            </div>
+
+            <div class="card">
+                <h2>P: Como mudo os limites de nível?</h2>
+                <p><strong>R:</strong> Vá a Configurações → Níveis e ajuste os valores (100, 300, 500, etc).</p>
+            </div>
+
+            <div class="card">
+                <h2>P: Posso ter resgates por tempo limitado?</h2>
+                <p><strong>R:</strong> Sim! Crie resgates e delete quando a promoção acabar.</p>
+            </div>
+
+            <div class="card">
+                <h2>P: Clientes veem seu saldo de pontos?</h2>
+                <p><strong>R:</strong> Sim! Na página de perfil do cliente após fazer login.</p>
+            </div>
+
+            <div class="card">
+                <h2>P: Posso exportar dados de pontos?</h2>
+                <p><strong>R:</strong> Sim! Em Configurações há opção de exportar/importar dados.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>📖 Guia do Sistema de Pontos - JóBurguers</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                ⚡ Dúvidas? Revise este guia ou teste as funcionalidades no painel admin!
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: #606060;">
+                Última atualização: 15 de Novembro de 2025
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
