@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPontos();
     loadHistorico();
     loadDados();
+    setupChangePassword();
 });
 
 // ========================================
@@ -342,6 +343,69 @@ function loadDados() {
         if (updated) {
             currentClient = updated;
             showNotification('✓ Dados atualizados com sucesso!', 'success');
+            document.getElementById('clientName').textContent = currentClient.name;
         }
     });
+}
+
+// ========================================
+// ALTERAR SENHA
+// ========================================
+
+function setupChangePassword() {
+    const btn = document.getElementById('changePasswordBtn');
+    const modal = document.getElementById('changePasswordModal');
+    const form = document.getElementById('changePasswordForm');
+    const cancelBtn = document.getElementById('cancelPassword');
+
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+        form.reset();
+        modal.style.display = 'flex';
+    });
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const messageDiv = document.getElementById('formMessage');
+
+        if (newPassword.length < 4) {
+            showErrorMessage('Senha deve ter no mínimo 4 caracteres', messageDiv);
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showErrorMessage('As senhas não conferem', messageDiv);
+            return;
+        }
+
+        // Atualizar senha
+        const updated = updateClient(currentClient.id, {
+            password: newPassword
+        });
+
+        if (updated) {
+            currentClient = updated;
+            showNotification('✓ Senha alterada com sucesso!', 'success');
+            modal.style.display = 'none';
+            form.reset();
+        }
+    });
+}
+
+function showErrorMessage(message, element) {
+    if (!element) return;
+    element.textContent = message;
+    element.classList.remove('alert--success');
+    element.classList.add('alert--error');
+    element.style.display = 'block';
 }

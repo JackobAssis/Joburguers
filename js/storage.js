@@ -184,15 +184,41 @@ function getClientByPhone(phone) {
     return clients.find(c => c.phone.replace(/\D/g, '') === normalizedPhone);
 }
 
+/**
+ * Valida login do cliente (telefone + senha)
+ */
+function validateClientLogin(phone, password) {
+    const client = getClientByPhone(phone);
+    if (!client) return null; // Cliente não encontrado
+    
+    // Comparar senha (pode ser a senha real ou os últimos 6 dígitos do telefone)
+    if (client.password === password) {
+        return client;
+    }
+    
+    return null; // Senha incorreta
+}
+
 function addClient(clientData) {
     const clients = getAllClients();
+    
+    // Se não tiver senha, gerar uma padrão (últimos 6 dígitos do telefone)
+    let password = clientData.password;
+    if (!password && clientData.phone) {
+        password = clientData.phone.replace(/\D/g, '').slice(-6);
+    }
+    
     const newClient = {
         id: clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1,
-        ...clientData,
+        name: clientData.name || '',
+        phone: clientData.phone || '',
+        email: clientData.email || '',
+        password: password || '000000', // Senha padrão
         points: clientData.points || 0,
         level: calculateLevel(clientData.points || 0),
         createdAt: new Date().toISOString(),
-        active: true
+        active: clientData.active !== false,
+        lastUpdatedAt: new Date().toISOString()
     };
     clients.push(newClient);
     localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients));
@@ -206,7 +232,8 @@ function updateClient(id, clientData) {
         clients[index] = {
             ...clients[index],
             ...clientData,
-            level: calculateLevel(clientData.points || clients[index].points)
+            level: calculateLevel(clientData.points || clients[index].points),
+            lastUpdatedAt: new Date().toISOString()
         };
         localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients));
         return clients[index];
@@ -539,6 +566,7 @@ export {
     getAllClients,
     getClientById,
     getClientByPhone,
+    validateClientLogin,
     addClient,
     updateClient,
     deleteClient,

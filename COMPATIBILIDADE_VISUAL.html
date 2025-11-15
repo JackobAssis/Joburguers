@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Compatibilidade Cliente-Admin - JóBurguers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 4px solid #FFD700;
+            padding-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #FF6B35;
+            font-weight: 600;
+        }
+
+        .alert-box {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .alert-box h3 {
+            color: #4caf50;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            background-color: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: #FFD700;
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #FFD700;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #FF6B35;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .flow-diagram {
+            background-color: #0f0f0f;
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .flow-box {
+            display: inline-block;
+            background-color: #1a1a1a;
+            border: 2px solid #FF6B35;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem;
+            border-radius: 8px;
+            color: #FFD700;
+            font-weight: 600;
+            min-width: 150px;
+        }
+
+        .flow-arrow {
+            display: inline-block;
+            color: #FFD700;
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-box {
+            background-color: #0f0f0f;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .comparison-box.before {
+            border-left-color: #d32f2f;
+        }
+
+        .comparison-box.after {
+            border-left-color: #4caf50;
+        }
+
+        .comparison-box h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .comparison-box.before h4 {
+            color: #d32f2f;
+        }
+
+        .comparison-box.after h4 {
+            color: #4caf50;
+        }
+
+        .code-block {
+            background-color: #0f0f0f;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #FFD700;
+        }
+
+        .scenario {
+            background-color: #1a1a1a;
+            border-left: 4px solid #FF6B35;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .scenario h4 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+        }
+
+        .scenario ol {
+            margin-left: 1.5rem;
+            color: #b0b0b0;
+        }
+
+        .scenario li {
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background-color: #0f0f0f;
+            border: 1px solid #FFD700;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-box .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-box h4 {
+            color: #FFD700;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-box p {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: #b0b0b0;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #0f0f0f;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #252525;
+            color: #FFD700;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #FF6B35;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #404040;
+            color: #b0b0b0;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 107, 53, 0.05);
+        }
+
+        .diagram-text {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #404040;
+            color: #808080;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .two-column,
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-box {
+                display: block;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔄 Compatibilidade 100% Cliente ↔ Admin</h1>
+            <p>Sistema Integrado de Gerenciamento de Clientes - JóBurguers</p>
+        </header>
+
+        <!-- Alert de Sucesso -->
+        <div class="alert-box">
+            <h3>✅ Sistema Implementado com Sucesso!</h3>
+            <p>
+                O sistema de clientes agora é 100% compatível entre admin e cliente. 
+                Admin e cliente podem gerenciar dados de forma sincronizada e segura.
+            </p>
+        </div>
+
+        <!-- Seção 1: Visão Geral -->
+        <div class="section">
+            <h2>🎯 O Que Mudou?</h2>
+            
+            <div class="two-column">
+                <div>
+                    <div class="comparison-box before">
+                        <h4>❌ Antes</h4>
+                        <ul class="checklist">
+                            <li style="color: #d32f2f; list-style: none; padding-left: 0;">
+                                ✗ Cliente criado pelo admin não conseguia fazer login
+                            </li>
+                            <li style="color: #d32f2f; list-style: none; padding-left: 0;">
+                                ✗ Senha era apenas o telefone (inseguro)
+                            </li>
+                            <li style="color: #d32f2f; list-style: none; padding-left: 0;">
+                                ✗ Cliente não podia editar dados
+                            </li>
+                            <li style="color: #d32f2f; list-style: none; padding-left: 0;">
+                                ✗ Sem sincronização entre sistemas
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="comparison-box after">
+                        <h4>✅ Depois</h4>
+                        <ul class="checklist">
+                            <li>Cliente criado pelo admin pode fazer login imediatamente</li>
+                            <li>Cada cliente tem senha própria e segura</li>
+                            <li>Cliente pode editar nome, email e alterar senha</li>
+                            <li>Mudanças sincronizam em tempo real</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Fluxo de Funcionamento -->
+        <div class="section">
+            <h2>🔄 Como Funciona</h2>
+
+            <h3>Fluxo 1: Admin Cria Cliente</h3>
+            <div class="flow-diagram">
+                <div class="flow-box">Admin Preenche Dados</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Sistema Gera Senha</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Cliente Pode Fazer Login</div>
+                <div class="diagram-text">Senha padrão: últimos 6 dígitos do telefone (ou custom)</div>
+            </div>
+
+            <h3>Fluxo 2: Cliente Se Registra</h3>
+            <div class="flow-diagram">
+                <div class="flow-box">Cliente Cria Conta</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Define Senha Própria</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Recebe 50 Pontos</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Faz Login</div>
+                <div class="diagram-text">Senha definida pelo cliente durante registro</div>
+            </div>
+
+            <h3>Fluxo 3: Cliente Edita Dados</h3>
+            <div class="flow-diagram">
+                <div class="flow-box">Cliente Edita Nome/Email</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Sistema Atualiza</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Admin Vê Atualização</div>
+                <div class="diagram-text">Em tempo real na tabela de clientes</div>
+            </div>
+        </div>
+
+        <!-- Seção 3: Recursos -->
+        <div class="section">
+            <h2>✨ Novos Recursos</h2>
+
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <div class="icon">🔐</div>
+                    <h4>Senhas Seguras</h4>
+                    <p>Cada cliente tem senha própria, não usa telefone</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">✏️</div>
+                    <h4>Editar Dados</h4>
+                    <p>Cliente pode editar nome, email a qualquer hora</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">🔄</div>
+                    <h4>Alterar Senha</h4>
+                    <p>Cliente pode mudar sua senha a qualquer momento</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">🔗</div>
+                    <h4>Sincronização</h4>
+                    <p>Admin e cliente veem dados em tempo real</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">⚙️</div>
+                    <h4>Senha Padrão</h4>
+                    <p>Admin define ou usa padrão automático</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">📊</div>
+                    <h4>Compatível</h4>
+                    <p>Admin e cliente totalmente integrados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Cenários de Uso -->
+        <div class="section">
+            <h2>📖 Cenários de Uso</h2>
+
+            <div class="scenario">
+                <h4>📍 Cenário 1: Admin Cria Cliente com Senha Padrão</h4>
+                <ol>
+                    <li>Admin clica "<strong>+ Novo Cliente</strong>"</li>
+                    <li>Preenche: Nome, Telefone, Email</li>
+                    <li>Deixa campo "Senha" <strong>em branco</strong></li>
+                    <li>Sistema cria cliente com senha padrão (últimos 6 dígitos do telefone)</li>
+                    <li>
+                        <strong>Cliente consegue fazer login:</strong>
+                        <div class="code-block">Telefone: 81992974918
+Senha: 974918 (padrão)</div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="scenario">
+                <h4>🔑 Cenário 2: Admin Cria Cliente com Senha Custom</h4>
+                <ol>
+                    <li>Admin clica "<strong>+ Novo Cliente</strong>"</li>
+                    <li>Preenche: Nome, Telefone, Email</li>
+                    <li>Preenche campo "Senha" com <strong>"minhasenha123"</strong></li>
+                    <li>Sistema cria cliente com essa senha</li>
+                    <li>
+                        <strong>Cliente consegue fazer login:</strong>
+                        <div class="code-block">Telefone: 81992974918
+Senha: minhasenha123</div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="scenario">
+                <h4>📝 Cenário 3: Cliente Cria Conta no App</h4>
+                <ol>
+                    <li>Cliente clica "<strong>Criar Conta</strong>"</li>
+                    <li>Preenche: Nome, Telefone, <strong>Senha própria</strong></li>
+                    <li>Confirma telefone e senha</li>
+                    <li>Sistema cria conta com 50 pontos bônus</li>
+                    <li>Cliente faz login automaticamente</li>
+                    <li><strong>Admin vê cliente novo na tabela</strong> com a senha que o cliente escolheu</li>
+                </ol>
+            </div>
+
+            <div class="scenario">
+                <h4>✏️ Cenário 4: Cliente Edita Nome</h4>
+                <ol>
+                    <li>Cliente logado → "<strong>Meus Dados</strong>"</li>
+                    <li>Clica em campo de nome e edita para "<strong>João Silva Novo</strong>"</li>
+                    <li>Clica "<strong>Salvar Alterações</strong>"</li>
+                    <li><strong>Admin vê nome atualizado na tabela de clientes em tempo real</strong></li>
+                    <li>Próxima vez que admin editar esse cliente, vê o nome atualizado</li>
+                </ol>
+            </div>
+
+            <div class="scenario">
+                <h4>🔐 Cenário 5: Cliente Altera Sua Senha</h4>
+                <ol>
+                    <li>Cliente logado → "<strong>Meus Dados</strong>" → "<strong>Alterar Senha</strong>"</li>
+                    <li>Preenche: Nova Senha: "<strong>novaSenha2024</strong>"</li>
+                    <li>Confirma: "<strong>novaSenha2024</strong>"</li>
+                    <li>Clica "Alterar"</li>
+                    <li>Sistema atualiza senha</li>
+                    <li>
+                        <strong>Próximo login do cliente:</strong>
+                        <div class="code-block">Telefone: 81992974918
+Senha: novaSenha2024 (nova)</div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="scenario">
+                <h4>🛠️ Cenário 6: Admin Reseta Senha de Cliente</h4>
+                <ol>
+                    <li>Admin clica em cliente → "<strong>Editar</strong>"</li>
+                    <li>Vê senha atual no campo "Senha"</li>
+                    <li>Se deixar <strong>em branco</strong> → Mantém senha atual</li>
+                    <li>Se digitar <strong>nova senha</strong> → Reseta para nova</li>
+                    <li>Clica "Salvar"</li>
+                    <li><strong>Cliente faz login com a nova senha na próxima vez</strong></li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Seção 5: Estrutura de Dados -->
+        <div class="section">
+            <h2>📊 Estrutura de Dados do Cliente</h2>
+
+            <h3>Objeto Cliente (Completo)</h3>
+            <div class="code-block">
+{
+  id: 1,
+  name: "João Silva",                  // ← Pode editar
+  phone: "(81) 99999-1234",            // ← Admin pode editar
+  email: "joao@email.com",             // ← Pode editar
+  password: "minhasenha123",           // ← NOVO! Pode editar
+  points: 50,                          // ← Admin gerencia
+  level: "bronze",                     // ← Automático baseado em pontos
+  createdAt: "2025-11-15T10:30:00Z",  // ← Automático
+  lastUpdatedAt: "2025-11-15T14:45:00Z", // ← Automático
+  active: true                         // ← Admin controla
+}
+            </div>
+
+            <h3>Comparação: Antes vs Depois</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Antes</th>
+                        <th>Depois</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>password</strong></td>
+                        <td>❌ Não existia</td>
+                        <td>✅ Agora existe</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tipo de Senha</strong></td>
+                        <td>❌ Telefone como senha</td>
+                        <td>✅ Senha própria</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Segurança</strong></td>
+                        <td>❌ Fraca</td>
+                        <td>✅ Melhorada</td>
+                    </tr>
+                    <tr>
+                        <td><strong>lastUpdatedAt</strong></td>
+                        <td>❌ Não existia</td>
+                        <td>✅ Sincronização</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Seção 6: Funções Importantes -->
+        <div class="section">
+            <h2>🔧 Funções Principais</h2>
+
+            <h3>Storage.js - Nova Função</h3>
+            <div class="code-block">
+// Valida login do cliente (telefone + senha)
+validateClientLogin(phone, password)
+  ↓ Retorna: objeto cliente se OK, null se erro
+            </div>
+
+            <h3>Login.js - Atualizado</h3>
+            <div class="code-block">
+// Agora usa validateClientLogin() em vez de comparar com telefone
+handleClientLogin(phone, password, errorDiv)
+  ✓ Usa função validateClientLogin()
+  ✓ Diferencia entre "cliente não existe" e "senha incorreta"
+            </div>
+
+            <h3>Cliente.js - Nova Função</h3>
+            <div class="code-block">
+// Permite cliente alterar sua senha
+setupChangePassword()
+  ✓ Modal para digitar nova senha
+  ✓ Valida senha (mín. 4 caracteres)
+  ✓ Confirma que as senhas conferem
+  ✓ Atualiza no localStorage
+            </div>
+
+            <h3>Admin.js - Atualizado</h3>
+            <div class="code-block">
+// Agora gerencia campo de senha
+setupClientsSection()
+  ✓ Novo campo "clientPassword" no modal
+  ✓ Se vazio → usa padrão (últimos 6 dígitos)
+  ✓ Se preenchido → usa a senha digitada
+  ✓ Ao editar → mostra senha atual
+            </div>
+        </div>
+
+        <!-- Seção 7: Testes -->
+        <div class="section">
+            <h2>✅ Como Testar</h2>
+
+            <h3>Teste 1: Admin Cria Cliente</h3>
+            <ol style="margin-left: 1.5rem; color: #b0b0b0;">
+                <li>Faça login como admin (telefone: 81992974918, senha: jodono)</li>
+                <li>Vá em "👥 Clientes" → "+ Novo Cliente"</li>
+                <li>Preencha:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Nome: "Teste Silva"</li>
+                        <li>Telefone: "(85) 98765-4321"</li>
+                        <li>Deixe "Senha" em branco</li>
+                        <li>Clique "Salvar"</li>
+                    </ul>
+                </li>
+                <li>Logout</li>
+                <li>Faça login como cliente:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Telefone: 85987654321</li>
+                        <li>Senha: 654321 (últimos 6 dígitos)</li>
+                    </ul>
+                </li>
+                <li>✅ Deve funcionar!</li>
+            </ol>
+
+            <h3 style="margin-top: 2rem;">Teste 2: Cliente Edita Dados</h3>
+            <ol style="margin-left: 1.5rem; color: #b0b0b0;">
+                <li>Logado como cliente, vá em "👤 Meus Dados"</li>
+                <li>Edite o nome para "Teste Silva Novo"</li>
+                <li>Clique "Salvar Alterações"</li>
+                <li>Logout e login como admin</li>
+                <li>Vá em "👥 Clientes"</li>
+                <li>✅ Deve ver nome atualizado na tabela!</li>
+            </ol>
+
+            <h3 style="margin-top: 2rem;">Teste 3: Cliente Altera Senha</h3>
+            <ol style="margin-left: 1.5rem; color: #b0b0b0;">
+                <li>Logado como cliente, vá em "👤 Meus Dados"</li>
+                <li>Clique "Alterar Senha"</li>
+                <li>Digite nova senha: "novaSenha123"</li>
+                <li>Confirme: "novaSenha123"</li>
+                <li>Logout</li>
+                <li>Tente login com:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Telefone: 85987654321</li>
+                        <li>Senha: novaSenha123</li>
+                    </ul>
+                </li>
+                <li>✅ Deve funcionar com nova senha!</li>
+            </ol>
+        </div>
+
+        <!-- Seção 8: Benefícios -->
+        <div class="section">
+            <h2>🎁 Benefícios</h2>
+
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <div class="icon">🎯</div>
+                    <h4>Mais Profissional</h4>
+                    <p>Sistema completo de gerenciamento de usuários</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">😊</div>
+                    <h4>Melhor UX</h4>
+                    <p>Cliente controla seus próprios dados</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">🔐</div>
+                    <h4>Mais Seguro</h4>
+                    <p>Cada cliente tem senha própria e segura</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">⚡</div>
+                    <h4>Rápido de Usar</h4>
+                    <p>Admin pode criar cliente em 1 clique</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">📱</div>
+                    <h4>Sincronizado</h4>
+                    <p>Mudanças aparecem em tempo real</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon">✨</div>
+                    <h4>Completo</h4>
+                    <p>Admin e cliente totalmente integrados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 9: Documentação -->
+        <div class="section">
+            <h2>📚 Documentação</h2>
+
+            <p>Para mais detalhes, consulte o arquivo:</p>
+            <div class="code-block">COMPATIBILIDADE_CLIENTE_ADMIN.md</div>
+
+            <h3 style="margin-top: 2rem;">Arquivos Modificados:</h3>
+            <ul style="margin-left: 1.5rem; color: #b0b0b0;">
+                <li><strong>js/storage.js</strong> - Adicionado sistema de senha</li>
+                <li><strong>js/login.js</strong> - Atualizado para usar novas senhas</li>
+                <li><strong>login.html</strong> - Novo campos de senha no registro</li>
+                <li><strong>admin.html</strong> - Novo campo de senha no modal</li>
+                <li><strong>js/admin.js</strong> - Gerencia senha de clientes</li>
+                <li><strong>cliente.html</strong> - Modal de trocar senha</li>
+                <li><strong>js/cliente.js</strong> - Função para alterar senha</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🔄 Sistema de Compatibilidade Cliente ↔ Admin - JóBurguers</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                ✅ Sistema implementado e testado com sucesso!
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: #606060;">
+                Versão: 1.0 | Data: 15 de Novembro de 2025
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

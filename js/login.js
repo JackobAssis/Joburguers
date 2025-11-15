@@ -7,6 +7,7 @@ import {
     validateAdminLogin,
     getAdmin,
     getClientByPhone,
+    validateClientLogin,
     addClient,
     setCurrentSession,
     getCurrentSession
@@ -116,19 +117,17 @@ function handleClientLogin(phone, password, errorDiv) {
         return;
     }
 
-    // Buscar cliente
-    const client = getClientByPhone(phone);
+    // Validar login (telefone + senha)
+    const client = validateClientLogin(phone, password);
+    
     if (!client) {
-        showError('Telefone não encontrado. Crie uma conta!', errorDiv);
-        return;
-    }
-
-    // Verificar senha (que é o telefone confirmado)
-    const normalizedPhone = sanitizePhone(phone);
-    const normalizedPassword = sanitizePhone(password);
-
-    if (normalizedPhone !== normalizedPassword) {
-        showError('Senha incorreta', errorDiv);
+        // Verificar se é porque cliente não existe ou senha está errada
+        const existingClient = getClientByPhone(phone);
+        if (!existingClient) {
+            showError('Telefone não encontrado. Crie uma conta!', errorDiv);
+        } else {
+            showError('Senha incorreta', errorDiv);
+        }
         return;
     }
 
@@ -150,6 +149,8 @@ function setupClientRegister() {
     const nameInput = document.getElementById('registerName');
     const phoneInput = document.getElementById('registerPhone');
     const confirmPhoneInput = document.getElementById('registerConfirmPhone');
+    const passwordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('registerConfirmPassword');
     const errorDiv = document.getElementById('registerError');
     const successDiv = document.getElementById('registerSuccess');
     const backBtn = document.getElementById('backToLogin');
@@ -176,9 +177,11 @@ function setupClientRegister() {
         const name = nameInput.value.trim();
         const phone = phoneInput.value.trim();
         const confirmPhone = confirmPhoneInput.value.trim();
+        const password = passwordInput.value.trim();
+        const confirmPassword = confirmPasswordInput.value.trim();
 
         // Validações
-        if (!name || !phone || !confirmPhone) {
+        if (!name || !phone || !confirmPhone || !password || !confirmPassword) {
             showError('Preencha todos os campos', errorDiv);
             return;
         }
@@ -198,6 +201,16 @@ function setupClientRegister() {
             return;
         }
 
+        if (password.length < 4) {
+            showError('Senha deve ter no mínimo 4 caracteres', errorDiv);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showError('As senhas não conferem', errorDiv);
+            return;
+        }
+
         // Verificar se cliente já existe
         if (getClientByPhone(phone)) {
             showError('Este telefone já está registrado', errorDiv);
@@ -209,6 +222,7 @@ function setupClientRegister() {
             const newClient = addClient({
                 name,
                 phone: formatPhone(phone),
+                password, // Usar senha fornecida pelo cliente
                 points: 50 // Bônus de boas-vindas
             });
 

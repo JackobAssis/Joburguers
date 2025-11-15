@@ -366,17 +366,22 @@ function setupClientsSection() {
             name: document.getElementById('clientName').value,
             phone: formatPhone(document.getElementById('clientPhone').value),
             email: document.getElementById('clientEmail').value,
+            password: document.getElementById('clientPassword').value || null, // null significa usar padrão
             points: parseInt(document.getElementById('clientPoints').value) || 0,
             active: document.getElementById('clientActive').checked
         };
 
         const clientId = form.dataset.clientId;
         if (clientId) {
+            // Ao editar, não sobrescrever senha se estiver vazia
+            if (!clientData.password) {
+                delete clientData.password;
+            }
             updateClient(parseInt(clientId), clientData);
             showNotification('✓ Cliente atualizado!', 'success');
         } else {
             addClient(clientData);
-            showNotification('✓ Cliente criado!', 'success');
+            showNotification('✓ Cliente criado com sucesso! Pode fazer login agora.', 'success');
         }
 
         modal.style.display = 'none';
@@ -457,9 +462,16 @@ window.editClient = function(clientId) {
     document.getElementById('clientName').value = client.name;
     document.getElementById('clientPhone').value = client.phone;
     document.getElementById('clientEmail').value = client.email || '';
+    document.getElementById('clientPassword').value = client.password || '';
     document.getElementById('clientPoints').value = client.points;
     document.getElementById('clientActive').checked = client.active;
     document.getElementById('clientForm').dataset.clientId = clientId;
+    
+    // Mudar texto do hint de senha
+    const hint = document.getElementById('passwordHint');
+    if (hint) {
+        hint.textContent = '(Deixe em branco para manter a senha atual)';
+    }
 
     document.getElementById('clientModal').style.display = 'flex';
 };

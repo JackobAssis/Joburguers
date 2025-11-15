@@ -1,0 +1,518 @@
+# 🧪 GUIA DE TESTE - Compatibilidade Cliente-Admin
+
+## 📋 Pré-requisitos
+
+- ✅ Todas as alterações foram implementadas
+- ✅ Arquivos foram salvos
+- ✅ localStorage está ativo
+- ✅ Navegador atualizado
+
+---
+
+## 🎬 Teste 1: Admin Cria Cliente com Senha Padrão
+
+### Passos:
+
+1. **Abra o site:**
+   ```
+   Navegador → http://localhost:3000 (ou seu URL local)
+   ```
+
+2. **Faça login como Admin:**
+   ```
+   Formulário de Login:
+   - Telefone: 81992974918
+   - Senha: jodono
+   ```
+
+3. **Navegue para Clientes:**
+   ```
+   Clique em: "👥 Clientes" (na barra lateral)
+   ```
+
+4. **Crie novo cliente:**
+   ```
+   Clique em: "+ Novo Cliente"
+   
+   Preencha:
+   - Nome: "Teste Silva"
+   - Telefone: (85) 98765-4321
+   - Email: teste@email.com
+   - Pontos: 0 (deixe padrão)
+   - Senha: [DEIXE EM BRANCO]
+   
+   Clique: "Salvar Cliente"
+   ```
+
+5. **Logout:**
+   ```
+   Clique em: "Sair" ou logout
+   ```
+
+6. **Faça login como cliente:**
+   ```
+   Formulário de Login:
+   - Telefone: 85987654321 (ou (85) 98765-4321)
+   - Senha: 654321 (últimos 6 dígitos do telefone)
+   
+   ✅ ESPERADO: Login com sucesso!
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Login do cliente com senha padrão funciona
+✓ Dashboard do cliente é exibido
+✓ Mostra nome: "Teste Silva"
+✓ Mostra saldo: 0 pontos
+```
+
+---
+
+## 🎬 Teste 2: Admin Cria Cliente com Senha Custom
+
+### Passos:
+
+1. **Faça login como Admin:**
+   ```
+   Telefone: 81992974918
+   Senha: jodono
+   ```
+
+2. **Navegue para Clientes:**
+   ```
+   Clique em: "👥 Clientes"
+   ```
+
+3. **Crie novo cliente:**
+   ```
+   Clique em: "+ Novo Cliente"
+   
+   Preencha:
+   - Nome: "Maria Santos"
+   - Telefone: (11) 97777-8888
+   - Email: maria@email.com
+   - Pontos: 50
+   - Senha: senhaforte123 [PREENCHA ISTO!]
+   
+   Clique: "Salvar Cliente"
+   ```
+
+4. **Logout e faça login como cliente:**
+   ```
+   Telefone: 11977778888
+   Senha: senhaforte123 (a que admin definiu)
+   
+   ✅ ESPERADO: Login com sucesso!
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Login com senha custom funciona
+✓ Mostra nome: "Maria Santos"
+✓ Mostra saldo: 50 pontos
+✓ Senha padrão (77778) NÃO funciona
+```
+
+---
+
+## 🎬 Teste 3: Cliente Cria Conta
+
+### Passos:
+
+1. **Vá para página de login (se não estiver logado):**
+   ```
+   URL: http://localhost:3000/login.html
+   ```
+
+2. **Clique em "Criar nova conta de cliente":**
+   ```
+   Ou clique em: "Não tem uma conta? Criar nova conta de cliente"
+   ```
+
+3. **Preencha o formulário de registro:**
+   ```
+   - Nome: "João Novo"
+   - Telefone: (81) 98888-9999
+   - Confirme Telefone: (81) 98888-9999
+   - Senha: minhaSenha456
+   - Confirme Senha: minhaSenha456
+   
+   Clique: "Criar Conta"
+   ```
+
+4. **Verifique sucesso:**
+   ```
+   ✅ Deve mostrar: "Conta criada com sucesso! 🎉"
+   ✅ Deve redirecionar para dashboard do cliente
+   ```
+
+5. **Verifique bônus:**
+   ```
+   Clique em: "⭐ Meus Pontos"
+   ✅ Deve mostrar: 50 pontos (bônus de boas-vindas)
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Conta criada com sucesso
+✓ Recebeu 50 pontos bônus
+✓ Está logado automaticamente
+✓ Dashboard é exibido com seus dados
+```
+
+---
+
+## 🎬 Teste 4: Cliente Edita Dados
+
+### Passos:
+
+1. **Estando logado como cliente:**
+   ```
+   Clique em: "👤 Meus Dados"
+   ```
+
+2. **Edite o nome:**
+   ```
+   Campo: "Nome Completo"
+   - De: "João Novo"
+   - Para: "João Silva Novo"
+   ```
+
+3. **Edite o email:**
+   ```
+   Campo: "Email (opcional)"
+   - Digite: "joao.novo@email.com"
+   ```
+
+4. **Salve as alterações:**
+   ```
+   Clique em: "Salvar Alterações"
+   ✅ Deve mostrar: "✓ Dados atualizados com sucesso!"
+   ```
+
+5. **Verifique no admin (abra outra aba):**
+   ```
+   - Fa login como admin em OUTRA ABA
+   - Vá em: "👥 Clientes"
+   - Procure por "João Silva Novo"
+   ✅ Deve estar com nome atualizado
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Dados atualizados no cliente
+✓ Mensagem de sucesso exibida
+✓ Admin vê dados atualizados em tempo real
+✓ Sem necessidade de refresh na página do admin
+```
+
+---
+
+## 🎬 Teste 5: Cliente Altera Senha
+
+### Passos:
+
+1. **Estando logado como cliente:**
+   ```
+   Clique em: "👤 Meus Dados"
+   ```
+
+2. **Clique em "Alterar Senha":**
+   ```
+   Botão verde: "Alterar Senha"
+   ```
+
+3. **Preencha o modal:**
+   ```
+   Modal que aparece:
+   - Nova Senha: novaSenha789
+   - Confirmar Senha: novaSenha789
+   
+   Clique: "Alterar"
+   ✅ Deve mostrar: "✓ Senha alterada com sucesso!"
+   ```
+
+4. **Logout:**
+   ```
+   Clique em: "Sair"
+   ```
+
+5. **Tente login com senha antiga:**
+   ```
+   Telefone: 81988889999 (ou seu telefone)
+   Senha: minhaSenha456 (ANTIGA)
+   
+   ❌ ESPERADO: "Senha incorreta"
+   ```
+
+6. **Faça login com senha nova:**
+   ```
+   Telefone: 81988889999
+   Senha: novaSenha789 (NOVA)
+   
+   ✅ ESPERADO: Login com sucesso!
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Modal de alterar senha funciona
+✓ Senha antiga não funciona mais
+✓ Senha nova funciona
+✓ Sistema consegue fazer logout e login
+```
+
+---
+
+## 🎬 Teste 6: Admin Redefine Senha de Cliente
+
+### Passos:
+
+1. **Faça login como admin:**
+   ```
+   Telefone: 81992974918
+   Senha: jodono
+   ```
+
+2. **Vá para clientes:**
+   ```
+   Clique em: "👥 Clientes"
+   ```
+
+3. **Procure e edite um cliente:**
+   ```
+   Procure por: "João Silva Novo"
+   Clique em: "Editar"
+   ```
+
+4. **Você vai ver o modal com a senha:**
+   ```
+   Campo "Senha": [vai mostrar a senha atual]
+   
+   OPÇÃO A - Deixar em branco (mantém):
+   - Deixe o campo vazio
+   - Clique "Salvar"
+   - Cliente continua com a mesma senha
+   
+   OPÇÃO B - Redefinir (nova):
+   - Limpe o campo
+   - Digite: "adminRedefiniuSenha123"
+   - Clique "Salvar"
+   ```
+
+5. **Logout e teste novo login de cliente:**
+   ```
+   Telefone: 81988889999
+   Senha: adminRedefiniuSenha123 (a que admin definiu)
+   
+   ✅ ESPERADO: Login com sucesso!
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Admin consegue ver senha atual
+✓ Admin pode deixar vazia (mantém)
+✓ Admin pode digitar nova senha
+✓ Cliente consegue fazer login com nova senha definida por admin
+```
+
+---
+
+## 🎬 Teste 7: Sincronização em Tempo Real
+
+### Passos:
+
+1. **Abra DUAS ABAS do navegador:**
+   ```
+   Aba 1: Login como ADMIN
+   Aba 2: Login como CLIENTE
+   ```
+
+2. **Na aba do cliente, edite nome:**
+   ```
+   Clique em: "👤 Meus Dados"
+   Edite nome para: "Teste Sincro"
+   Clique: "Salvar"
+   ```
+
+3. **Na aba do admin, SEM REFRESH:**
+   ```
+   Vá em: "👥 Clientes"
+   Procure pelo cliente
+   ✅ ESPERADO: Nome atualizado para "Teste Sincro"
+   ```
+
+### ✅ Resultado Esperado:
+```
+✓ Mudança aparece em tempo real no admin
+✓ Sem necessidade de refresh ou logout/login
+✓ Sistema está sincronizado
+```
+
+---
+
+## 🎬 Teste 8: Validações
+
+### Teste 8A: Telefone não registrado
+```
+Login como cliente:
+- Telefone: 99999999999 (não existe)
+- Senha: qualquer
+
+❌ ESPERADO: "Telefone não encontrado. Crie uma conta!"
+```
+
+### Teste 8B: Senha incorreta
+```
+Login como cliente (telefone correto):
+- Telefone: 81988889999
+- Senha: senhaerrada
+
+❌ ESPERADO: "Senha incorreta"
+```
+
+### Teste 8C: Senha muito curta no registro
+```
+Criar conta:
+- Nome: "Teste"
+- Telefone: (81) 98888-1111
+- Senha: 123 [SÓ 3 CARACTERES]
+
+❌ ESPERADO: "Senha deve ter no mínimo 4 caracteres"
+```
+
+### Teste 8D: Senhas não conferem
+```
+Criar conta:
+- Senha: senhaCorreta123
+- Confirmar: senhaErrada456
+
+❌ ESPERADO: "As senhas não conferem"
+```
+
+---
+
+## 📊 Checklist Final
+
+### ✅ Admin
+- [ ] Consegue criar cliente com senha padrão
+- [ ] Consegue criar cliente com senha custom
+- [ ] Consegue editar cliente e ver senha
+- [ ] Consegue deixar senha vazia (mantém)
+- [ ] Consegue digitar nova senha
+- [ ] Vê atualizações do cliente em tempo real
+
+### ✅ Cliente
+- [ ] Consegue fazer login (padrão do admin)
+- [ ] Consegue fazer login (senha custom do admin)
+- [ ] Consegue criar conta própria
+- [ ] Consegue receber 50 pontos bônus
+- [ ] Consegue editar nome
+- [ ] Consegue editar email
+- [ ] Consegue alterar sua própria senha
+- [ ] Admin vê atualização em tempo real
+
+### ✅ Compatibilidade
+- [ ] Admin cria → Cliente consegue logar
+- [ ] Cliente edita → Admin vê
+- [ ] Admin edita → Cliente vê
+- [ ] Senha antiga não funciona após alteração
+- [ ] Senha nova funciona após alteração
+
+### ✅ Validações
+- [ ] Telefone não existe → Erro correto
+- [ ] Senha errada → Erro correto
+- [ ] Senha muito curta → Erro correto
+- [ ] Senhas não conferem → Erro correto
+- [ ] Telefone já registrado → Erro correto
+
+---
+
+## 🐛 Se Encontrar Problemas
+
+### Problema: Cliente não consegue fazer login
+**Solução:**
+1. Verifique se cliente foi criado (abra DevTools F12 → Application → localStorage)
+2. Verifique se a senha está correta
+3. Verifique formato do telefone (normalize: apenas números)
+4. Limpe cache do navegador (Ctrl+Shift+Del)
+
+### Problema: Admin não vê atualização do cliente
+**Solução:**
+1. Clique em outro cliente e volte
+2. Atualize a página (F5)
+3. Verifique console (F12 → Console) se há erros
+4. Verifique localStorage (F12 → Application)
+
+### Problema: Senha não funciona
+**Solução:**
+1. Verifique se digitou corretamente (case-sensitive? espaços?)
+2. Verifique qual senha o admin definiu
+3. Se vazio, use: últimos 6 dígitos do telefone
+4. Limpe localStorage e tente novamente
+
+---
+
+## 📱 Simulando Usuários
+
+### Usuários de Teste Pré-criados:
+
+**Admin:**
+```
+Telefone: 81992974918
+Senha: jodono
+```
+
+**Para criar mais:**
+Use os testes acima para criar quantos clientes quiser com nomes e senhas diferentes.
+
+---
+
+## 📸 Prints Esperados
+
+### 1️⃣ Login bem-sucedido (cliente)
+```
+Tela: Dashboard do Cliente
+Mostra:
+- Nome do cliente
+- Saldo de pontos
+- Nível atual
+- Próximo nível
+- Sidebar com opções: Dashboard, Meus Pontos, Histórico, Meus Dados
+```
+
+### 2️⃣ Edição de dados
+```
+Tela: Meus Dados
+Campos preenchidos:
+- Nome Completo: [editável]
+- Telefone: [editável]
+- Email: [editável]
+Botões:
+- "Salvar Alterações" (verde)
+- "Alterar Senha" (verde)
+```
+
+### 3️⃣ Modal de senha
+```
+Modal: "Alterar Senha"
+Campos:
+- Nova Senha: [input password]
+- Confirmar Senha: [input password]
+Botões:
+- "Alterar" (verde)
+- "Cancelar" (cinza)
+```
+
+---
+
+## ✨ Conclusão
+
+Se todos os 8 testes passarem ✅, o sistema está funcionando perfeitamente!
+
+Parabéns! 🎉 O sistema de compatibilidade Cliente-Admin está 100% funcional!
+
+---
+
+**Versão:** 1.0  
+**Data:** 15 de Novembro de 2025  
+**Status:** ✅ Guia Completo

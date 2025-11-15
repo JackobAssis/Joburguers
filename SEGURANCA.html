@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Segurança - JóBurguers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 4px solid #FF6B35;
+            padding-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: #FF6B35;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .alert {
+            background-color: #2a2a2a;
+            border-left: 5px solid #FF6B35;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .alert h3 {
+            color: #FF6B35;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert p {
+            color: #e0e0e0;
+        }
+
+        .section {
+            background-color: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: #FF6B35;
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.2);
+        }
+
+        .section h2 {
+            color: #FFD700;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #FF6B35;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+        }
+
+        .section p {
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .section ul, .section ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section li {
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #FFD700;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: #FFD700;
+        }
+
+        .danger-box {
+            background-color: rgba(255, 107, 53, 0.15);
+            border-left: 4px solid #FF6B35;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .danger-box strong {
+            color: #FF6B35;
+        }
+
+        .success-box {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .success-box strong {
+            color: #4caf50;
+        }
+
+        .code-block {
+            background-color: #0f0f0f;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #FFD700;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #0f0f0f;
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #252525;
+            color: #FFD700;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #FF6B35;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #404040;
+            color: #b0b0b0;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 107, 53, 0.05);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .warning-list {
+            list-style: none;
+        }
+
+        .warning-list li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .warning-list li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+            color: #FF6B35;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #FF6B35;
+            color: #fff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-danger {
+            background-color: #d32f2f;
+        }
+
+        .badge-success {
+            background-color: #4caf50;
+        }
+
+        .flow-chart {
+            background-color: #0f0f0f;
+            border: 1px solid #FF6B35;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .flow-item {
+            display: inline-block;
+            background-color: #1a1a1a;
+            border: 2px solid #FFD700;
+            padding: 1rem 2rem;
+            margin: 0.5rem;
+            border-radius: 8px;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .flow-arrow {
+            color: #FF6B35;
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #404040;
+            color: #808080;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔒 Política de Segurança</h1>
+            <p>JóBurguers - Proteção de Dados e Informações</p>
+        </header>
+
+        <!-- Alert Inicial -->
+        <div class="alert">
+            <h3>⚡ Informação Crítica</h3>
+            <p>
+                Este site é uma <strong>aplicação web de DEMONSTRAÇÃO</strong> executada localmente e via Vercel. 
+                Para uso em produção com dados reais, implementações adicionais de segurança são OBRIGATÓRIAS.
+            </p>
+        </div>
+
+        <!-- Seção 1: Estado Atual de Segurança -->
+        <div class="section">
+            <h2>📊 Estado Atual de Segurança</h2>
+            
+            <h3>✅ Implementado</h3>
+            <ul class="checklist">
+                <li>Autenticação básica com credenciais</li>
+                <li>Armazenamento local (localStorage) com separação de dados</li>
+                <li>Proteção de rotas (acesso a páginas restritas)</li>
+                <li>Validação de entrada de dados</li>
+                <li>HTTPS via Vercel (quando deployado)</li>
+                <li>Logout com limpeza de sessão</li>
+            </ul>
+
+            <h3>⚠️ Limitações Atuais</h3>
+            <ul class="warning-list">
+                <li>Sem banco de dados backend (dados em localStorage)</li>
+                <li>Senhas não criptografadas (apenas em localStorage)</li>
+                <li>Sem autenticação OAuth (Google, Facebook, etc)</li>
+                <li>Sem autenticação de dois fatores (2FA)</li>
+                <li>Sem auditoria de logs centralizada</li>
+                <li>Sem proteção contra CSRF</li>
+                <li>localStorage é vulnerável em XSS</li>
+            </ul>
+
+            <div class="danger-box">
+                <strong>⚠️ IMPORTANTE:</strong> Esta aplicação NÃO é segura para dados sensíveis em produção. 
+                Para usar em produção, você PRECISA de um backend seguro!
+            </div>
+        </div>
+
+        <!-- Seção 2: Arquitetura de Segurança -->
+        <div class="section">
+            <h2>🏗️ Arquitetura de Segurança</h2>
+
+            <h3>Como o Site Funciona Atualmente</h3>
+            <div class="flow-chart">
+                <div class="flow-item">Cliente Acessa</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">Login/Autenticação</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">localStorage</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">Página Carregada</div>
+            </div>
+
+            <h3>Fluxo de Autenticação</h3>
+            <ol>
+                <li><strong>Usuário digita credenciais:</strong> Email/telefone + senha</li>
+                <li><strong>Sistema valida:</strong> Compara com dados em localStorage</li>
+                <li><strong>Se correto:</strong> Token armazenado em localStorage</li>
+                <li><strong>Redirecionamento:</strong> Vai para página apropriada (cliente/admin)</li>
+                <li><strong>Proteção de rotas:</strong> Se não estiver logado, volta para login</li>
+                <li><strong>Logout:</strong> Limpa localStorage e volta para login</li>
+            </ol>
+
+            <div class="highlight-box">
+                <strong>💡 Token Atual:</strong> Apenas um identificador simples em localStorage. 
+                Não é um JWT criptografado (que seria mais seguro).
+            </div>
+        </div>
+
+        <!-- Seção 3: Dados Armazenados -->
+        <div class="section">
+            <h2>💾 Dados Armazenados Localmente</h2>
+
+            <h3>localStorage - O Que é Armazenado?</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Chave</th>
+                        <th>Conteúdo</th>
+                        <th>Sensibilidade</th>
+                        <th>Formato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>currentUser</code></td>
+                        <td>ID/email do usuário logado</td>
+                        <td>Média</td>
+                        <td>JSON</td>
+                    </tr>
+                    <tr>
+                        <td><code>clients</code></td>
+                        <td>Lista completa de clientes com dados</td>
+                        <td>Alta</td>
+                        <td>JSON Array</td>
+                    </tr>
+                    <tr>
+                        <td><code>products</code></td>
+                        <td>Cardápio e preços</td>
+                        <td>Baixa</td>
+                        <td>JSON Array</td>
+                    </tr>
+                    <tr>
+                        <td><code>promotions</code></td>
+                        <td>Promoções e resgates</td>
+                        <td>Média</td>
+                        <td>JSON Array</td>
+                    </tr>
+                    <tr>
+                        <td><code>admin</code></td>
+                        <td>Credencial admin (telefone + senha)</td>
+                        <td>Crítica</td>
+                        <td>Texto plano</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="danger-box">
+                <strong>🚨 RISCO CRÍTICO:</strong> Senha do admin está em TEXTO PLANO no localStorage!
+                Qualquer pessoa com acesso ao navegador pode ver isto no DevTools (F12 → Application).
+            </div>
+
+            <h3>Localização do localStorage</h3>
+            <div class="code-block">
+Navegador → F12 (DevTools) → Application → Local Storage → https://localhost:3000
+            </div>
+        </div>
+
+        <!-- Seção 4: Vulnerabilidades Conhecidas -->
+        <div class="section">
+            <h2>🔓 Vulnerabilidades Conhecidas</h2>
+
+            <div class="two-column">
+                <div>
+                    <h3>XSS (Cross-Site Scripting)</h3>
+                    <p><strong>O quê:</strong> Injeção de código JavaScript malicioso</p>
+                    <p><strong>Como:</strong> Campos de entrada não sanitizados</p>
+                    <p><strong>Risco:</strong> Acesso a localStorage, cookies, dados do usuário</p>
+                    <div class="danger-box">
+                        <strong>Status:</strong> Parcialmente mitigado com validação básica
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Armazenamento Inseguro</h3>
+                    <p><strong>O quê:</strong> localStorage é facilmente acessível</p>
+                    <p><strong>Como:</strong> DevTools → F12 → Application</p>
+                    <p><strong>Risco:</strong> Roubo de credenciais e dados do cliente</p>
+                    <div class="danger-box">
+                        <strong>Status:</strong> NÃO mitigado - risco crítico
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div>
+                    <h3>Man-in-the-Middle (MITM)</h3>
+                    <p><strong>O quê:</strong> Interceptação de comunicação</p>
+                    <p><strong>Como:</strong> HTTP não criptografado, Wi-Fi aberto</p>
+                    <p><strong>Risco:</strong> Roubo de credenciais e dados</p>
+                    <div class="success-box">
+                        <strong>Status:</strong> Mitigado com HTTPS via Vercel
+                    </div>
+                </div>
+
+                <div>
+                    <h3>SQL Injection</h3>
+                    <p><strong>O quê:</strong> Injeção de comando SQL malicioso</p>
+                    <p><strong>Como:</strong> Sem backend SQL = sem risco direto</p>
+                    <p><strong>Risco:</strong> Baixo em localStorage</p>
+                    <div class="success-box">
+                        <strong>Status:</strong> Não aplicável - sem banco de dados
+                    </div>
+                </div>
+            </div>
+
+            <h3>Outras Vulnerabilidades</h3>
+            <ul class="warning-list">
+                <li><strong>CSRF (Cross-Site Request Forgery):</strong> Sem proteção implementada</li>
+                <li><strong>Força Bruta:</strong> Sem limite de tentativas de login</li>
+                <li><strong>Acesso Não Autorizado:</strong> Proteção por URL apenas (frágil)</li>
+                <li><strong>Expiração de Sessão:</strong> Sessão nunca expira automaticamente</li>
+                <li><strong>Auditoria:</strong> Sem logs de quem fez o quê e quando</li>
+            </ul>
+        </div>
+
+        <!-- Seção 5: Boas Práticas Atuais -->
+        <div class="section">
+            <h2>✅ Boas Práticas Implementadas</h2>
+
+            <h3>1. Validação de Entrada</h3>
+            <div class="code-block">
+// Exemplo: Verificar se email é válido
+if (!email.includes('@')) {
+    showError('Email inválido');
+    return;
+}
+
+// Verificar comprimento de senha
+if (password.length < 4) {
+    showError('Senha muito curta');
+    return;
+}
+            </div>
+
+            <h3>2. Proteção de Rotas</h3>
+            <div class="code-block">
+// Verificar se usuário está logado antes de carregar página
+function checkAuth() {
+    const user = localStorage.getItem('currentUser');
+    if (!user) {
+        window.location.href = 'login.html';
+    }
+}
+            </div>
+
+            <h3>3. Limpeza de Dados ao Logout</h3>
+            <div class="code-block">
+function logout() {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userRole');
+    window.location.href = 'login.html';
+}
+            </div>
+
+            <h3>4. Separação de Dados por Tipo de Usuário</h3>
+            <ul class="checklist">
+                <li>Admin vê todos os clientes e dados</li>
+                <li>Cliente vê apenas seus próprios dados</li>
+                <li>Dados sensiveis (admin) protegidos por autenticação</li>
+            </ul>
+        </div>
+
+        <!-- Seção 6: Para Ir Para Produção -->
+        <div class="section">
+            <h2>🚀 O Que Você PRECISA Fazer Para Produção</h2>
+
+            <div class="danger-box">
+                <strong>⚠️ OBRIGATÓRIO:</strong> Estas implementações são essenciais antes de lidar com dados reais!
+            </div>
+
+            <h3>1. Backend Seguro (Crítico)</h3>
+            <ul class="warning-list">
+                <li><strong>Banco de Dados:</strong> PostgreSQL, MongoDB, etc (NÃO localStorage)</li>
+                <li><strong>API REST/GraphQL:</strong> Node.js/Express, Python/Django, etc</li>
+                <li><strong>Autenticação JWT:</strong> Tokens criptografados e com expiração</li>
+                <li><strong>HTTPS Obrigatório:</strong> Certificado SSL válido</li>
+                <li><strong>Variáveis de Ambiente:</strong> Senhas/chaves fora do código</li>
+            </ul>
+
+            <h3>2. Criptografia de Dados</h3>
+            <ul class="warning-list">
+                <li><strong>Passwords:</strong> bcrypt, Argon2 (nunca texto plano!)</li>
+                <li><strong>Dados Sensíveis:</strong> AES-256 no banco de dados</li>
+                <li><strong>Comunicação:</strong> TLS 1.2+ obrigatório</li>
+                <li><strong>API Keys:</strong> Tokens JWT com expiration</li>
+            </ul>
+
+            <h3>3. Autenticação e Autorização</h3>
+            <ul class="warning-list">
+                <li><strong>Autenticação de Dois Fatores (2FA):</strong> SMS ou app authenticator</li>
+                <li><strong>OAuth:</strong> Google, Facebook para clientes (opcional)</li>
+                <li><strong>Rate Limiting:</strong> Máximo de tentativas de login</li>
+                <li><strong>Roles e Permissões:</strong> Controle granular de acesso</li>
+            </ul>
+
+            <h3>4. Proteção de Dados</h3>
+            <ul class="warning-list">
+                <li><strong>Validação no Backend:</strong> Nunca confie apenas no frontend</li>
+                <li><strong>Sanitização de Input:</strong> Remove caracteres maliciosos</li>
+                <li><strong>CORS Configurado:</strong> Apenas domínios autorizados</li>
+                <li><strong>CSRF Protection:</strong> Tokens CSRF em formulários</li>
+                <li><strong>Content Security Policy:</strong> Headers de segurança</li>
+            </ul>
+
+            <h3>5. Auditoria e Logging</h3>
+            <ul class="warning-list">
+                <li><strong>Logs Centralizados:</strong> Quem fez o quê, quando e de onde</li>
+                <li><strong>Alertas de Segurança:</strong> Notificações de atividades suspeitas</li>
+                <li><strong>Backup Automático:</strong> Recuperação de dados em caso de problema</li>
+                <li><strong>Retenção de Logs:</strong> Mínimo 6-12 meses</li>
+            </ul>
+
+            <h3>6. Conformidade Legal</h3>
+            <ul class="warning-list">
+                <li><strong>LGPD (Lei Geral de Proteção de Dados):</strong> Brasil</li>
+                <li><strong>Política de Privacidade:</strong> Documento legal claro</li>
+                <li><strong>Termos de Serviço:</strong> Regras de uso explicadas</li>
+                <li><strong>Consentimento do Usuário:</strong> Aprovação explícita</li>
+                <li><strong>Direito ao Esquecimento:</strong> Deletar dados do usuário</li>
+            </ul>
+        </div>
+
+        <!-- Seção 7: Checklist de Produção -->
+        <div class="section">
+            <h2>📋 Checklist Antes de Deployar em Produção</h2>
+
+            <h3>Segurança</h3>
+            <ul class="checklist">
+                <li>Backend implementado com autenticação segura</li>
+                <li>Todas as senhas criptografadas (bcrypt)</li>
+                <li>HTTPS/SSL configurado</li>
+                <li>Variáveis sensíveis em arquivo .env (não no código)</li>
+                <li>Rate limiting ativado</li>
+                <li>CORS configurado corretamente</li>
+                <li>Headers de segurança adicionados</li>
+            </ul>
+
+            <h3>Dados</h3>
+            <ul class="checklist">
+                <li>Banco de dados preparado e testado</li>
+                <li>Backup automático configurado</li>
+                <li>Logs centralizados funcionando</li>
+                <li>Política de retenção definida</li>
+                <li>Conformidade LGPD verificada</li>
+            </ul>
+
+            <h3>Testes</h3>
+            <ul class="checklist">
+                <li>Testes de segurança (penetration testing)</li>
+                <li>Testes de carga e performance</li>
+                <li>Testes de autenticação e autorização</li>
+                <li>Verificação de vulnerabilidades comuns (OWASP Top 10)</li>
+            </ul>
+
+            <h3>Legal</h3>
+            <ul class="checklist">
+                <li>Política de Privacidade online</li>
+                <li>Termos de Serviço publicados</li>
+                <li>Consentimento do usuário obtido</li>
+                <li>Direito ao esquecimento implementado</li>
+            </ul>
+        </div>
+
+        <!-- Seção 8: Proteção do Admin -->
+        <div class="section">
+            <h2>👨‍💼 Proteção da Conta Admin</h2>
+
+            <div class="danger-box">
+                <strong>🚨 CRÍTICO:</strong> A conta admin é a mais importante e deve ser super protegida!
+            </div>
+
+            <h3>Credenciais Atuais</h3>
+            <div class="code-block">
+Telefone: 81992974918
+Senha: jodono
+            </div>
+
+            <div class="warning-list">
+                <li><strong>⚠️ MUDE IMEDIATAMENTE</strong> antes de ir para produção</li>
+                <li><strong>⚠️ NÃO compartilhe</strong> com ninguém além do necessário</li>
+                <li><strong>⚠️ Use uma senha forte:</strong> Mínimo 12 caracteres, mistura de letras/números/símbolos</li>
+                <li><strong>⚠️ Habilite 2FA</strong> quando implementado</li>
+                <li><strong>⚠️ Use VPN</strong> ao acessar de fora</li>
+            </ul>
+
+            <h3>Senhas Fortes - Exemplo</h3>
+            <div class="code-block">
+❌ Ruim: jodono, 123456, admin123
+✅ Bom: Xk$9mP@2wQ!vLn4R
+
+Dica: Use gerenciador de senhas (1Password, Bitwarden)
+            </div>
+
+            <h3>Segurança da Conta Admin em Produção</h3>
+            <ul class="warning-list">
+                <li><strong>Autenticação de Dois Fatores (2FA):</strong> Obrigatória</li>
+                <li><strong>IP Whitelist:</strong> Apenas IPs autorizados podem acessar admin</li>
+                <li><strong>Alertas de Login:</strong> Notificação sempre que alguém faz login</li>
+                <li><strong>Sessão com Timeout:</strong> Desconecta automaticamente</li>
+                <li><strong>Auditoria Total:</strong> Log de todas as ações do admin</li>
+                <li><strong>Aprovação de Mudanças:</strong> Mudanças críticas requerem dois admins</li>
+            </ul>
+        </div>
+
+        <!-- Seção 9: Proteção do Cliente -->
+        <div class="section">
+            <h2>👥 Proteção dos Dados do Cliente</h2>
+
+            <h3>Quais Dados Coleto?</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dado</th>
+                        <th>Necessário?</th>
+                        <th>Sensibilidade</th>
+                        <th>Como Proteger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nome</td>
+                        <td>✓ Sim</td>
+                        <td>Baixa</td>
+                        <td>Validação básica</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>✓ Sim</td>
+                        <td>Média</td>
+                        <td>Validação + HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>Telefone</td>
+                        <td>✓ Sim</td>
+                        <td>Média</td>
+                        <td>Validação + HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>Senha</td>
+                        <td>✓ Sim</td>
+                        <td>Crítica</td>
+                        <td>bcrypt + HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>Histórico de Compras</td>
+                        <td>✓ Sim</td>
+                        <td>Alta</td>
+                        <td>Criptografia + HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>Pontos Acumulados</td>
+                        <td>✓ Sim</td>
+                        <td>Média</td>
+                        <td>Validação backend</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Direitos do Cliente (LGPD)</h3>
+            <ul class="checklist">
+                <li><strong>Direito de Acesso:</strong> Ver todos seus dados</li>
+                <li><strong>Direito de Portabilidade:</strong> Exportar seus dados</li>
+                <li><strong>Direito de Retificação:</strong> Corrigir dados incorretos</li>
+                <li><strong>Direito ao Esquecimento:</strong> Deletar conta e dados</li>
+                <li><strong>Direito de Não Rastreamento:</strong> Optar por não ser rastreado</li>
+            </ul>
+        </div>
+
+        <!-- Seção 10: Resposta a Incidentes -->
+        <div class="section">
+            <h2>🚨 Plano de Resposta a Incidentes</h2>
+
+            <h3>Se Descobrir uma Falha de Segurança:</h3>
+            <ol>
+                <li><strong>Isolar:</strong> Desconecte o servidor se necessário</li>
+                <li><strong>Investigar:</strong> Descubra o escopo e a gravidade</li>
+                <li><strong>Notificar:</strong> Informe clientes afetados em 24-48h</li>
+                <li><strong>Consertar:</strong> Implemente correção permanente</li>
+                <li><strong>Validar:</strong> Teste para garantir que está resolvido</li>
+                <li><strong>Documentar:</strong> Registre tudo para compliance</li>
+                <li><strong>Prevenir:</strong> Melhore processos para evitar repetição</li>
+            </ol>
+
+            <div class="danger-box">
+                <strong>⚠️ Notificação Obrigatória:</strong> Lei brasileira (LGPD) exige notificar 
+                em caso de vazamento de dados pessoais!
+            </div>
+
+            <h3>Contatos Importantes</h3>
+            <ul>
+                <li><strong>Time de Segurança:</strong> Email de contato dedicado</li>
+                <li><strong>Autoridades:</strong> ANPD (Autoridade Nacional de Proteção de Dados)</li>
+                <li><strong>Advogado:</strong> Para questões legais</li>
+                <li><strong>Backup:</strong> Restaurar de último backup conhecido como bom</li>
+            </ul>
+        </div>
+
+        <!-- Seção 11: Recursos Úteis -->
+        <div class="section">
+            <h2>📚 Recursos e Referências</h2>
+
+            <h3>Padrões de Segurança</h3>
+            <ul>
+                <li><strong>OWASP Top 10:</strong> top10.owasp.org - As 10 vulnerabilidades mais comuns</li>
+                <li><strong>NIST Cybersecurity:</strong> Padrão americano de segurança</li>
+                <li><strong>ISO/IEC 27001:</strong> Padrão internacional de segurança de informação</li>
+            </ul>
+
+            <h3>Ferramentas de Teste</h3>
+            <ul>
+                <li><strong>OWASP ZAP:</strong> Teste de penetração gratuito</li>
+                <li><strong>Burp Suite:</strong> Teste de segurança avançado</li>
+                <li><strong>Snyk:</strong> Verificação de vulnerabilidades em dependências</li>
+                <li><strong>npm audit:</strong> Auditoria de pacotes Node.js</li>
+            </ul>
+
+            <h3>Leis e Conformidade</h3>
+            <ul>
+                <li><strong>LGPD (Lei 13.709/2018):</strong> Brasil - lei.gov.br</li>
+                <li><strong>GDPR:</strong> União Europeia (se tiver usuários europeus)</li>
+                <li><strong>CCPA:</strong> Califórnia, EUA (se tiver usuários da CA)</li>
+            </ul>
+
+            <h3>Bibliotecas de Segurança (JavaScript/Node.js)</h3>
+            <ul>
+                <li><strong>bcryptjs:</strong> Hashing seguro de senhas</li>
+                <li><strong>jsonwebtoken:</strong> Criação de JWT</li>
+                <li><strong>helmet:</strong> Headers de segurança HTTP</li>
+                <li><strong>express-rate-limit:</strong> Rate limiting</li>
+                <li><strong>cors:</strong> Proteção CORS</li>
+                <li><strong>dotenv:</strong> Variáveis de ambiente</li>
+            </ul>
+        </div>
+
+        <!-- Seção 12: Próximas Etapas -->
+        <div class="section">
+            <h2>📈 Próximas Etapas</h2>
+
+            <h3>Curto Prazo (Immediate)</h3>
+            <ul class="warning-list">
+                <li><strong>Mude senha do admin</strong> para algo forte</li>
+                <li><strong>Não compartilhe credenciais</strong> por email/Whatsapp</li>
+                <li><strong>Use HTTPS</strong> sempre que possível</li>
+                <li><strong>Faça backup</strong> dos dados regularmente</li>
+            </ul>
+
+            <h3>Médio Prazo (Próximo Mês)</h3>
+            <ul class="warning-list">
+                <li><strong>Comece backend seguro:</strong> Node.js + Express ou similar</li>
+                <li><strong>Implemente banco de dados:</strong> PostgreSQL ou MongoDB</li>
+                <li><strong>Autenticação JWT:</strong> Tokens criptografados</li>
+                <li><strong>Teste de penetração</strong> básico</li>
+            </ul>
+
+            <h3>Longo Prazo (3-6 Meses)</h3>
+            <ul class="warning-list">
+                <li><strong>2FA implementado</strong> para admin e clientes</li>
+                <li><strong>Auditoria e logs</strong> centralizados</li>
+                <li><strong>Conformidade LGPD</strong> completa</li>
+                <li><strong>Teste de segurança profissional</strong> (penetration testing)</li>
+                <li><strong>Seguro cibernético</strong> contratado</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🔒 Política de Segurança - JóBurguers</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                ⚠️ Esta é uma aplicação de demonstração. Para produção, implementações adicionais são obrigatórias.
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: #606060;">
+                Última atualização: 15 de Novembro de 2025
+                <br>
+                Segurança é responsabilidade compartilhada. Sempre mantenha-se atualizado!
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
