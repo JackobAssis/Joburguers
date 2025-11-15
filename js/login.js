@@ -211,35 +211,41 @@ function setupClientRegister() {
             return;
         }
 
+        // Normalizar telefone
+        const normalizedPhone = sanitizePhone(phone);
+
         // Verificar se cliente já existe
-        if (getClientByPhone(phone)) {
+        if (getClientByPhone(normalizedPhone)) {
             showError('Este telefone já está registrado', errorDiv);
             return;
         }
 
-        // Criar novo cliente
+        // Criar novo cliente (usar telefone formatado para exibição)
         try {
             const newClient = addClient({
                 name,
-                phone: formatPhone(phone),
+                phone: formatPhone(normalizedPhone),
                 password, // Usar senha fornecida pelo cliente
                 points: 50 // Bônus de boas-vindas
             });
 
-            showSuccess(
-                `Conta criada com sucesso! 🎉 Ganhou 50 pontos de boas-vindas!`,
-                successDiv
-            );
+            showSuccess(`Conta criada com sucesso! 🎉 Ganhou 50 pontos de boas-vindas!`, successDiv);
 
             // Limpar formulário
             form.reset();
 
             // Redirecionar após 2 segundos
             setTimeout(() => {
-                setCurrentSession('cliente', newClient.id);
-                window.location.href = 'cliente.html';
+                try {
+                    setCurrentSession('cliente', newClient.id);
+                    window.location.href = 'cliente.html';
+                } catch (err) {
+                    console.error('Erro ao definir sessão após registro:', err);
+                    showError('Erro ao iniciar sessão. Faça login manualmente.', errorDiv);
+                }
             }, 2000);
         } catch (error) {
+            console.error('Erro ao criar cliente:', error);
             showError('Erro ao criar conta. Tente novamente.', errorDiv);
         }
     });

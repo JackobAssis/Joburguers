@@ -424,6 +424,25 @@ function setupClientsSection() {
     });
 
     searchInput.addEventListener('input', filterClients);
+
+    // Sincronização entre abas: se outra aba/tab alterar os clients (ex.: cliente se registra),
+    // o evento 'storage' será disparado e recarregamos a tabela automaticamente.
+    // Isso garante que o admin veja novos clientes sem precisar recarregar a página.
+    window.addEventListener('storage', (ev) => {
+        try {
+            if (!ev.key) return; // ignore clear
+            if (ev.key === 'clients_data') {
+                // Pequeno debounce para evitar múltiplas atualizações quando necessário
+                setTimeout(() => {
+                    loadClientsTable();
+                    showNotification('Lista de clientes atualizada (sincronização entre abas).', 'info');
+                }, 100);
+            }
+        } catch (err) {
+            // Não bloqueante
+            console.warn('Erro ao processar storage event (clients):', err);
+        }
+    });
 }
 
 function loadClientsTable() {
@@ -572,34 +591,79 @@ function getLevelLabel(level) {
 
 function setupPromotionsSection() {
     const addBtn = document.getElementById('addPromotionBtn');
+    const modal = document.getElementById('promotionModal');
+    const form = document.getElementById('promotionForm');
+    const closeBtn = document.getElementById('closePromotionModal');
+
     if (!addBtn) return;
 
     loadPromotionsTable();
 
+    // Adicionar nova promoção
     addBtn.addEventListener('click', () => {
-        const name = prompt('Nome da promoção:');
-        if (!name) return;
+        document.getElementById('promotionModalTitle').textContent = 'Nova Promoção';
+        form.reset();
+        form.dataset.promotionId = '';
+        modal.style.display = 'flex';
+    });
 
-        const description = prompt('Descrição:');
-        if (!description) return;
+    // Fechar modal
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
 
-        const discount = prompt('Desconto (%):');
-        if (!discount) return;
+    // Salvar promoção
+    async function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
 
-        const startDate = prompt('Data início (YYYY-MM-DD):');
-        const endDate = prompt('Data fim (YYYY-MM-DD):');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-        const promotion = {
-            name,
-            description,
-            discount: parseInt(discount),
-            startDate: startDate || new Date().toISOString(),
-            endDate: endDate || new Date(Date.now() + 7*24*60*60*1000).toISOString(),
-            active: true
+        // Verificar se foi feito upload de arquivo
+        const fileInput = document.getElementById('promotionPhoto');
+        let photoValue = '';
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+                const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+                photoValue = dataUrl;
+            } catch (err) {
+                console.warn('Falha ao processar arquivo de imagem:', err);
+                showNotification('Erro ao ler imagem enviada. Tente novamente.', 'error');
+                return;
+            }
+        }
+
+        const promotionData = {
+            name: document.getElementById('promotionName').value,
+            value: document.getElementById('promotionValue').value,
+            description: document.getElementById('promotionDescription').value,
+            photo: photoValue,
+            instagramLink: document.getElementById('promotionInstagramLink').value,
+            active: document.getElementById('promotionActive').checked
         };
 
-        addPromotion(promotion);
-        showNotification('✓ Promoção criada!', 'success');
+        const promotionId = form.dataset.promotionId;
+        if (promotionId) {
+            updatePromotion(parseInt(promotionId), promotionData);
+            showNotification('✓ Promoção atualizada!', 'success');
+        } else {
+            addPromotion(promotionData);
+            showNotification('✓ Promoção criada!', 'success');
+        }
+
+        // Resetar input de arquivo
+        if (fileInput) fileInput.value = '';
+
+        modal.style.display = 'none';
         loadPromotionsTable();
     });
 }
@@ -611,10 +675,8 @@ function loadPromotionsTable() {
     tbody.innerHTML = promotions.map(promo => `
         <tr>
             <td>${promo.name}</td>
+            <td>${promo.value}</td>
             <td>${truncateText(promo.description, 50)}</td>
-            <td>${promo.discount}%</td>
-            <td>${formatDateOnly(promo.startDate)}</td>
-            <td>${formatDateOnly(promo.endDate)}</td>
             <td><span class="status-badge ${promo.active ? 'status-badge--ativo' : 'status-badge--inativo'}">${promo.active ? 'Ativa' : 'Inativa'}</span></td>
             <td>
                 <div class="table-actions">
@@ -641,30 +703,63 @@ function truncateText(text, max) {
 
 function setupRedeemSection() {
     const addBtn = document.getElementById('addRedeemBtn');
+    const modal = document.getElementById('redeemModal');
+    const form = document.getElementById('redeemForm');
+    const closeBtn = document.getElementById('closeRedeemModal');
+    const productSelect = document.getElementById('redeemProduct');
+
     if (!addBtn) return;
 
     loadRedeemsTable();
 
+    // Carregar produtos no select
+    const products = getAllProducts();
+    productSelect.innerHTML = '<option value="">Selecione um produto</option>' +
+        products.map(product => `<option value="${product.id}">${product.name}</option>`).join('');
+
+    // Adicionar novo resgate
     addBtn.addEventListener('click', () => {
-        const name = prompt('Nome do resgate:');
-        if (!name) return;
+        document.getElementById('redeemModalTitle').textContent = 'Novo Resgate';
+        form.reset();
+        form.dataset.redeemId = '';
+        modal.style.display = 'flex';
+    });
 
-        const points = prompt('Pontos necessários:');
-        if (!points) return;
+    // Fechar modal
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
 
-        const value = prompt('Valor/Desconto:');
-        if (!value) return;
+    // Salvar resgate
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-        const redeem = {
-            name,
-            points: parseInt(points),
-            value: parseFloat(value),
-            type: 'percentage',
-            active: true
+        const selectedProductId = document.getElementById('redeemProduct').value;
+        const selectedProduct = getProductById(parseInt(selectedProductId));
+
+        if (!selectedProduct) {
+            showNotification('Selecione um produto válido.', 'error');
+            return;
+        }
+
+        const redeemData = {
+            productId: parseInt(selectedProductId),
+            pointsRequired: parseInt(document.getElementById('redeemPointsRequired').value),
+            active: document.getElementById('redeemActive').checked
         };
 
-        addRedeem(redeem);
-        showNotification('✓ Resgate criado!', 'success');
+        const redeemId = form.dataset.redeemId;
+        if (redeemId) {
+            updateRedeem(parseInt(redeemId), redeemData);
+            showNotification('✓ Resgate atualizado!', 'success');
+        } else {
+            addRedeem(redeemData);
+            showNotification('✓ Resgate criado!', 'success');
+        }
+
+        modal.style.display = 'none';
         loadRedeemsTable();
     });
 }
@@ -673,19 +768,23 @@ function loadRedeemsTable() {
     const tbody = document.getElementById('redeemsTableBody');
     const redeems = getAllRedeems();
 
-    tbody.innerHTML = redeems.map(redeem => `
-        <tr>
-            <td>${redeem.name}</td>
-            <td>${redeem.points}</td>
-            <td>${redeem.type === 'percentage' ? redeem.value + '%' : formatCurrency(redeem.value)}</td>
-            <td><span class="status-badge ${redeem.active ? 'status-badge--ativo' : 'status-badge--inativo'}">${redeem.active ? 'Ativo' : 'Inativo'}</span></td>
-            <td>
-                <div class="table-actions">
-                    <button class="table-btn table-btn--delete" onclick="deleteRedeemItem(${redeem.id})">Deletar</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = redeems.map(redeem => {
+        const product = getProductById(redeem.productId);
+        const productName = product ? product.name : 'Produto não encontrado';
+
+        return `
+            <tr>
+                <td>${productName}</td>
+                <td>${redeem.pointsRequired}</td>
+                <td><span class="status-badge ${redeem.active ? 'status-badge--ativo' : 'status-badge--inativo'}">${redeem.active ? 'Ativo' : 'Inativo'}</span></td>
+                <td>
+                    <div class="table-actions">
+                        <button class="table-btn table-btn--delete" onclick="deleteRedeemItem(${redeem.id})">Deletar</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 window.deleteRedeemItem = function(redeemId) {

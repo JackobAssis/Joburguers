@@ -183,10 +183,8 @@
                         <thead>
                             <tr>
                                 <th>Nome</th>
+                                <th>Valor</th>
                                 <th>Descrição</th>
-                                <th>Desconto</th>
-                                <th>Data Início</th>
-                                <th>Data Fim</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
@@ -209,9 +207,8 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Nome</th>
+                                <th>Produto</th>
                                 <th>Pontos Necessários</th>
-                                <th>Valor</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
@@ -427,7 +424,7 @@
             <h2>Gerenciar Pontos</h2>
             <form id="pointsForm">
                 <input type="hidden" id="pointsClientId">
-                
+
                 <div class="form-group">
                     <p id="pointsClientInfo"></p>
                 </div>
@@ -451,6 +448,87 @@
                 <div class="modal__actions">
                     <button type="submit" class="btn btn--primary">Adicionar Pontos</button>
                     <button type="button" class="btn btn--secondary" id="closePointsModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Promoções -->
+    <div id="promotionModal" class="modal" style="display: none;">
+        <div class="modal__content modal__content--large">
+            <h2 id="promotionModalTitle">Nova Promoção</h2>
+            <form id="promotionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="promotionName">Nome</label>
+                        <input type="text" id="promotionName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promotionValue">Valor</label>
+                        <input type="text" id="promotionValue" placeholder="Ex: 20% OFF, R$ 5 OFF" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="promotionDescription">Descrição</label>
+                    <textarea id="promotionDescription" rows="3" placeholder="Descreva a promoção..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="promotionPhoto">Foto (upload)</label>
+                    <input type="file" id="promotionPhoto" accept="image/*" required>
+                    <small style="display:block; color:#9aa4b6; margin-top:6px;">Selecione uma imagem para a promoção</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="promotionInstagramLink">Link do Instagram (opcional)</label>
+                    <input type="url" id="promotionInstagramLink" placeholder="https://instagram.com/...">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="promotionActive" checked>
+                        Promoção Ativa
+                    </label>
+                </div>
+
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Salvar Promoção</button>
+                    <button type="button" class="btn btn--secondary" id="closePromotionModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Resgates -->
+    <div id="redeemModal" class="modal" style="display: none;">
+        <div class="modal__content">
+            <h2 id="redeemModalTitle">Novo Resgate</h2>
+            <form id="redeemForm">
+                <div class="form-group">
+                    <label for="redeemProduct">Produto</label>
+                    <select id="redeemProduct" required>
+                        <option value="">Selecione um produto</option>
+                        <!-- Produtos serão carregados aqui -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="redeemPointsRequired">Pontos Necessários</label>
+                    <input type="number" id="redeemPointsRequired" min="1" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="redeemActive" checked>
+                        Resgate Ativo
+                    </label>
+                </div>
+
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Salvar Resgate</button>
+                    <button type="button" class="btn btn--secondary" id="closeRedeemModal">Cancelar</button>
                 </div>
             </form>
         </div>

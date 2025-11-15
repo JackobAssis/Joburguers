@@ -108,33 +108,7 @@ function initializeStorage() {
 
     // Inicializar resgates
     if (!localStorage.getItem(STORAGE_KEYS.REDEEMS)) {
-        const defaultRedeems = [
-            {
-                id: 1,
-                name: 'Desconto 10%',
-                points: 50,
-                value: 10,
-                type: 'percentage',
-                active: true
-            },
-            {
-                id: 2,
-                name: 'Desconto 20%',
-                points: 150,
-                value: 20,
-                type: 'percentage',
-                active: true
-            },
-            {
-                id: 3,
-                name: 'Hamburger Grátis',
-                points: 250,
-                value: 25,
-                type: 'product',
-                active: true
-            }
-        ];
-        localStorage.setItem(STORAGE_KEYS.REDEEMS, JSON.stringify(defaultRedeems));
+        localStorage.setItem(STORAGE_KEYS.REDEEMS, JSON.stringify([]));
     }
 
     // Inicializar configurações
@@ -337,7 +311,12 @@ function addPromotion(promotionData) {
     const promotions = getAllPromotions();
     const newPromotion = {
         id: promotions.length > 0 ? Math.max(...promotions.map(p => p.id)) + 1 : 1,
-        ...promotionData,
+        name: promotionData.name || '',
+        value: promotionData.value || '',
+        description: promotionData.description || '',
+        photo: promotionData.photo || '',
+        instagramLink: promotionData.instagramLink || '',
+        active: promotionData.active !== false,
         createdAt: new Date().toISOString()
     };
     promotions.push(newPromotion);
@@ -379,7 +358,10 @@ function addRedeem(redeemData) {
     const redeems = getAllRedeems();
     const newRedeem = {
         id: redeems.length > 0 ? Math.max(...redeems.map(r => r.id)) + 1 : 1,
-        ...redeemData
+        productId: redeemData.productId || 0,
+        pointsRequired: redeemData.pointsRequired || 0,
+        active: redeemData.active !== false,
+        createdAt: new Date().toISOString()
     };
     redeems.push(newRedeem);
     localStorage.setItem(STORAGE_KEYS.REDEEMS, JSON.stringify(redeems));
