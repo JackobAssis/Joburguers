@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Joburguers</title>
+    <link rel="stylesheet" href="css/globals.css">
+    <link rel="stylesheet" href="css/cliente.css">
+    <link rel="stylesheet" href="css/header.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header__container">
+            <div class="header__logo">
+                <h1>🍔 Joburguers</h1>
+            </div>
+            <nav class="header__nav">
+                <a href="index.html" class="header__link">Cardápio</a>
+                <a href="index.html#promocoes" class="header__link">Promoções</a>
+                <button id="logoutBtn" class="header__link header__link--logout">Sair</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="cliente-container">
+        <!-- Sidebar de Navegação -->
+        <aside class="cliente-sidebar">
+            <nav class="cliente-nav">
+                <button class="cliente-nav__item cliente-nav__item--active" data-section="dashboard">
+                    📊 Dashboard
+                </button>
+                <button class="cliente-nav__item" data-section="pontos">
+                    ⭐ Meus Pontos
+                </button>
+                <button class="cliente-nav__item" data-section="historico">
+                    📜 Histórico
+                </button>
+                <button class="cliente-nav__item" data-section="dados">
+                    👤 Meus Dados
+                </button>
+            </nav>
+            <button id="logoutBtnSidebar" class="cliente-nav__logout">
+                🚪 Sair
+            </button>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="cliente-content">
+            <!-- Dashboard -->
+            <section id="dashboard" class="cliente-section cliente-section--active">
+                <h2>Dashboard</h2>
+                
+                <div class="dashboard-grid">
+                    <!-- Card Perfil -->
+                    <div class="dashboard-card dashboard-card--large">
+                        <div class="perfil-card">
+                            <div class="perfil-card__avatar" id="profileAvatar">👤</div>
+                            <div class="perfil-card__info">
+                                <h3 id="clientName" class="perfil-card__name"></h3>
+                                <p id="clientPhone" class="perfil-card__phone"></p>
+                                <p id="memberSince" class="perfil-card__date"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Pontos Totais -->
+                    <div class="dashboard-card">
+                        <div class="stat-card">
+                            <span class="stat-card__icon">⭐</span>
+                            <h3 class="stat-card__label">Pontos Disponíveis</h3>
+                            <p class="stat-card__value" id="totalPoints">0</p>
+                            <small>Próximo nível: <span id="nextLevel">100</span> pontos</small>
+                        </div>
+                    </div>
+
+                    <!-- Card Status -->
+                    <div class="dashboard-card">
+                        <div class="stat-card">
+                            <span class="stat-card__icon">🎯</span>
+                            <h3 class="stat-card__label">Status</h3>
+                            <p class="stat-card__value" id="memberStatus">Bronze</p>
+                            <small>Ganhe mais pontos para subir!</small>
+                        </div>
+                    </div>
+
+                    <!-- Card Próximo Resgate -->
+                    <div class="dashboard-card">
+                        <div class="stat-card">
+                            <span class="stat-card__icon">🎁</span>
+                            <h3 class="stat-card__label">Próximo Resgate</h3>
+                            <p class="stat-card__value" id="nextReward">150 pontos</p>
+                            <small>Faltam <span id="pointsNeeded">150</span> pontos</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progresso de Nível -->
+                <div class="progress-section">
+                    <h3>Progresso do Nível</h3>
+                    <div class="level-progress">
+                        <div id="progressBar" class="level-progress__bar" style="width: 0%;"></div>
+                    </div>
+                    <p class="level-progress__label">
+                        <span id="currentPoints">0</span> de <span id="levelTarget">100</span> pontos
+                    </p>
+                </div>
+
+                <!-- Niveis Disponíveis -->
+                <div class="levels-section">
+                    <h3>Níveis de Recompensa</h3>
+                    <div class="levels-grid">
+                        <div class="level-item level-item--bronze">
+                            <span>🥉 Bronze</span>
+                            <small>0-100 pts</small>
+                        </div>
+                        <div class="level-item level-item--silver">
+                            <span>🥈 Prata</span>
+                            <small>101-300 pts</small>
+                        </div>
+                        <div class="level-item level-item--gold">
+                            <span>🥇 Ouro</span>
+                            <small>301-500 pts</small>
+                        </div>
+                        <div class="level-item level-item--platinum">
+                            <span>💎 Platina</span>
+                            <small>501+ pts</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Meus Pontos -->
+            <section id="pontos" class="cliente-section">
+                <h2>Meus Pontos</h2>
+                
+                <div class="pontos-info">
+                    <div class="info-card">
+                        <h3>Saldo Atual</h3>
+                        <p class="pontos-value" id="saldoPontos">0</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Pontos Ganhos</h3>
+                        <p class="pontos-value" id="pontosGanhos">0</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>Pontos Resgatados</h3>
+                        <p class="pontos-value" id="pontosResgatados">0</p>
+                    </div>
+                </div>
+
+                <!-- Como Ganhar Pontos -->
+                <div class="como-ganhar">
+                    <h3>Como Ganhar Pontos?</h3>
+                    <ul class="pontos-list">
+                        <li>
+                            <span class="icon">🍔</span>
+                            <div>
+                                <strong>Compre Hambúrgueres</strong>
+                                <p>1 ponto a cada R$ 10 gasto</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">🎁</span>
+                            <div>
+                                <strong>Ganhos Bônus</strong>
+                                <p>Receba pontos extras em promoções especiais</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">📱</span>
+                            <div>
+                                <strong>Indique Amigos</strong>
+                                <p>Ganhe 50 pontos quando seu amigo fazer o primeiro pedido</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">🎉</span>
+                            <div>
+                                <strong>Resgate de Recompensas</strong>
+                                <p>Use seus pontos para ganhar descontos</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Resgates Disponíveis -->
+                <div class="resgates-section">
+                    <h3>Resgates Disponíveis</h3>
+                    <div id="resgatesGrid" class="resgates-grid">
+                        <!-- Resgates serão carregados aqui -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Histórico -->
+            <section id="historico" class="cliente-section">
+                <h2>Histórico de Transações</h2>
+                
+                <div class="historico-filters">
+                    <button class="filter-btn filter-btn--active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="ganho">Ganhos</button>
+                    <button class="filter-btn" data-filter="resgate">Resgates</button>
+                </div>
+
+                <div id="historicoList" class="historico-list">
+                    <!-- Transações serão carregadas aqui -->
+                </div>
+
+                <div id="emptyHistorico" class="empty-state" style="display: none;">
+                    <p>Você ainda não tem transações</p>
+                    <small>Faça um pedido para ganhar seus primeiros pontos!</small>
+                </div>
+            </section>
+
+            <!-- Meus Dados -->
+            <section id="dados" class="cliente-section">
+                <h2>Meus Dados Pessoais</h2>
+                
+                <form id="clientDataForm" class="dados-form">
+                    <div class="form-group">
+                        <label for="editName">Nome Completo</label>
+                        <input type="text" id="editName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editPhone">Telefone</label>
+                        <input type="tel" id="editPhone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEmail">Email (opcional)</label>
+                        <input type="email" id="editEmail">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editBirthdate">Data de Nascimento (opcional)</label>
+                        <input type="date" id="editBirthdate">
+                    </div>
+
+                    <button type="submit" class="btn btn--primary">Salvar Alterações</button>
+                </form>
+
+                <!-- Seção de Segurança -->
+                <div class="seguranca-section">
+                    <h3>Segurança</h3>
+                    <button class="btn btn--secondary" id="changePasswordBtn">Alterar Senha</button>
+                    <button class="btn btn--danger" id="deleteAccountBtn">Deletar Conta</button>
+                </div>
+
+                <div id="formMessage" class="alert" style="display: none;"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmação de Resgate -->
+    <div id="resgatarModal" class="modal" style="display: none;">
+        <div class="modal__content">
+            <h2>Confirmar Resgate</h2>
+            <p id="resgatarModalText"></p>
+            <div class="modal__actions">
+                <button class="btn btn--primary" id="confirmarResgate">Confirmar</button>
+                <button class="btn btn--secondary" id="cancelarResgate">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Alteração de Senha -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal__content">
+            <h2>Alterar Senha</h2>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="newPassword">Nova Senha</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Senha</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Alterar</button>
+                    <button type="button" class="btn btn--secondary" id="cancelPassword">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/cliente.js"></script>
+</body>
+</html>

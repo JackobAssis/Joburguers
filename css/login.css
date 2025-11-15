@@ -1,0 +1,169 @@
+/* ====================================
+   LOGIN - Estilos da Página de Login
+   ==================================== */
+
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-card {
+    background-color: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.login-card__title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #ff9500;
+}
+
+/* Abas */
+.login-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #404040;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    color: #808080;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -2px;
+}
+
+.login-tab:hover {
+    color: #b0b0b0;
+}
+
+.login-tab--active {
+    color: #ff9500;
+    border-bottom-color: #ff9500;
+}
+
+/* Formulários */
+.login-form {
+    display: none;
+}
+
+.login-form--active {
+    display: block;
+}
+
+.login-form h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.login-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-form .form-group label {
+    color: #e0e0e0;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.login-form .form-group input,
+.login-form .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    background-color: #0f0f0f;
+    color: #e0e0e0;
+    font-size: 1rem;
+}
+
+.login-form .form-group input:focus {
+    outline: none;
+    border-color: #ff9500;
+    box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+}
+
+.login-form .btn {
+    margin-top: 0.5rem;
+}
+
+.login-info {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #808080;
+    font-size: 0.9rem;
+}
+
+.login-info a {
+    color: #ff9500;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-info a:hover {
+    text-decoration: underline;
+}
+
+/* Alerts */
+#clientError,
+#adminError,
+#registerError {
+    margin-bottom: 1rem;
+}
+
+#registerSuccess {
+    margin-bottom: 1rem;
+}
+
+/* Link Voltar */
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #404040;
+}
+
+.link-back {
+    color: #808080;
+    font-size: 0.9rem;
+}
+
+.link-back:hover {
+    color: #ff9500;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.5rem;
+    }
+
+    .login-card__title {
+        font-size: 1.5rem;
+    }
+
+    .login-form h2 {
+        font-size: 1.2rem;
+    }
+}

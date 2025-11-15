@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Joburguers</title>
+    <link rel="stylesheet" href="css/globals.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card">
+            <h1 class="login-card__title">🍔 Joburguers</h1>
+            
+            <!-- Abas de Login -->
+            <div class="login-tabs">
+                <button class="login-tab login-tab--active" data-tab="cliente">Cliente</button>
+                <button class="login-tab" data-tab="admin">Administrador</button>
+            </div>
+
+            <!-- Formulário Cliente -->
+            <form id="clientLoginForm" class="login-form login-form--active">
+                <h2>Login Cliente</h2>
+                
+                <div class="form-group">
+                    <label for="clientPhone">Telefone</label>
+                    <input 
+                        type="tel" 
+                        id="clientPhone" 
+                        placeholder="(85) 9 9999-9999"
+                        pattern="[0-9\-\(\)\s]+"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="clientPassword">Senha</label>
+                    <input 
+                        type="password" 
+                        id="clientPassword" 
+                        placeholder="Confirme seu telefone"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--full">Entrar</button>
+                
+                <p class="login-info">
+                    Não tem uma conta? 
+                    <a href="#" id="goToRegister">Criar nova conta</a>
+                </p>
+
+                <div id="clientError" class="alert alert--error" style="display: none;"></div>
+            </form>
+
+            <!-- Formulário Admin -->
+            <form id="adminLoginForm" class="login-form">
+                <h2>Login Administrador</h2>
+                
+                <div class="form-group">
+                    <label for="adminEmail">Email</label>
+                    <input 
+                        type="email" 
+                        id="adminEmail" 
+                        placeholder="admin@joburguers.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword">Senha</label>
+                    <input 
+                        type="password" 
+                        id="adminPassword" 
+                        placeholder="Sua senha"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--full">Entrar</button>
+
+                <div id="adminError" class="alert alert--error" style="display: none;"></div>
+            </form>
+
+            <!-- Formulário de Registro Cliente -->
+            <form id="clientRegisterForm" class="login-form" style="display: none;">
+                <h2>Criar Conta Cliente</h2>
+                
+                <div class="form-group">
+                    <label for="registerName">Nome Completo</label>
+                    <input 
+                        type="text" 
+                        id="registerName" 
+                        placeholder="Seu nome"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPhone">Telefone</label>
+                    <input 
+                        type="tel" 
+                        id="registerPhone" 
+                        placeholder="(85) 9 9999-9999"
+                        pattern="[0-9\-\(\)\s]+"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="registerConfirmPhone">Confirme o Telefone</label>
+                    <input 
+                        type="tel" 
+                        id="registerConfirmPhone" 
+                        placeholder="Confirme seu telefone"
+                        pattern="[0-9\-\(\)\s]+"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--full">Criar Conta</button>
+                <button type="button" class="btn btn--secondary btn--full" id="backToLogin">Voltar</button>
+
+                <div id="registerError" class="alert alert--error" style="display: none;"></div>
+                <div id="registerSuccess" class="alert alert--success" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <a href="index.html" class="link-back">← Voltar ao Cardápio</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/login.js"></script>
+</body>
+</html>

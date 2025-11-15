@@ -1,0 +1,19 @@
+{
+  "name": "Joburguers",
+  "version": "1.0.0",
+  "description": "Sistema Digital de Hamburgueria com Cardápio e Sistema de Rewards",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server -p 8000 -o -c-1",
+    "build": "echo 'Static site - no build needed'",
+    "preview": "npx http-server -p 3000"
+  },
+  "keywords": [
+    "hamburger",
+    "cardapio",
+    "rewards",
+    "pontos"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT"
+}

@@ -1,0 +1,139 @@
+/* ====================================
+   FOOTER - Estilos do Footer
+   ==================================== */
+
+.footer {
+    background-color: #0f0f0f;
+    border-top: 1px solid #404040;
+    margin-top: 4rem;
+    padding: 2rem 1.5rem 1rem;
+}
+
+.footer__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #404040;
+}
+
+.footer__content h3 {
+    color: #ff9500;
+    margin-bottom: 1rem;
+}
+
+.footer__content p {
+    color: #808080;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.footer__links {
+    display: flex;
+    gap: 2rem;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.footer__links a {
+    color: #808080;
+    transition: color 0.3s ease;
+}
+
+.footer__links a:hover {
+    color: #ff9500;
+}
+
+.footer__bottom {
+    text-align: center;
+    color: #606060;
+    font-size: 0.9rem;
+}
+
+/* Botão WhatsApp Flutuante */
+.whatsapp-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    background-color: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s ease;
+    z-index: 99;
+}
+
+.whatsapp-btn:hover {
+    background-color: #20ba58;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+/* Botão Scroll to Top */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 130px;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    background-color: #ff9500;
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 99;
+    display: none;
+    font-weight: 600;
+}
+
+.scroll-top-btn.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll-top-btn:hover {
+    background-color: #ffb028;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .footer__container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .footer__links {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .whatsapp-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .scroll-top-btn {
+        bottom: 110px;
+        right: 1.5rem;
+        width: 45px;
+        height: 45px;
+    }
+}

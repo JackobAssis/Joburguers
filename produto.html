@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto - Joburguers</title>
+    <link rel="stylesheet" href="css/globals.css">
+    <link rel="stylesheet" href="css/produto.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header__container">
+            <div class="header__logo">
+                <h1>🍔 Joburguers</h1>
+            </div>
+            <nav class="header__nav">
+                <a href="index.html#cardapio" class="header__link">Cardápio</a>
+                <a href="index.html#promocoes" class="header__link">Promoções</a>
+                <a href="login.html" class="header__link header__link--login">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="index.html">Cardápio</a> / <span id="productNameBreadcrumb">Produto</span>
+    </div>
+
+    <!-- Conteúdo do Produto -->
+    <main class="product-detail">
+        <div class="product-detail__container">
+            <!-- Coluna Esquerda - Imagem -->
+            <div class="product-detail__image-container">
+                <img id="productImage" src="" alt="Produto" class="product-detail__image">
+                <div class="product-detail__badges">
+                    <span id="categoryBadge" class="badge badge--category"></span>
+                    <span id="promotionBadge" class="badge badge--promotion" style="display: none;"></span>
+                </div>
+            </div>
+
+            <!-- Coluna Direita - Informações -->
+            <div class="product-detail__info">
+                <h1 id="productName" class="product-detail__name"></h1>
+                
+                <div class="product-detail__price">
+                    <span id="productPrice" class="price"></span>
+                </div>
+
+                <div class="product-detail__rating" id="ratingContainer" style="display: none;">
+                    <span id="ratingStars">★★★★★</span>
+                    <span id="ratingCount">(0 avaliações)</span>
+                </div>
+
+                <div class="product-detail__description">
+                    <h3>Descrição</h3>
+                    <p id="productDescription"></p>
+                </div>
+
+                <!-- Ingredientes (opcional) -->
+                <div id="ingredientsContainer" class="product-detail__ingredients" style="display: none;">
+                    <h3>Ingredientes</h3>
+                    <ul id="ingredientsList"></ul>
+                </div>
+
+                <!-- Informações Nutricionais (opcional) -->
+                <div id="nutritionContainer" class="product-detail__nutrition" style="display: none;">
+                    <h3>Informações Nutricionais</h3>
+                    <div id="nutritionInfo"></div>
+                </div>
+
+                <!-- Availability -->
+                <div class="product-detail__availability">
+                    <span id="availabilityStatus" class="availability availability--available">✓ Disponível</span>
+                </div>
+
+                <!-- Ações -->
+                <div class="product-detail__actions">
+                    <a id="whatsappBtn" href="#" class="btn btn--primary btn--large">
+                        💬 Pedir pelo WhatsApp
+                    </a>
+                    <a href="index.html#cardapio" class="btn btn--secondary btn--large">
+                        ← Voltar ao Cardápio
+                    </a>
+                </div>
+
+                <!-- Recomendações -->
+                <div id="recommendationContainer" class="product-detail__recommendation" style="display: none;">
+                    <h3>Você também pode gostar</h3>
+                    <div id="recommendedProducts" class="recommendation-grid"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <h3>Joburguers</h3>
+                <p>📍 Endereço: Rua das Hambúrgueres, 123 - Fortaleza, CE</p>
+                <p>📞 Telefone: (85) 99999-9999</p>
+                <p>⏰ Funcionamento: Seg-Dom 11h às 23h</p>
+            </div>
+            <div class="footer__links">
+                <a href="#">Sobre Nós</a>
+                <a href="#">Contato</a>
+                <a href="#">Política de Privacidade</a>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>&copy; 2025 Joburguers. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Botão WhatsApp Flutuante -->
+    <a href="https://wa.me/5585999999999?text=Olá!%20Quero%20fazer%20um%20pedido" 
+       class="whatsapp-btn" 
+       target="_blank"
+       title="Fale conosco no WhatsApp">
+        💬
+    </a>
+
+    <script type="module" src="js/produto.js"></script>
+</body>
+</html>

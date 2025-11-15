@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Joburguers</title>
+    <link rel="stylesheet" href="css/globals.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+    <!-- Header Admin -->
+    <header class="admin-header">
+        <div class="admin-header__container">
+            <h1 class="admin-header__title">🍔 Joburguers Admin</h1>
+            <div class="admin-header__actions">
+                <span id="adminUsername" class="admin-header__user"></span>
+                <button id="adminLogoutBtn" class="btn btn--danger btn--small">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <!-- Sidebar de Navegação -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard">
+                    📊 Dashboard
+                </button>
+                <button class="admin-nav__item" data-section="produtos">
+                    🍔 Produtos
+                </button>
+                <button class="admin-nav__item" data-section="clientes">
+                    👥 Clientes
+                </button>
+                <button class="admin-nav__item" data-section="promocoes">
+                    🎉 Promoções
+                </button>
+                <button class="admin-nav__item" data-section="resgates">
+                    🎁 Resgates
+                </button>
+                <button class="admin-nav__item" data-section="configuracoes">
+                    ⚙️ Configurações
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="admin-content">
+            <!-- Dashboard -->
+            <section id="dashboard" class="admin-section admin-section--active">
+                <h2>Dashboard</h2>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-box">
+                        <span class="stat-box__icon">🍔</span>
+                        <div>
+                            <p class="stat-box__label">Produtos Ativos</p>
+                            <p class="stat-box__value" id="totalProducts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box__icon">👥</span>
+                        <div>
+                            <p class="stat-box__label">Clientes</p>
+                            <p class="stat-box__value" id="totalClientes">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box__icon">⭐</span>
+                        <div>
+                            <p class="stat-box__label">Pontos em Circulação</p>
+                            <p class="stat-box__value" id="totalPoints">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box__icon">📈</span>
+                        <div>
+                            <p class="stat-box__label">Últimas Transações</p>
+                            <p class="stat-box__value" id="recentTransactions">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Atividades Recentes -->
+                <div class="dashboard-recent">
+                    <h3>Atividades Recentes</h3>
+                    <div id="recentActivities" class="activities-list">
+                        <!-- Atividades serão carregadas aqui -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gerenciar Produtos -->
+            <section id="produtos" class="admin-section">
+                <div class="section-header">
+                    <h2>Gerenciar Produtos</h2>
+                    <button id="addProductBtn" class="btn btn--primary">+ Novo Produto</button>
+                </div>
+
+                <div class="admin-filters">
+                    <input type="text" id="productSearch" placeholder="Buscar produto...">
+                    <select id="productCategoryFilter">
+                        <option value="">Todas as Categorias</option>
+                        <option value="hamburguer">Hambúrgueres</option>
+                        <option value="bebida">Bebidas</option>
+                        <option value="combo">Combos</option>
+                        <option value="acompanhamento">Acompanhamentos</option>
+                    </select>
+                </div>
+
+                <div id="productsList" class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Produtos serão carregados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyProducts" class="empty-state" style="display: none;">
+                    <p>Nenhum produto cadastrado</p>
+                    <button class="btn btn--primary">Adicionar Primeiro Produto</button>
+                </div>
+            </section>
+
+            <!-- Gerenciar Clientes -->
+            <section id="clientes" class="admin-section">
+                <div class="section-header">
+                    <h2>Gerenciar Clientes</h2>
+                    <button id="addClientBtn" class="btn btn--primary">+ Novo Cliente</button>
+                </div>
+
+                <div class="admin-filters">
+                    <input type="text" id="clientSearch" placeholder="Buscar cliente...">
+                    <select id="clientStatusFilter">
+                        <option value="">Todos os Status</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+
+                <div id="clientsList" class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Pontos Totais</th>
+                                <th>Nível</th>
+                                <th>Data de Cadastro</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                            <!-- Clientes serão carregados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyClients" class="empty-state" style="display: none;">
+                    <p>Nenhum cliente cadastrado</p>
+                </div>
+            </section>
+
+            <!-- Gerenciar Promoções -->
+            <section id="promocoes" class="admin-section">
+                <div class="section-header">
+                    <h2>Gerenciar Promoções</h2>
+                    <button id="addPromotionBtn" class="btn btn--primary">+ Nova Promoção</button>
+                </div>
+
+                <div id="promotionsList" class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Desconto</th>
+                                <th>Data Início</th>
+                                <th>Data Fim</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promotionsTableBody">
+                            <!-- Promoções serão carregadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Gerenciar Resgates -->
+            <section id="resgates" class="admin-section">
+                <div class="section-header">
+                    <h2>Gerenciar Resgates</h2>
+                    <button id="addRedeemBtn" class="btn btn--primary">+ Novo Resgate</button>
+                </div>
+
+                <div id="redeemList" class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Pontos Necessários</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reedemsTableBody">
+                            <!-- Resgates serão carregados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Configurações -->
+            <section id="configuracoes" class="admin-section">
+                <h2>Configurações do Sistema</h2>
+                
+                <div class="settings-group">
+                    <h3>Regras de Pontuação</h3>
+                    <form id="pointsSettingsForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="pointsPerReal">Pontos por R$ gasto</label>
+                            <input type="number" id="pointsPerReal" min="0.1" step="0.1" value="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bonusRegistration">Pontos Bônus para Novo Cliente</label>
+                            <input type="number" id="bonusRegistration" min="0" step="1" value="50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="referralBonus">Pontos por Indicação</label>
+                            <input type="number" id="referralBonus" min="0" step="1" value="50" required>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary">Salvar</button>
+                    </form>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Níveis de Recompensa</h3>
+                    <form id="levelsSettingsForm" class="settings-form">
+                        <div class="level-input">
+                            <label>Bronze (0 pontos)</label>
+                            <input type="hidden" value="0">
+                        </div>
+                        <div class="level-input">
+                            <label for="silverLevel">Prata (começa em)</label>
+                            <input type="number" id="silverLevel" min="1" step="1" value="100" required>
+                        </div>
+                        <div class="level-input">
+                            <label for="goldLevel">Ouro (começa em)</label>
+                            <input type="number" id="goldLevel" min="1" step="1" value="300" required>
+                        </div>
+                        <div class="level-input">
+                            <label for="platinumLevel">Platina (começa em)</label>
+                            <input type="number" id="platinumLevel" min="1" step="1" value="500" required>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary">Salvar Níveis</button>
+                    </form>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Informações da Loja</h3>
+                    <form id="storeInfoForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="storeName">Nome da Loja</label>
+                            <input type="text" id="storeName" value="Joburguers" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="storeAddress">Endereço</label>
+                            <input type="text" id="storeAddress" value="Rua das Hambúrgueres, 123 - Fortaleza, CE" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="storePhone">Telefone</label>
+                            <input type="tel" id="storePhone" value="(85) 99999-9999" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="storeHours">Horário de Funcionamento</label>
+                            <input type="text" id="storeHours" value="Seg-Dom 11h às 23h" required>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary">Salvar Informações</button>
+                    </form>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Dados do Banco</h3>
+                    <button id="exportDataBtn" class="btn btn--secondary">📥 Exportar Dados (JSON)</button>
+                    <button id="importDataBtn" class="btn btn--secondary">📤 Importar Dados</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button id="resetDataBtn" class="btn btn--danger">🗑️ Limpar Todos os Dados</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para Produtos -->
+    <div id="productModal" class="modal" style="display: none;">
+        <div class="modal__content modal__content--large">
+            <h2 id="productModalTitle">Novo Produto</h2>
+            <form id="productForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="productName">Nome</label>
+                        <input type="text" id="productName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productCategory">Categoria</label>
+                        <select id="productCategory" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="hamburguer">Hambúrguer</option>
+                            <option value="bebida">Bebida</option>
+                            <option value="combo">Combo</option>
+                            <option value="acompanhamento">Acompanhamento</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productPrice">Preço (R$)</label>
+                        <input type="number" id="productPrice" min="0" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productImage">Imagem (URL)</label>
+                        <input type="url" id="productImage" placeholder="https://exemplo.com/imagem.jpg" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Descrição</label>
+                    <textarea id="productDescription" rows="4" placeholder="Descreva o produto..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productIngredients">Ingredientes (opcional)</label>
+                    <textarea id="productIngredients" rows="3" placeholder="Liste os ingredientes separados por vírgula..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="productAvailable" checked>
+                        Produto Disponível
+                    </label>
+                </div>
+
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Salvar Produto</button>
+                    <button type="button" class="btn btn--secondary" id="closeProductModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Clientes -->
+    <div id="clientModal" class="modal" style="display: none;">
+        <div class="modal__content">
+            <h2 id="clientModalTitle">Novo Cliente</h2>
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="clientName">Nome</label>
+                    <input type="text" id="clientName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientPhone">Telefone</label>
+                    <input type="tel" id="clientPhone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientEmail">Email (opcional)</label>
+                    <input type="email" id="clientEmail">
+                </div>
+
+                <div class="form-group">
+                    <label for="clientPoints">Pontos Iniciais</label>
+                    <input type="number" id="clientPoints" min="0" step="1" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="clientActive" checked>
+                        Cliente Ativo
+                    </label>
+                </div>
+
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Salvar Cliente</button>
+                    <button type="button" class="btn btn--secondary" id="closeClientModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Edição de Pontos -->
+    <div id="pointsModal" class="modal" style="display: none;">
+        <div class="modal__content">
+            <h2>Gerenciar Pontos</h2>
+            <form id="pointsForm">
+                <input type="hidden" id="pointsClientId">
+                
+                <div class="form-group">
+                    <p id="pointsClientInfo"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="pointsAmount">Quantidade de Pontos</label>
+                    <input type="number" id="pointsAmount" min="-10000" max="10000" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pointsReason">Motivo</label>
+                    <select id="pointsReason" required>
+                        <option value="">Selecione um motivo</option>
+                        <option value="compra">Compra</option>
+                        <option value="bono">Bônus</option>
+                        <option value="resgate">Resgate</option>
+                        <option value="ajuste">Ajuste Manual</option>
+                    </select>
+                </div>
+
+                <div class="modal__actions">
+                    <button type="submit" class="btn btn--primary">Adicionar Pontos</button>
+                    <button type="button" class="btn btn--secondary" id="closePointsModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>

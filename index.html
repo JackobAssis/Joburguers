@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joburguers - Cardápio Digital</title>
+    <link rel="stylesheet" href="css/globals.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header__container">
+            <div class="header__logo">
+                <h1>🍔 Joburguers</h1>
+            </div>
+            <nav class="header__nav">
+                <a href="#cardapio" class="header__link">Cardápio</a>
+                <a href="#promocoes" class="header__link">Promoções</a>
+                <a href="login.html" class="header__link header__link--login">Login</a>
+            </nav>
+            <button class="header__menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Menu Mobile -->
+        <nav class="header__mobile-menu" id="mobileMenu">
+            <a href="#cardapio">Cardápio</a>
+            <a href="#promocoes">Promoções</a>
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero__content">
+            <h2>Bem-vindo ao Joburguers</h2>
+            <p>Os melhores hambúrgueres da cidade, feitos com qualidade e amor</p>
+            <a href="#cardapio" class="btn btn--primary">Explore Nosso Cardápio</a>
+        </div>
+    </section>
+
+    <!-- Barra de Busca e Filtros -->
+    <section class="cardapio-controls">
+        <div class="cardapio-controls__container">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-bar__input" 
+                    placeholder="Buscar produto..."
+                >
+                <button class="search-bar__btn" id="searchBtn">🔍</button>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn filter-btn--active" data-category="todos">Todos</button>
+                <button class="filter-btn" data-category="hamburguer">Hambúrgueres</button>
+                <button class="filter-btn" data-category="bebida">Bebidas</button>
+                <button class="filter-btn" data-category="combo">Combos</button>
+                <button class="filter-btn" data-category="acompanhamento">Acompanhamentos</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Cardápio -->
+    <section id="cardapio" class="cardapio">
+        <div class="cardapio__container">
+            <h2 class="cardapio__title">Nosso Cardápio</h2>
+            
+            <div id="productsGrid" class="products-grid">
+                <!-- Produtos serão carregados aqui via JavaScript -->
+            </div>
+
+            <!-- Mensagem de Vazio -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <p>🍔 Nenhum produto encontrado</p>
+                <small>Em breve teremos mais opções!</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Promoções -->
+    <section id="promocoes" class="promocoes">
+        <div class="promocoes__container">
+            <h2 class="promocoes__title">Promoções 🎉</h2>
+            
+            <div id="promotionsGrid" class="promotions-grid">
+                <!-- Promoções serão carregadas aqui -->
+            </div>
+
+            <!-- Mensagem de Vazio -->
+            <div id="emptyPromotions" class="empty-state" style="display: none;">
+                <p>Volte em breve para conferir nossas promoções!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão Voltar ao Topo -->
+    <button id="scrollTopBtn" class="scroll-top-btn" style="display: none;">↑</button>
+
+    <!-- Botão WhatsApp Flutuante -->
+    <a href="https://wa.me/5581989334497?text=Olá!%20Quero%20fazer%20um%20pedido" 
+       class="whatsapp-btn" 
+       target="_blank"
+       title="Fale conosco no WhatsApp">
+        💬
+    </a>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <h3>Joburguers</h3>
+                <p>📍 Endereço: Rua Pasárgada, Bairro três Marias - Carpina, PE</p>
+                <p>📞 Telefone: (81) 98933-4497</p>
+                <p>⏰ Funcionamento: Seg-sex-sab-Dom 6:30h às 22h</p>
+            </div>
+            <div class="footer__links">
+                <a href="#">Sobre Nós</a>
+                <a href="#">Contato</a>
+                <a href="#">Política de Privacidade</a>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>&copy; 2025 Joburguers. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
