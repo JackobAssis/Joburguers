@@ -1,7 +1,5 @@
 {
   "buildCommand": "echo 'Static site - no build needed'",
-  "devCommand": "npx http-server -p 3000 -o",
   "outputDirectory": ".",
-  "framework": "static",
   "public": true
 }
