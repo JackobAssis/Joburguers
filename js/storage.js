@@ -1,10 +1,30 @@
 /**
- * STORAGE.JS - Gerenciamento de dados locais com localStorage
- * Centraliza toda a lógica de persistência de dados
+ * STORAGE.JS - Gerenciamento de dados com Firebase Firestore + localStorage fallback
+ * Centraliza toda a lógica de persistência de dados com sincronização em tempo real
  */
 
+import {
+    db,
+    COLLECTIONS,
+    initializeRealtimeListeners,
+    cleanupListeners,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    addDoc,
+    serverTimestamp
+} from './firebase.js';
+
 // ========================================
-// CHAVES DE ARMAZENAMENTO
+// CHAVES DE ARMAZENAMENTO LOCAL (FALLBACK)
 // ========================================
 const STORAGE_KEYS = {
     ADMIN: 'admin_user',
@@ -14,7 +34,8 @@ const STORAGE_KEYS = {
     REDEEMS: 'redeems_data',
     SETTINGS: 'system_settings',
     TRANSACTIONS: 'transactions_data',
-    CURRENT_USER: 'current_user_session'
+    CURRENT_USER: 'current_user_session',
+    USE_FIREBASE: 'use_firebase'
 };
 
 // ========================================
@@ -46,13 +67,51 @@ const DEFAULT_SETTINGS = {
 };
 
 // ========================================
+// CONFIGURAÇÃO FIREBASE
+// ========================================
+
+let useFirebase = false;
+let realtimeCallbacks = {};
+
+// Verificar se Firebase está disponível
+function checkFirebaseAvailability() {
+    try {
+        // Tentar acessar Firebase
+        if (typeof db !== 'undefined') {
+            useFirebase = true;
+            console.log('Firebase disponível - usando sincronização em tempo real');
+            return true;
+        }
+    } catch (error) {
+        console.warn('Firebase não disponível - usando localStorage como fallback');
+    }
+    useFirebase = false;
+    return false;
+}
+
+// ========================================
 // FUNÇÕES DE INICIALIZAÇÃO
 // ========================================
 
 /**
- * Inicializa o localStorage com dados padrão se não existirem
+ * Inicializa o armazenamento (Firebase + localStorage fallback)
  */
-function initializeStorage() {
+async function initializeStorage() {
+    checkFirebaseAvailability();
+
+    if (useFirebase) {
+        // Inicializar dados padrão no Firebase se necessário
+        await initializeFirebaseDefaults();
+    } else {
+        // Fallback para localStorage
+        initializeLocalStorageDefaults();
+    }
+}
+
+/**
+ * Inicializa dados padrão no localStorage
+ */
+function initializeLocalStorageDefaults() {
     // Inicializar admin
     if (!localStorage.getItem(STORAGE_KEYS.ADMIN)) {
         localStorage.setItem(STORAGE_KEYS.ADMIN, JSON.stringify(DEFAULT_ADMIN));
@@ -122,15 +181,94 @@ function initializeStorage() {
     }
 }
 
+/**
+ * Inicializa dados padrão no Firebase
+ */
+async function initializeFirebaseDefaults() {
+    try {
+        // Verificar se admin existe
+        const adminDoc = await getDoc(doc(db, COLLECTIONS.ADMIN, 'main'));
+        if (!adminDoc.exists()) {
+            await setDoc(doc(db, COLLECTIONS.ADMIN, 'main'), DEFAULT_ADMIN);
+        }
+
+        // Verificar se configurações existem
+        const settingsDoc = await getDoc(doc(db, COLLECTIONS.SETTINGS, 'main'));
+        if (!settingsDoc.exists()) {
+            await setDoc(doc(db, COLLECTIONS.SETTINGS, 'main'), DEFAULT_SETTINGS);
+        }
+
+        // Verificar se produtos padrão existem
+        const productsSnapshot = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
+        if (productsSnapshot.empty) {
+            const defaultProducts = [
+                {
+                    name: 'Hamburger Clássico',
+                    category: 'hamburguer',
+                    price: 25.00,
+                    image: 'https://via.placeholder.com/400x300?text=Hamburger+Classico',
+                    description: 'Nosso hambúrguer clássico com carne suculenta, alface fresca, tomate e cebola roxa.',
+                    ingredients: ['Pão', 'Carne', 'Alface', 'Tomate', 'Cebola'],
+                    available: true,
+                    createdAt: serverTimestamp()
+                },
+                {
+                    name: 'Refrigerante 2L',
+                    category: 'bebida',
+                    price: 8.00,
+                    image: 'https://via.placeholder.com/400x300?text=Refrigerante',
+                    description: 'Refrigerante gelado de 2 litros para acompanhar seu pedido.',
+                    available: true,
+                    createdAt: serverTimestamp()
+                },
+                {
+                    name: 'Batata Frita Premium',
+                    category: 'acompanhamento',
+                    price: 12.00,
+                    image: 'https://via.placeholder.com/400x300?text=Batata+Frita',
+                    description: 'Batata frita crocante e salgadinha, feita na hora.',
+                    available: true,
+                    createdAt: serverTimestamp()
+                }
+            ];
+
+            for (const product of defaultProducts) {
+                await addDoc(collection(db, COLLECTIONS.PRODUCTS), product);
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao inicializar Firebase:', error);
+        // Fallback para localStorage
+        useFirebase = false;
+        initializeLocalStorageDefaults();
+    }
+}
+
 // ========================================
 // FUNÇÕES DE ADMIN
 // ========================================
 
-function getAdmin() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMIN));
+async function getAdmin() {
+    if (useFirebase) {
+        try {
+            const docSnap = await getDoc(doc(db, COLLECTIONS.ADMIN, 'main'));
+            return docSnap.exists() ? docSnap.data() : DEFAULT_ADMIN;
+        } catch (error) {
+            console.error('Erro ao buscar admin do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMIN)) || DEFAULT_ADMIN;
+        }
+    }
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ADMIN)) || DEFAULT_ADMIN;
 }
 
-function updateAdmin(adminData) {
+async function updateAdmin(adminData) {
+    if (useFirebase) {
+        try {
+            await setDoc(doc(db, COLLECTIONS.ADMIN, 'main'), adminData);
+        } catch (error) {
+            console.error('Erro ao atualizar admin no Firebase:', error);
+        }
+    }
     localStorage.setItem(STORAGE_KEYS.ADMIN, JSON.stringify(adminData));
 }
 
@@ -143,16 +281,51 @@ function validateAdminLogin(phone, password) {
 // FUNÇÕES DE CLIENTES
 // ========================================
 
-function getAllClients() {
+async function getAllClients() {
+    if (useFirebase) {
+        try {
+            const querySnapshot = await getDocs(collection(db, COLLECTIONS.CLIENTS));
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Erro ao buscar clientes do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.CLIENTS)) || [];
+        }
+    }
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.CLIENTS)) || [];
 }
 
-function getClientById(id) {
+async function getClientById(id) {
+    if (useFirebase) {
+        try {
+            const docSnap = await getDoc(doc(db, COLLECTIONS.CLIENTS, id));
+            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        } catch (error) {
+            console.error('Erro ao buscar cliente por ID do Firebase:', error);
+            const clients = await getAllClients();
+            return clients.find(c => c.id === id);
+        }
+    }
     const clients = getAllClients();
     return clients.find(c => c.id === id);
 }
 
-function getClientByPhone(phone) {
+async function getClientByPhone(phone) {
+    if (useFirebase) {
+        try {
+            const normalizedPhone = phone.replace(/\D/g, '');
+            const q = query(collection(db, COLLECTIONS.CLIENTS), where('phone', '==', normalizedPhone));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error('Erro ao buscar cliente por telefone do Firebase:', error);
+            const clients = await getAllClients();
+            return clients.find(c => c.phone.replace(/\D/g, '') === normalizedPhone);
+        }
+    }
     const clients = getAllClients();
     const normalizedPhone = phone.replace(/\D/g, '');
     return clients.find(c => c.phone.replace(/\D/g, '') === normalizedPhone);
@@ -161,45 +334,74 @@ function getClientByPhone(phone) {
 /**
  * Valida login do cliente (telefone + senha)
  */
-function validateClientLogin(phone, password) {
-    const client = getClientByPhone(phone);
+async function validateClientLogin(phone, password) {
+    const client = await getClientByPhone(phone);
     if (!client) return null; // Cliente não encontrado
-    
+
     // Comparar senha (pode ser a senha real ou os últimos 6 dígitos do telefone)
     if (client.password === password) {
         return client;
     }
-    
+
     return null; // Senha incorreta
 }
 
-function addClient(clientData) {
-    const clients = getAllClients();
-    
+async function addClient(clientData) {
     // Se não tiver senha, gerar uma padrão (últimos 6 dígitos do telefone)
     let password = clientData.password;
     if (!password && clientData.phone) {
         password = clientData.phone.replace(/\D/g, '').slice(-6);
     }
-    
+
     const newClient = {
-        id: clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1,
         name: clientData.name || '',
         phone: clientData.phone || '',
         email: clientData.email || '',
         password: password || '000000', // Senha padrão
         points: clientData.points || 0,
         level: calculateLevel(clientData.points || 0),
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
         active: clientData.active !== false,
-        lastUpdatedAt: new Date().toISOString()
+        lastUpdatedAt: serverTimestamp()
     };
+
+    if (useFirebase) {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTIONS.CLIENTS), newClient);
+            newClient.id = docRef.id;
+            return newClient;
+        } catch (error) {
+            console.error('Erro ao adicionar cliente no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
+    const clients = getAllClients();
+    newClient.id = clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1;
+    newClient.createdAt = new Date().toISOString();
+    newClient.lastUpdatedAt = new Date().toISOString();
     clients.push(newClient);
     localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients));
     return newClient;
 }
 
-function updateClient(id, clientData) {
+async function updateClient(id, clientData) {
+    const updateData = {
+        ...clientData,
+        level: calculateLevel(clientData.points || (await getClientById(id))?.points || 0),
+        lastUpdatedAt: useFirebase ? serverTimestamp() : new Date().toISOString()
+    };
+
+    if (useFirebase) {
+        try {
+            await updateDoc(doc(db, COLLECTIONS.CLIENTS, id), updateData);
+            return { id, ...updateData };
+        } catch (error) {
+            console.error('Erro ao atualizar cliente no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const clients = getAllClients();
     const index = clients.findIndex(c => c.id === id);
     if (index !== -1) {
@@ -215,25 +417,36 @@ function updateClient(id, clientData) {
     return null;
 }
 
-function deleteClient(id) {
+async function deleteClient(id) {
+    if (useFirebase) {
+        try {
+            await deleteDoc(doc(db, COLLECTIONS.CLIENTS, id));
+            return true;
+        } catch (error) {
+            console.error('Erro ao deletar cliente do Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const clients = getAllClients();
     const filtered = clients.filter(c => c.id !== id);
     localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(filtered));
+    return true;
 }
 
-function addPointsToClient(clientId, points, reason = 'ajuste') {
-    const client = getClientById(clientId);
+async function addPointsToClient(clientId, points, reason = 'ajuste') {
+    const client = await getClientById(clientId);
     if (client) {
         const newPoints = client.points + points;
-        const updatedClient = updateClient(clientId, { points: newPoints });
-        
+        const updatedClient = await updateClient(clientId, { points: newPoints });
+
         // Registrar transação
-        recordTransaction({
+        await recordTransaction({
             clientId,
             points,
             type: points > 0 ? 'ganho' : 'resgate',
             reason,
-            timestamp: new Date().toISOString()
+            timestamp: useFirebase ? serverTimestamp() : new Date().toISOString()
         });
 
         return updatedClient;
@@ -245,34 +458,76 @@ function addPointsToClient(clientId, points, reason = 'ajuste') {
 // FUNÇÕES DE PRODUTOS
 // ========================================
 
-function getAllProducts() {
+async function getAllProducts() {
+    if (useFirebase) {
+        try {
+            const querySnapshot = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Erro ao buscar produtos do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [];
+        }
+    }
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [];
 }
 
-function getProductById(id) {
+async function getProductById(id) {
+    if (useFirebase) {
+        try {
+            const docSnap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id));
+            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        } catch (error) {
+            console.error('Erro ao buscar produto por ID do Firebase:', error);
+            const products = await getAllProducts();
+            return products.find(p => p.id === id);
+        }
+    }
     const products = getAllProducts();
     return products.find(p => p.id === id);
 }
 
-function getProductsByCategory(category) {
-    const products = getAllProducts();
+async function getProductsByCategory(category) {
+    const products = await getAllProducts();
     if (category === 'todos') return products;
     return products.filter(p => p.category === category);
 }
 
-function addProduct(productData) {
-    const products = getAllProducts();
+async function addProduct(productData) {
     const newProduct = {
-        id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
         ...productData,
-        createdAt: new Date().toISOString()
+        createdAt: useFirebase ? serverTimestamp() : new Date().toISOString()
     };
+
+    if (useFirebase) {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTIONS.PRODUCTS), newProduct);
+            newProduct.id = docRef.id;
+            return newProduct;
+        } catch (error) {
+            console.error('Erro ao adicionar produto no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
+    const products = getAllProducts();
+    newProduct.id = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    newProduct.createdAt = new Date().toISOString();
     products.push(newProduct);
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
     return newProduct;
 }
 
-function updateProduct(id, productData) {
+async function updateProduct(id, productData) {
+    if (useFirebase) {
+        try {
+            await updateDoc(doc(db, COLLECTIONS.PRODUCTS, id), productData);
+            return { id, ...productData };
+        } catch (error) {
+            console.error('Erro ao atualizar produto no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const products = getAllProducts();
     const index = products.findIndex(p => p.id === id);
     if (index !== -1) {
@@ -283,48 +538,150 @@ function updateProduct(id, productData) {
     return null;
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
+    if (useFirebase) {
+        try {
+            await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id));
+            return true;
+        } catch (error) {
+            console.error('Erro ao deletar produto do Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const products = getAllProducts();
     const filtered = products.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(filtered));
+    return true;
 }
 
 // ========================================
 // FUNÇÕES DE PROMOÇÕES
 // ========================================
 
-function getAllPromotions() {
+async function getAllPromotions() {
+    if (useFirebase) {
+        try {
+            const querySnapshot = await getDocs(collection(db, COLLECTIONS.PROMOTIONS));
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Erro ao buscar promoções do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROMOTIONS)) || [];
+        }
+    }
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROMOTIONS)) || [];
 }
 
-function getActivePromotions() {
-    const promotions = getAllPromotions();
-    const now = new Date();
-    return promotions.filter(p => {
-        const start = new Date(p.startDate);
-        const end = new Date(p.endDate);
-        return now >= start && now <= end && p.active;
-    });
+async function getActivePromotions() {
+    const promotions = await getAllPromotions();
+    return promotions.filter(p => p.active === true);
 }
 
-function addPromotion(promotionData) {
-    const promotions = getAllPromotions();
+// ========================================
+// FUNÇÕES DE STORAGE PARA IMAGENS (FIREBASE STORAGE)
+// ========================================
+
+async function uploadPromotionPhoto(file) {
+    if (!useFirebase) {
+        // Fallback: converter para data URL
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    try {
+        const { getStorage, ref, uploadBytes, getDownloadURL } = await import('./firebase.js');
+        const storage = getStorage();
+        const storageRef = ref(storage, `promotions/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error('Erro ao fazer upload da foto da promoção:', error);
+        // Fallback para data URL
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+async function uploadProductPhoto(file) {
+    if (!useFirebase) {
+        // Fallback: converter para data URL
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    try {
+        const { getStorage, ref, uploadBytes, getDownloadURL } = await import('./firebase.js');
+        const storage = getStorage();
+        const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error('Erro ao fazer upload da foto do produto:', error);
+        // Fallback para data URL
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+async function addPromotion(promotionData) {
     const newPromotion = {
-        id: promotions.length > 0 ? Math.max(...promotions.map(p => p.id)) + 1 : 1,
         name: promotionData.name || '',
         value: promotionData.value || '',
         description: promotionData.description || '',
         photo: promotionData.photo || '',
         instagramLink: promotionData.instagramLink || '',
         active: promotionData.active !== false,
-        createdAt: new Date().toISOString()
+        createdAt: useFirebase ? serverTimestamp() : new Date().toISOString()
     };
+
+    if (useFirebase) {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTIONS.PROMOTIONS), newPromotion);
+            newPromotion.id = docRef.id;
+            return newPromotion;
+        } catch (error) {
+            console.error('Erro ao adicionar promoção no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
+    const promotions = getAllPromotions();
+    newPromotion.id = promotions.length > 0 ? Math.max(...promotions.map(p => p.id)) + 1 : 1;
+    newPromotion.createdAt = new Date().toISOString();
     promotions.push(newPromotion);
     localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(promotions));
     return newPromotion;
 }
 
-function updatePromotion(id, promotionData) {
+async function updatePromotion(id, promotionData) {
+    if (useFirebase) {
+        try {
+            await updateDoc(doc(db, COLLECTIONS.PROMOTIONS, id), promotionData);
+            return { id, ...promotionData };
+        } catch (error) {
+            console.error('Erro ao atualizar promoção no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const promotions = getAllPromotions();
     const index = promotions.findIndex(p => p.id === id);
     if (index !== -1) {
@@ -335,40 +692,93 @@ function updatePromotion(id, promotionData) {
     return null;
 }
 
-function deletePromotion(id) {
+async function deletePromotion(id) {
+    if (useFirebase) {
+        try {
+            await deleteDoc(doc(db, COLLECTIONS.PROMOTIONS, id));
+            return true;
+        } catch (error) {
+            console.error('Erro ao deletar promoção do Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const promotions = getAllPromotions();
     const filtered = promotions.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(filtered));
+    return true;
 }
 
 // ========================================
 // FUNÇÕES DE RESGATES
 // ========================================
 
-function getAllRedeems() {
+async function getAllRedeems() {
+    if (useFirebase) {
+        try {
+            const querySnapshot = await getDocs(collection(db, COLLECTIONS.REDEEMS));
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error('Erro ao buscar resgates do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.REDEEMS)) || [];
+        }
+    }
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.REDEEMS)) || [];
 }
 
-function getRedeemById(id) {
+async function getRedeemById(id) {
+    if (useFirebase) {
+        try {
+            const docSnap = await getDoc(doc(db, COLLECTIONS.REDEEMS, id));
+            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        } catch (error) {
+            console.error('Erro ao buscar resgate por ID do Firebase:', error);
+            const redeems = await getAllRedeems();
+            return redeems.find(r => r.id === id);
+        }
+    }
     const redeems = getAllRedeems();
     return redeems.find(r => r.id === id);
 }
 
-function addRedeem(redeemData) {
-    const redeems = getAllRedeems();
+async function addRedeem(redeemData) {
     const newRedeem = {
-        id: redeems.length > 0 ? Math.max(...redeems.map(r => r.id)) + 1 : 1,
         productId: redeemData.productId || 0,
         pointsRequired: redeemData.pointsRequired || 0,
         active: redeemData.active !== false,
-        createdAt: new Date().toISOString()
+        createdAt: useFirebase ? serverTimestamp() : new Date().toISOString()
     };
+
+    if (useFirebase) {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTIONS.REDEEMS), newRedeem);
+            newRedeem.id = docRef.id;
+            return newRedeem;
+        } catch (error) {
+            console.error('Erro ao adicionar resgate no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
+    const redeems = getAllRedeems();
+    newRedeem.id = redeems.length > 0 ? Math.max(...redeems.map(r => r.id)) + 1 : 1;
+    newRedeem.createdAt = new Date().toISOString();
     redeems.push(newRedeem);
     localStorage.setItem(STORAGE_KEYS.REDEEMS, JSON.stringify(redeems));
     return newRedeem;
 }
 
-function updateRedeem(id, redeemData) {
+async function updateRedeem(id, redeemData) {
+    if (useFirebase) {
+        try {
+            await updateDoc(doc(db, COLLECTIONS.REDEEMS, id), redeemData);
+            return { id, ...redeemData };
+        } catch (error) {
+            console.error('Erro ao atualizar resgate no Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const redeems = getAllRedeems();
     const index = redeems.findIndex(r => r.id === id);
     if (index !== -1) {
@@ -379,25 +789,50 @@ function updateRedeem(id, redeemData) {
     return null;
 }
 
-function deleteRedeem(id) {
+async function deleteRedeem(id) {
+    if (useFirebase) {
+        try {
+            await deleteDoc(doc(db, COLLECTIONS.REDEEMS, id));
+            return true;
+        } catch (error) {
+            console.error('Erro ao deletar resgate do Firebase:', error);
+        }
+    }
+
+    // Fallback para localStorage
     const redeems = getAllRedeems();
     const filtered = redeems.filter(r => r.id !== id);
     localStorage.setItem(STORAGE_KEYS.REDEEMS, JSON.stringify(filtered));
+    return true;
 }
 
 // ========================================
 // FUNÇÕES DE CONFIGURAÇÕES
 // ========================================
 
-function getSettings() {
+async function getSettings() {
+    if (useFirebase) {
+        try {
+            const docSnap = await getDoc(doc(db, COLLECTIONS.SETTINGS, 'main'));
+            return docSnap.exists() ? docSnap.data() : DEFAULT_SETTINGS;
+        } catch (error) {
+            console.error('Erro ao buscar configurações do Firebase:', error);
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
+        }
+    }
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_SETTINGS;
 }
 
-function updateSettings(newSettings) {
-    const settings = getSettings();
-    const updated = { ...settings, ...newSettings };
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
-    return updated;
+async function updateSettings(newSettings) {
+    if (useFirebase) {
+        try {
+            await setDoc(doc(db, COLLECTIONS.SETTINGS, 'main'), newSettings);
+        } catch (error) {
+            console.error('Erro ao atualizar configurações no Firebase:', error);
+        }
+    }
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(newSettings));
+    return newSettings;
 }
 
 // ========================================
@@ -457,8 +892,8 @@ function isLoggedIn() {
 /**
  * Calcula o nível do cliente baseado em pontos
  */
-function calculateLevel(points) {
-    const settings = getSettings();
+async function calculateLevel(points) {
+    const settings = await getSettings();
     const levels = settings.levels;
 
     if (points >= levels.platinum) return 'platinum';
@@ -563,6 +998,7 @@ export {
     // Promotions
     getAllPromotions,
     getActivePromotions,
+    uploadPromotionPhoto,
     addPromotion,
     updatePromotion,
     deletePromotion,

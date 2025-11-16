@@ -64,8 +64,8 @@
     <!-- Divider -->
     <div class="section-divider section-divider--large"></div>
 
-        <!-- Seção Promoções (integrada pelo assistente) -->
-        <section id="promocoes" aria-labelledby="promocoes-title">
+        <!-- Seção Promoções -->
+        <section id="promocoes" aria-labelledby="promocoes-title" style="display: none;">
             <div class="container">
                 <h2 id="promocoes-title">Promoções</h2>
                 <p class="subtitle">Aproveite nossas ofertas e confira os posts recentes.</p>
@@ -110,16 +110,7 @@
         <!-- Script da seção de Promoções -->
         <script src="promocoes.js"></script>
         <script>
-            // Lista de exemplo — substitua pelos links reais das publicações do Instagram
-            window.promocoesLinks = [
-                "https://www.instagram.com/p/POST1/",
-                "https://www.instagram.com/p/POST2/",
-                "https://www.instagram.com/p/POST3/"
-            ];
-            // Chama a função que injeta os embeds (a função foi definida em promocoes.js)
-            if (typeof renderPromocoes === 'function') {
-                renderPromocoes(window.promocoesLinks, 'promocoes-grid');
-            }
+            // Promoções serão carregadas dinamicamente pelo js/app.js
         </script>
 </body>
 </html>

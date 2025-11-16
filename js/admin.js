@@ -25,6 +25,7 @@ import {
     addPromotion,
     updatePromotion,
     deletePromotion,
+    uploadPromotionPhoto,
     // Redeems
     getAllRedeems,
     addRedeem,
@@ -188,14 +189,9 @@ function setupProductsSection() {
 
     // Salvar produto
     async function readFileAsDataURL(file) {
-        // Solução simplificada: sempre converter diretamente sem compressão
-        // para evitar problemas com canvas e limitações de localStorage
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-            reader.readAsDataURL(file);
-        });
+        // Usar uploadProductPhoto do storage.js
+        const { uploadProductPhoto } = await import('./storage.js');
+        return await uploadProductPhoto(file);
     }
 
     form.addEventListener('submit', async (e) => {
@@ -617,17 +613,6 @@ function setupPromotionsSection() {
     }
 
     // Salvar promoção
-    async function readFileAsDataURL(file) {
-        // Solução simplificada: sempre converter diretamente sem compressão
-        // para evitar problemas com canvas e limitações de localStorage
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-            reader.readAsDataURL(file);
-        });
-    }
-
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -637,11 +622,11 @@ function setupPromotionsSection() {
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
             try {
-                const dataUrl = await readFileAsDataURL(fileInput.files[0]);
-                photoValue = dataUrl;
+                // Usar uploadPromotionPhoto para Firebase Storage
+                photoValue = await uploadPromotionPhoto(fileInput.files[0]);
             } catch (err) {
-                console.warn('Falha ao processar arquivo de imagem:', err);
-                showNotification('Erro ao ler imagem enviada. Tente novamente.', 'error');
+                console.warn('Falha ao fazer upload da foto da promoção:', err);
+                showNotification('Erro ao fazer upload da imagem. Tente novamente.', 'error');
                 return;
             }
         }

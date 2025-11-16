@@ -204,30 +204,13 @@ function setupSearch() {
 // PROMOÇÕES
 // ========================================
 
-function setupPromotions() {
-    const grid = document.getElementById('promotionsGrid');
-    const emptyState = document.getElementById('emptyPromotions');
+async function setupPromotions() {
+    const promotions = await getActivePromotions();
 
-    if (!grid) return;
-
-    const promotions = getActivePromotions();
-
-    if (promotions.length === 0) {
-        grid.innerHTML = '';
-        if (emptyState) emptyState.style.display = 'block';
-        return;
+    // Chama renderPromocoes com os objetos de promoção
+    if (typeof renderPromocoes === 'function') {
+        renderPromocoes(promotions, 'promocoes-grid');
     }
-
-    if (emptyState) emptyState.style.display = 'none';
-
-    grid.innerHTML = promotions.map(promo => `
-        <div class="promotion-card">
-            <h3>${promo.name}</h3>
-            <p>${promo.description}</p>
-            <div class="promotion-card__discount">${promo.discount}% OFF</div>
-            <small>Válida até ${new Date(promo.endDate).toLocaleDateString('pt-BR')}</small>
-        </div>
-    `).join('');
 }
 
 // ========================================
