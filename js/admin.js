@@ -327,6 +327,7 @@ function renderFilteredProducts(products) {
 }
 
 window.editProduct = async function(productId) {
+    productId = parseInt(productId);
     const product = await getProductById(productId);
     if (!product) return;
 
@@ -347,6 +348,7 @@ window.editProduct = async function(productId) {
 };
 
 window.deleteProductItem = async function(productId) {
+    productId = parseInt(productId);
     showConfirmDialog(
         'Deletar Produto?',
         'Esta ação não pode ser desfeita.',
@@ -414,10 +416,10 @@ async function setupClientsSection() {
             if (!clientData.password) {
                 delete clientData.password;
             }
-            updateClient(parseInt(clientId), clientData);
+            await updateClient(parseInt(clientId), clientData);
             showNotification('✓ Cliente atualizado!', 'success');
         } else {
-            addClient(clientData);
+            await addClient(clientData);
             showNotification('✓ Cliente criado com sucesso! Pode fazer login agora.', 'success');
         }
 
