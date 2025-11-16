@@ -1,7 +1,3 @@
-/**
- * ADMIN.JS - Painel Administrativo Completo
- * Gerencia produtos, clientes, promoções e configurações
- */
 
 import {
     initializeStorage,
@@ -189,9 +185,12 @@ function setupProductsSection() {
 
     // Salvar produto
     async function readFileAsDataURL(file) {
-        // Usar uploadProductPhoto do storage.js
-        const { uploadProductPhoto } = await import('./storage.js');
-        return await uploadProductPhoto(file);
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
     }
 
     form.addEventListener('submit', async (e) => {

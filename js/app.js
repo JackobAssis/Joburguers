@@ -259,3 +259,4 @@ async function setupWhatsAppLinks() {
         console.error('Erro ao configurar links WhatsApp:', e);
     }
 }
+i
