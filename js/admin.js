@@ -158,7 +158,7 @@ async function loadDashboard() {
 // PRODUTOS
 // ========================================
 
-function setupProductsSection() {
+async function setupProductsSection() {
     const addBtn = document.getElementById('addProductBtn');
     const searchInput = document.getElementById('productSearch');
     const categoryFilter = document.getElementById('productCategoryFilter');
@@ -169,7 +169,8 @@ function setupProductsSection() {
     if (!addBtn) return;
 
     // Carregar produtos
-    loadProductsTable();
+    const products = await getAllProducts();
+    loadProductsTable(products);
 
     // Adicionar novo
     addBtn.addEventListener('click', () => {
@@ -245,7 +246,7 @@ function setupProductsSection() {
         if (fileInput) fileInput.value = '';
 
         modal.style.display = 'none';
-        loadProductsTable();
+        loadProductsTable(await getAllProducts());
     });
 
     // Filtros e busca
@@ -253,11 +254,11 @@ function setupProductsSection() {
     categoryFilter.addEventListener('change', () => filterProducts());
 }
 
-function loadProductsTable() {
+function loadProductsTable(products) {
     const tbody = document.getElementById('productsTableBody');
-    const products = getAllProducts();
+    const list = products ? Object.values(products) : [];
 
-    if (products.length === 0) {
+    if (list.length === 0) {
         document.getElementById('productsList').style.display = 'none';
         document.getElementById('emptyProducts').style.display = 'block';
         return;
@@ -266,7 +267,7 @@ function loadProductsTable() {
     document.getElementById('productsList').style.display = 'block';
     document.getElementById('emptyProducts').style.display = 'none';
 
-    tbody.innerHTML = products.map(product => `
+    tbody.innerHTML = list.map(product => `
         <tr>
             <td><img src="${product.image}" alt="${product.name}" class="table-image" onerror="this.src='https://via.placeholder.com/50'"></td>
             <td>${product.name}</td>
@@ -344,14 +345,14 @@ window.editProduct = function(productId) {
     document.getElementById('productModal').style.display = 'flex';
 };
 
-window.deleteProductItem = function(productId) {
+window.deleteProductItem = async function(productId) {
     showConfirmDialog(
         'Deletar Produto?',
         'Esta ação não pode ser desfeita.',
-        () => {
+        async () => {
             deleteProduct(productId);
             showNotification('✓ Produto deletado!', 'success');
-            loadProductsTable();
+            loadProductsTable(await getAllProducts());
         }
     );
 };
