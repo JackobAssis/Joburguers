@@ -243,15 +243,16 @@ export { renderProducts, getCategoryLabel };
 // ========================================
 // WHATSAPP LINKS DINÂMICOS
 // ========================================
-function setupWhatsAppLinks() {
+async function setupWhatsAppLinks() {
     try {
-        const settings = getSettings();
+        const settings = await getSettings();
         const wa = settings && settings.storeWhatsApp ? settings.storeWhatsApp : null;
         if (!wa) return;
 
         document.querySelectorAll('.whatsapp-btn').forEach(btn => {
             const text = btn.dataset.waText || 'Olá! Quero fazer um pedido';
-            const href = `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
+            const href = `https://wa.me/5581989334497?text=Fazer%20pedido%20no%20WhatsApp%20%F0%9F%8D%94%F0%9F%93%B1
+`;
             btn.setAttribute('href', href);
         });
     } catch (e) {
