@@ -1,4 +1,4 @@
-/**
+198/**
  * STORAGE.JS - Gerenciamento de dados com Firebase Firestore + localStorage fallback
  * Centraliza toda a lógica de persistência de dados com sincronização em tempo real
  */
@@ -272,8 +272,8 @@ async function updateAdmin(adminData) {
     localStorage.setItem(STORAGE_KEYS.ADMIN, JSON.stringify(adminData));
 }
 
-function validateAdminLogin(phone, password) {
-    const admin = getAdmin();
+async function validateAdminLogin(phone, password) {
+    const admin = await getAdmin();
     return admin.phone === phone && admin.password === password;
 }
 
