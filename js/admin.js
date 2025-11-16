@@ -122,14 +122,15 @@ function setupLogout() {
 
 async function loadDashboard() {
     const products = await getAllProducts();
-    const clients = await getAllClients();
+    const clientsObj = await getAllClients();
+    const clients = clientsObj ? Object.values(clientsObj) : [];
     const transactions = getAllTransactions();
     const settings = await getSettings();
 
     // Stats
     document.getElementById('totalProducts').textContent = products.length;
     document.getElementById('totalClientes').textContent = clients.length;
-    
+
     let totalPoints = 0;
     clients.forEach(c => totalPoints += c.points);
     document.getElementById('totalPoints').textContent = totalPoints;
@@ -448,7 +449,8 @@ function setupClientsSection() {
 
 function loadClientsTable() {
     const tbody = document.getElementById('clientsTableBody');
-    const clients = getAllClients();
+    const clientsObj = getAllClients();
+    const clients = clientsObj ? Object.values(clientsObj) : [];
 
     if (clients.length === 0) {
         document.getElementById('clientsList').style.display = 'none';
@@ -479,9 +481,10 @@ function loadClientsTable() {
 
 function filterClients() {
     const search = document.getElementById('clientSearch').value.toLowerCase();
-    let clients = getAllClients();
+    let clientsObj = getAllClients();
+    let clients = clientsObj ? Object.values(clientsObj) : [];
 
-    clients = clients.filter(c => 
+    clients = clients.filter(c =>
         c.name.toLowerCase().includes(search) ||
         c.phone.includes(search)
     );

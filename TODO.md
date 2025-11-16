@@ -1,28 +1,28 @@
 # TODO: Update Promotion and Redemption System
 
 ## 1. Update storage.js Schema
-- [ ] Change promotion schema: remove 'discount', 'startDate', 'endDate'; add 'value', 'photo', 'instagramLink'
-- [ ] Change redeem schema: remove 'name', 'value', 'type'; add 'productId', 'pointsRequired'
+- [x] Change promotion schema: remove 'discount', 'startDate', 'endDate'; add 'value', 'photo', 'instagramLink'
+- [x] Change redeem schema: remove 'name', 'value', 'type'; add 'productId', 'pointsRequired'
 
 ## 2. Update admin.html Modals
-- [ ] Add proper promotion modal with fields: name, value, description, photo (file upload), instagramLink
-- [ ] Add proper redeem modal with fields: select product dropdown, points required
+- [x] Add proper promotion modal with fields: name, value, description, photo (file upload), instagramLink
+- [x] Add proper redeem modal with fields: select product dropdown, points required
 
 ## 3. Update js/admin.js Logic
-- [ ] Update setupPromotionsSection() to use new modal instead of prompts
-- [ ] Update setupRedeemSection() to use new modal instead of prompts
-- [ ] Add form handling for new promotion fields (file upload for photo)
-- [ ] Add form handling for new redeem fields (product selection)
+- [x] Update setupPromotionsSection() to use new modal instead of prompts
+- [x] Update setupRedeemSection() to use new modal instead of prompts
+- [x] Add form handling for new promotion fields (file upload for photo)
+- [x] Add form handling for new redeem fields (product selection)
 
 ## 4. Update index.html
-- [ ] Remove hardcoded promocoesLinks array
-- [ ] Load promotions from storage instead of hardcoded links
-- [ ] Conditionally show promotions section only if promotions exist
+- [x] Remove hardcoded promocoesLinks array
+- [x] Load promotions from storage instead of hardcoded links
+- [x] Conditionally show promotions section only if promotions exist
 
 ## 5. Update promocoes.js
-- [ ] Modify renderPromocoes to accept promotion objects instead of just links
-- [ ] Render either image or instagram embed based on promotion data
-- [ ] Hide promotions section if no promotions
+- [x] Modify renderPromocoes to accept promotion objects instead of just links
+- [x] Render either image or instagram embed based on promotion data
+- [x] Hide promotions section if no promotions
 
 ## 6. Testing
 - [ ] Test creating promotions with images and instagram links
