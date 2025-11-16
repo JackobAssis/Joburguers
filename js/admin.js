@@ -187,63 +187,15 @@ function setupProductsSection() {
     }
 
     // Salvar produto
-    async function compressImage(file, maxWidth = 800, quality = 0.8) {
-        return new Promise((resolve, reject) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-
-            img.onload = () => {
-                // Calcular novas dimensões mantendo proporção
-                let { width, height } = img;
-
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-
-                // Configurar canvas
-                canvas.width = width;
-                canvas.height = height;
-
-                // Desenhar imagem comprimida
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // Converter para data URL com compressão
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                resolve(compressedDataUrl);
-            };
-
-            img.onerror = () => reject(new Error('Erro ao processar imagem'));
-            img.src = URL.createObjectURL(file);
-        });
-    }
-
     async function readFileAsDataURL(file) {
-        try {
-            // Verificar tamanho do arquivo (se > 2MB, comprimir)
-            if (file.size > 2 * 1024 * 1024) { // 2MB
-                console.log('Imagem grande detectada, comprimindo...');
-                return await compressImage(file);
-            } else {
-                // Arquivo pequeno, converter diretamente
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-                    reader.readAsDataURL(file);
-                });
-            }
-        } catch (error) {
-            console.warn('Falha na compressão, tentando leitura direta:', error);
-            // Fallback para leitura direta
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-                reader.readAsDataURL(file);
-            });
-        }
+        // Solução simplificada: sempre converter diretamente sem compressão
+        // para evitar problemas com canvas e limitações de localStorage
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
     }
 
     form.addEventListener('submit', async (e) => {
@@ -665,63 +617,15 @@ function setupPromotionsSection() {
     }
 
     // Salvar promoção
-    async function compressImage(file, maxWidth = 800, quality = 0.8) {
-        return new Promise((resolve, reject) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-
-            img.onload = () => {
-                // Calcular novas dimensões mantendo proporção
-                let { width, height } = img;
-
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-
-                // Configurar canvas
-                canvas.width = width;
-                canvas.height = height;
-
-                // Desenhar imagem comprimida
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // Converter para data URL com compressão
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                resolve(compressedDataUrl);
-            };
-
-            img.onerror = () => reject(new Error('Erro ao processar imagem'));
-            img.src = URL.createObjectURL(file);
-        });
-    }
-
     async function readFileAsDataURL(file) {
-        try {
-            // Verificar tamanho do arquivo (se > 2MB, comprimir)
-            if (file.size > 2 * 1024 * 1024) { // 2MB
-                console.log('Imagem grande detectada, comprimindo...');
-                return await compressImage(file);
-            } else {
-                // Arquivo pequeno, converter diretamente
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-                    reader.readAsDataURL(file);
-                });
-            }
-        } catch (error) {
-            console.warn('Falha na compressão, tentando leitura direta:', error);
-            // Fallback para leitura direta
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-                reader.readAsDataURL(file);
-            });
-        }
+        // Solução simplificada: sempre converter diretamente sem compressão
+        // para evitar problemas com canvas e limitações de localStorage
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+            reader.readAsDataURL(file);
+        });
     }
 
     form.addEventListener('submit', async (e) => {
