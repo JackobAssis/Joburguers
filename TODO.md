@@ -1,31 +1,46 @@
-# TODO: Update Promotion and Redemption System
+# TODO - Correção Completa do Projeto Joburguers
 
-## 1. Update storage.js Schema
-- [x] Change promotion schema: remove 'discount', 'startDate', 'endDate'; add 'value', 'photo', 'instagramLink'
-- [x] Change redeem schema: remove 'name', 'value', 'type'; add 'productId', 'pointsRequired'
+## ✅ Concluído
+- [x] Análise completa do projeto e identificação de problemas
+- [x] Criação do plano de correção
 
-## 2. Update admin.html Modals
-- [x] Add proper promotion modal with fields: name, value, description, photo (file upload), instagramLink
-- [x] Add proper redeem modal with fields: select product dropdown, points required
+## 🔄 Em Andamento
+- [x] Corrigir storage.js - Normalizar tipos de IDs e garantir consistência
+- [ ] Refatorar admin.js - Usar async/await corretamente
+- [ ] Corrigir cliente.js - Promises não aguardadas
+- [ ] Corrigir app.js - Chamadas assíncronas
+- [ ] Corrigir produto.js - Funções assíncronas
+- [ ] Testar todas as funcionalidades CRUD
+- [ ] Adicionar validações e fallbacks
 
-## 3. Update js/admin.js Logic
-- [x] Update setupPromotionsSection() to use new modal instead of prompts
-- [x] Update setupRedeemSection() to use new modal instead of prompts
-- [x] Add form handling for new promotion fields (file upload for photo)
-- [x] Add form handling for new redeem fields (product selection)
+## 📋 Detalhes das Correções
 
-## 4. Update index.html
-- [x] Remove hardcoded promocoesLinks array
-- [x] Load promotions from storage instead of hardcoded links
-- [x] Conditionally show promotions section only if promotions exist
+### storage.js
+- [ ] Normalizar IDs para sempre serem strings
+- [ ] Garantir consistência entre Firebase e localStorage
+- [ ] Adicionar try/catch em todas as operações
+- [ ] Melhorar logs de erro com contexto
 
-## 5. Update promocoes.js
-- [x] Modify renderPromocoes to accept promotion objects instead of just links
-- [x] Render either image or instagram embed based on promotion data
-- [x] Hide promotions section if no promotions
+### admin.js
+- [ ] Adicionar await em todas as chamadas getAll*
+- [ ] Corrigir window.editProduct, deleteProductItem, etc.
+- [ ] Tratar Promises corretamente
+- [ ] Corrigir filtros e buscas
 
-## 6. Testing
-- [ ] Test creating promotions with images and instagram links
-- [ ] Test creating product-based redemptions
-- [ ] Test homepage shows promotions correctly
-- [ ] Test homepage hides promotions when none exist
+### cliente.js
+- [ ] Corrigir currentClient = getClientById()
+- [ ] Adicionar await em loadResgates()
+- [ ] Corrigir outras chamadas assíncronas
+
+### app.js e produto.js
+- [ ] Corrigir chamadas sem await
+- [ ] Garantir que dados sejam aguardados antes de renderizar
+
+## 🧪 Testes Necessários
+- [ ] CRUD de Produtos (criar, editar, excluir)
+- [ ] CRUD de Clientes (criar, editar, excluir)
+- [ ] Sistema de Promoções
+- [ ] Sistema de Resgates
+- [ ] Painel Admin funcionando
+- [ ] Painel Cliente funcionando
+- [ ] Sincronização Firebase/localStorage

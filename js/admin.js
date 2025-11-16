@@ -290,10 +290,10 @@ function loadProductsTable(products) {
     `).join('');
 }
 
-function filterProducts() {
+async function filterProducts() {
     const search = document.getElementById('productSearch').value.toLowerCase();
     const category = document.getElementById('productCategoryFilter').value;
-    let products = getAllProducts();
+    let products = await getAllProducts();
 
     products = products.filter(p => {
         const matchSearch = p.name.toLowerCase().includes(search);
@@ -499,9 +499,9 @@ async function loadClientsTable() {
     `).join('');
 }
 
-function filterClients() {
+async function filterClients() {
     const search = document.getElementById('clientSearch').value.toLowerCase();
-    let clientsObj = getAllClients();
+    let clientsObj = await getAllClients();
     let clients = clientsObj ? Object.values(clientsObj) : [];
 
     clients = clients.filter(c =>
@@ -532,8 +532,8 @@ function renderFilteredClients(clients) {
     `).join('');
 }
 
-window.editClient = function(clientId) {
-    const client = getClientById(clientId);
+window.editClient = async function(clientId) {
+    const client = await getClientById(clientId);
     if (!client) return;
 
     document.getElementById('clientModalTitle').textContent = 'Editar Cliente';
@@ -544,7 +544,7 @@ window.editClient = function(clientId) {
     document.getElementById('clientPoints').value = client.points;
     document.getElementById('clientActive').checked = client.active;
     document.getElementById('clientForm').dataset.clientId = clientId;
-    
+
     // Mudar texto do hint de senha
     const hint = document.getElementById('passwordHint');
     if (hint) {
@@ -554,20 +554,20 @@ window.editClient = function(clientId) {
     document.getElementById('clientModal').style.display = 'flex';
 };
 
-window.deleteClientItem = function(clientId) {
+window.deleteClientItem = async function(clientId) {
     showConfirmDialog(
         'Deletar Cliente?',
         'Esta ação não pode ser desfeita e todos os pontos serão perdidos.',
-        () => {
-            deleteClient(clientId);
+        async () => {
+            await deleteClient(clientId);
             showNotification('✓ Cliente deletado!', 'success');
-            loadClientsTable();
+            await loadClientsTable();
         }
     );
 };
 
-window.managePoints = function(clientId) {
-    const client = getClientById(clientId);
+window.managePoints = async function(clientId) {
+    const client = await getClientById(clientId);
     if (!client) return;
 
     const modal = document.getElementById('pointsModal');
@@ -583,13 +583,13 @@ window.managePoints = function(clientId) {
         closeBtn.onclick = () => { modal.style.display = 'none'; };
     }
 
-    form.onsubmit = (e) => {
+    form.onsubmit = async (e) => {
         e.preventDefault();
         const amount = parseInt(document.getElementById('pointsAmount').value);
-        addPointsToClient(clientId, amount, document.getElementById('pointsReason').value);
+        await addPointsToClient(clientId, amount, document.getElementById('pointsReason').value);
         showNotification('✓ Pontos atualizados!', 'success');
         modal.style.display = 'none';
-        loadClientsTable();
+        await loadClientsTable();
     };
 
     modal.style.display = 'flex';
@@ -780,12 +780,12 @@ async function setupRedeemSection() {
     });
 }
 
-function loadRedeemsTable() {
+async function loadRedeemsTable() {
     const tbody = document.getElementById('redeemsTableBody');
-    const redeems = getAllRedeems();
+    const redeems = await getAllRedeems();
 
-    tbody.innerHTML = redeems.map(redeem => {
-        const product = getProductById(redeem.productId);
+    const rows = await Promise.all(redeems.map(async redeem => {
+        const product = await getProductById(redeem.productId);
         const productName = product ? product.name : 'Produto não encontrado';
 
         return `
@@ -800,7 +800,9 @@ function loadRedeemsTable() {
                 </td>
             </tr>
         `;
-    }).join('');
+    }));
+
+    tbody.innerHTML = rows.join('');
 }
 
 window.deleteRedeemItem = async function(redeemId) {

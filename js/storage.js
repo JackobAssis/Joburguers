@@ -1,6 +1,6 @@
-198/**
+/**
  * STORAGE.JS - Gerenciamento de dados com Firebase Firestore + localStorage fallback
- * Centraliza toda a lógica de persistência de dados com sincronização em tempo real
+ * Versão corrigida: Normaliza IDs como strings, adiciona try/catch completo
  */
 
 import {
@@ -50,9 +50,7 @@ const DEFAULT_ADMIN = {
 const DEFAULT_SETTINGS = {
     storeName: 'JóBurguers',
     storeAddress: 'Rua Pasárgada, Bairro: Três Marias - Carpina, PE',
-    // storePhone must be a string to avoid JS syntax errors
     storePhone: '+55 (81) 98933-4497',
-    // Normalized WhatsApp number for direct links (country + area + number)
     storeWhatsApp: '5581989334497',
     storeHours: 'Seg-Sex-Sab-Dom 6:30h às 22h',
     pointsPerReal: 0.1,
@@ -76,8 +74,7 @@ let realtimeCallbacks = {};
 // Verificar se Firebase está disponível
 function checkFirebaseAvailability() {
     try {
-        // Tentar acessar Firebase
-        if (typeof db !== 'undefined') {
+        if (typeof db !== 'undefined' && db) {
             useFirebase = true;
             console.log('Firebase disponível - usando sincronização em tempo real');
             return true;
@@ -87,6 +84,20 @@ function checkFirebaseAvailability() {
     }
     useFirebase = false;
     return false;
+}
+
+// ========================================
+// FUNÇÕES UTILITÁRIAS
+// ========================================
+
+// Normalizar ID para string
+function normalizeId(id) {
+    return String(id);
+}
+
+// Verificar se objeto tem ID válido
+function hasValidId(obj) {
+    return obj && (obj.id || obj.id === 0) && String(obj.id).trim() !== '';
 }
 
 // ========================================
@@ -130,7 +141,7 @@ function initializeLocalStorageDefaults() {
                 name: 'Hamburger Clássico',
                 category: 'hamburguer',
                 price: 25.00,
-                image: 'https://via.placeholder.com/400x300?text=Hamburger+Classico',
+                image: `https://via.placeholder.com/400x300?text=${encodeURIComponent('Hamburger Classico')}`,
                 description: 'Nosso hambúrguer clássico com carne suculenta, alface fresca, tomate e cebola roxa.',
                 ingredients: ['Pão', 'Carne', 'Alface', 'Tomate', 'Cebola'],
                 available: true,
@@ -206,7 +217,7 @@ async function initializeFirebaseDefaults() {
                     name: 'Hamburger Clássico',
                     category: 'hamburguer',
                     price: 25.00,
-                    image: 'https://via.placeholder.com/400x300?text=Hamburger+Classico',
+                    image: `https://via.placeholder.com/400x300?text=${encodeURIComponent('Hamburger Classico')}`,
                     description: 'Nosso hambúrguer clássico com carne suculenta, alface fresca, tomate e cebola roxa.',
                     ingredients: ['Pão', 'Carne', 'Alface', 'Tomate', 'Cebola'],
                     available: true,
@@ -295,18 +306,14 @@ async function getAllClients() {
 }
 
 async function getClientById(id) {
-    if (useFirebase) {
-        try {
-            const docSnap = await getDoc(doc(db, COLLECTIONS.CLIENTS, id));
-            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
-        } catch (error) {
-            console.error('Erro ao buscar cliente por ID do Firebase:', error);
-            const clients = await getAllClients();
-            return clients.find(c => c.id === id);
-        }
+    try {
+        const normalizedId = normalizeId(id);
+        const clients = await getAllClients();
+        return clients.find(c => normalizeId(c.id) === normalizedId);
+    } catch (error) {
+        console.error('Erro ao buscar cliente por ID:', error);
+        return null;
     }
-    const clients = getAllClients();
-    return clients.find(c => c.id === id);
 }
 
 async function getClientByPhone(phone) {
@@ -326,7 +333,7 @@ async function getClientByPhone(phone) {
             return clients.find(c => c.phone.replace(/\D/g, '') === normalizedPhone);
         }
     }
-    const clients = getAllClients();
+    const clients = await getAllClients();
     const normalizedPhone = phone.replace(/\D/g, '');
     return clients.find(c => c.phone.replace(/\D/g, '') === normalizedPhone);
 }
@@ -472,18 +479,14 @@ async function getAllProducts() {
 }
 
 async function getProductById(id) {
-    if (useFirebase) {
-        try {
-            const docSnap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id));
-            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
-        } catch (error) {
-            console.error('Erro ao buscar produto por ID do Firebase:', error);
-            const products = await getAllProducts();
-            return products.find(p => p.id === id);
-        }
+    try {
+        const normalizedId = normalizeId(id);
+        const products = await getAllProducts();
+        return products.find(p => normalizeId(p.id) === normalizedId);
+    } catch (error) {
+        console.error('Erro ao buscar produto por ID:', error);
+        return null;
     }
-    const products = getAllProducts();
-    return products.find(p => p.id === id);
 }
 
 async function getProductsByCategory(category) {
@@ -727,18 +730,14 @@ async function getAllRedeems() {
 }
 
 async function getRedeemById(id) {
-    if (useFirebase) {
-        try {
-            const docSnap = await getDoc(doc(db, COLLECTIONS.REDEEMS, id));
-            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
-        } catch (error) {
-            console.error('Erro ao buscar resgate por ID do Firebase:', error);
-            const redeems = await getAllRedeems();
-            return redeems.find(r => r.id === id);
-        }
+    try {
+        const normalizedId = normalizeId(id);
+        const redeems = await getAllRedeems();
+        return redeems.find(r => normalizeId(r.id) === normalizedId);
+    } catch (error) {
+        console.error('Erro ao buscar resgate por ID:', error);
+        return null;
     }
-    const redeems = getAllRedeems();
-    return redeems.find(r => r.id === id);
 }
 
 async function addRedeem(redeemData) {
