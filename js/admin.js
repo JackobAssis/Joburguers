@@ -372,7 +372,7 @@ function getCategoryLabel(category) {
 // CLIENTES
 // ========================================
 
-function setupClientsSection() {
+async function setupClientsSection() {
     const addBtn = document.getElementById('addClientBtn');
     const searchInput = document.getElementById('clientSearch');
     const modal = document.getElementById('clientModal');
@@ -381,7 +381,7 @@ function setupClientsSection() {
 
     if (!addBtn) return;
 
-    loadClientsTable();
+    await loadClientsTable();
 
     addBtn.addEventListener('click', () => {
         document.getElementById('clientModalTitle').textContent = 'Novo Cliente';
@@ -396,7 +396,7 @@ function setupClientsSection() {
         });
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const clientData = {
@@ -422,10 +422,10 @@ function setupClientsSection() {
         }
 
         modal.style.display = 'none';
-        loadClientsTable();
+        await loadClientsTable();
     });
 
-    searchInput.addEventListener('input', filterClients);
+    searchInput.addEventListener('input', async () => await filterClients());
 
     // Sincronização entre abas: se outra aba/tab alterar os clients (ex.: cliente se registra),
     // o evento 'storage' será disparado e recarregamos a tabela automaticamente.
@@ -435,8 +435,8 @@ function setupClientsSection() {
             if (!ev.key) return; // ignore clear
             if (ev.key === 'clients_data') {
                 // Pequeno debounce para evitar múltiplas atualizações quando necessário
-                setTimeout(() => {
-                    loadClientsTable();
+                setTimeout(async () => {
+                    await loadClientsTable();
                     showNotification('Lista de clientes atualizada (sincronização entre abas).', 'info');
                 }, 100);
             }
@@ -447,9 +447,9 @@ function setupClientsSection() {
     });
 }
 
-function loadClientsTable() {
+async function loadClientsTable() {
     const tbody = document.getElementById('clientsTableBody');
-    const clientsObj = getAllClients();
+    const clientsObj = await getAllClients();
     const clients = clientsObj ? Object.values(clientsObj) : [];
 
     if (clients.length === 0) {
