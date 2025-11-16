@@ -282,6 +282,7 @@ function loadProductsTable(products) {
             <td>
                 <div class="table-actions">
                     <button class="table-btn table-btn--edit" onclick="editProduct(${product.id})">Editar</button>
+                    <button class="table-btn table-btn--duplicate" onclick="duplicateProduct(${product.id})">Duplicar</button>
                     <button class="table-btn table-btn--delete" onclick="deleteProductItem(${product.id})">Deletar</button>
                 </div>
             </td>
@@ -319,6 +320,7 @@ function renderFilteredProducts(products) {
             <td>
                 <div class="table-actions">
                     <button class="table-btn table-btn--edit" onclick="editProduct(${product.id})">Editar</button>
+                    <button class="table-btn table-btn--duplicate" onclick="duplicateProduct(${product.id})">Duplicar</button>
                     <button class="table-btn table-btn--delete" onclick="deleteProductItem(${product.id})">Deletar</button>
                 </div>
             </td>
@@ -358,6 +360,22 @@ window.deleteProductItem = async function(productId) {
             loadProductsTable(await getAllProducts());
         }
     );
+};
+
+window.duplicateProduct = async function(productId) {
+    productId = parseInt(productId);
+    const product = await getProductById(productId);
+    if (!product) return;
+
+    const duplicatedProduct = {
+        ...product,
+        name: `${product.name} (Cópia)`,
+        id: undefined // Remove id to create new
+    };
+
+    await addProduct(duplicatedProduct);
+    showNotification('✓ Produto duplicado!', 'success');
+    loadProductsTable(await getAllProducts());
 };
 
 function getCategoryLabel(category) {
