@@ -1,3 +1,6 @@
+/**
+ * ADMIN.JS - Painel Administrativo Completo
+ */
 
 import {
     initializeStorage,
@@ -117,11 +120,11 @@ function setupLogout() {
 // DASHBOARD
 // ========================================
 
-function loadDashboard() {
-    const products = getAllProducts();
-    const clients = getAllClients();
+async function loadDashboard() {
+    const products = await getAllProducts();
+    const clients = await getAllClients();
     const transactions = getAllTransactions();
-    const settings = getSettings();
+    const settings = await getSettings();
 
     // Stats
     document.getElementById('totalProducts').textContent = products.length;
