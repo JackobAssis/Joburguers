@@ -325,8 +325,8 @@ function renderFilteredProducts(products) {
     `).join('');
 }
 
-window.editProduct = function(productId) {
-    const product = getProductById(productId);
+window.editProduct = async function(productId) {
+    const product = await getProductById(productId);
     if (!product) return;
 
     document.getElementById('productModalTitle').textContent = 'Editar Produto';
@@ -350,7 +350,7 @@ window.deleteProductItem = async function(productId) {
         'Deletar Produto?',
         'Esta ação não pode ser desfeita.',
         async () => {
-            deleteProduct(productId);
+            await deleteProduct(productId);
             showNotification('✓ Produto deletado!', 'success');
             loadProductsTable(await getAllProducts());
         }
@@ -680,8 +680,8 @@ async function loadPromotionsTable() {
     `).join('');
 }
 
-window.deletePromoItem = function(promoId) {
-    deletePromotion(promoId);
+window.deletePromoItem = async function(promoId) {
+    await deletePromotion(promoId);
     showNotification('✓ Promoção deletada!', 'success');
     loadPromotionsTable();
 };
@@ -694,7 +694,7 @@ function truncateText(text, max) {
 // RESGATES
 // ========================================
 
-function setupRedeemSection() {
+async function setupRedeemSection() {
     const addBtn = document.getElementById('addRedeemBtn');
     const modal = document.getElementById('redeemModal');
     const form = document.getElementById('redeemForm');
@@ -703,10 +703,10 @@ function setupRedeemSection() {
 
     if (!addBtn) return;
 
-    loadRedeemsTable();
+    await loadRedeemsTable();
 
     // Carregar produtos no select
-    const products = getAllProducts();
+    const products = await getAllProducts();
     productSelect.innerHTML = '<option value="">Selecione um produto</option>' +
         products.map(product => `<option value="${product.id}">${product.name}</option>`).join('');
 
@@ -730,7 +730,7 @@ function setupRedeemSection() {
         e.preventDefault();
 
         const selectedProductId = document.getElementById('redeemProduct').value;
-        const selectedProduct = getProductById(parseInt(selectedProductId));
+        const selectedProduct = await getProductById(parseInt(selectedProductId));
 
         if (!selectedProduct) {
             showNotification('Selecione um produto válido.', 'error');
@@ -780,8 +780,8 @@ function loadRedeemsTable() {
     }).join('');
 }
 
-window.deleteRedeemItem = function(redeemId) {
-    deleteRedeem(redeemId);
+window.deleteRedeemItem = async function(redeemId) {
+    await deleteRedeem(redeemId);
     showNotification('✓ Resgate deletado!', 'success');
     loadRedeemsTable();
 };
