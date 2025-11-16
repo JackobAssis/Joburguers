@@ -55,7 +55,7 @@ import {
 // INICIALIZAÇÃO
 // ========================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initializeStorage();
 
     const session = getCurrentSession();
@@ -65,15 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('adminUsername').textContent = 'Admin';
-    
+
     setupNavigation();
     setupLogout();
-    loadDashboard();
-    setupProductsSection();
-    setupClientsSection();
-    setupPromotionsSection();
-    setupRedeemSection();
-    setupSettings();
+    await loadDashboard();
+    await setupProductsSection();
+    await setupClientsSection();
+    await setupPromotionsSection();
+    await setupRedeemSection();
+    await setupSettings();
 });
 
 // ========================================
@@ -590,7 +590,7 @@ function getLevelLabel(level) {
 // PROMOÇÕES
 // ========================================
 
-function setupPromotionsSection() {
+async function setupPromotionsSection() {
     const addBtn = document.getElementById('addPromotionBtn');
     const modal = document.getElementById('promotionModal');
     const form = document.getElementById('promotionForm');
@@ -598,7 +598,7 @@ function setupPromotionsSection() {
 
     if (!addBtn) return;
 
-    loadPromotionsTable();
+    await loadPromotionsTable();
 
     // Adicionar nova promoção
     addBtn.addEventListener('click', () => {
@@ -660,9 +660,10 @@ function setupPromotionsSection() {
     });
 }
 
-function loadPromotionsTable() {
+async function loadPromotionsTable() {
     const tbody = document.getElementById('promotionsTableBody');
-    const promotions = getAllPromotions();
+    const data = await getAllPromotions();
+    const promotions = data ? Object.values(data) : [];
 
     tbody.innerHTML = promotions.map(promo => `
         <tr>
