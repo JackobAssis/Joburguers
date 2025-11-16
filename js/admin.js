@@ -235,10 +235,10 @@ async function setupProductsSection() {
 
         const productId = form.dataset.productId;
         if (productId) {
-            updateProduct(parseInt(productId), productData);
+            await updateProduct(parseInt(productId), productData);
             showNotification('✓ Produto atualizado!', 'success');
         } else {
-            addProduct(productData);
+            await addProduct(productData);
             showNotification('✓ Produto criado!', 'success');
         }
 
@@ -645,10 +645,10 @@ async function setupPromotionsSection() {
 
         const promotionId = form.dataset.promotionId;
         if (promotionId) {
-            updatePromotion(parseInt(promotionId), promotionData);
+            await updatePromotion(parseInt(promotionId), promotionData);
             showNotification('✓ Promoção atualizada!', 'success');
         } else {
-            addPromotion(promotionData);
+            await addPromotion(promotionData);
             showNotification('✓ Promoção criada!', 'success');
         }
 
@@ -726,7 +726,7 @@ function setupRedeemSection() {
     }
 
     // Salvar resgate
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const selectedProductId = document.getElementById('redeemProduct').value;
@@ -745,10 +745,10 @@ function setupRedeemSection() {
 
         const redeemId = form.dataset.redeemId;
         if (redeemId) {
-            updateRedeem(parseInt(redeemId), redeemData);
+            await updateRedeem(parseInt(redeemId), redeemData);
             showNotification('✓ Resgate atualizado!', 'success');
         } else {
-            addRedeem(redeemData);
+            await addRedeem(redeemData);
             showNotification('✓ Resgate criado!', 'success');
         }
 
