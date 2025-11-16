@@ -85,11 +85,12 @@ function setupMenuToggle() {
 // CARDÁPIO
 // ========================================
 
-function setupCardapio() {
+async function setupCardapio() {
     const grid = document.getElementById('productsGrid');
     if (!grid) return;
 
-    renderProducts(getAllProducts());
+    const products = await getAllProducts();
+    renderProducts(products);
 }
 
 function renderProducts(products) {
@@ -146,7 +147,7 @@ function getCategoryLabel(category) {
 // FILTROS
 // ========================================
 
-function setupFilters() {
+async function setupFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     if (filterBtns.length === 0) return;
 
@@ -159,8 +160,7 @@ function setupFilters() {
 
             // Filtrar produtos
             const category = btn.dataset.category;
-            const products = getProductsByCategory(category);
-            renderProducts(products);
+            getProductsByCategory(category).then(products => renderProducts(products));
         });
     });
 }
@@ -169,15 +169,15 @@ function setupFilters() {
 // BUSCA
 // ========================================
 
-function setupSearch() {
+async function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
 
     if (!searchInput || !searchBtn) return;
 
-    const performSearch = debounce(() => {
+    const performSearch = debounce(async () => {
         const query = searchInput.value.toLowerCase().trim();
-        const allProducts = getAllProducts();
+        const allProducts = await getAllProducts();
 
         if (!query) {
             renderProducts(allProducts);
@@ -259,4 +259,3 @@ async function setupWhatsAppLinks() {
         console.error('Erro ao configurar links WhatsApp:', e);
     }
 }
-i
