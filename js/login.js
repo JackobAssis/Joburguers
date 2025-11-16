@@ -64,7 +64,7 @@ function setupUnifiedLogin() {
         });
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errorDiv.style.display = 'none';
 
@@ -78,13 +78,13 @@ function setupUnifiedLogin() {
         }
 
         // Detectar tipo de login: verifica se é o telefone do admin
-        const admin = getAdmin ? getAdmin() : null;
+        const admin = await getAdmin();
         if (admin && input === admin.phone) {
             // Login de Admin
-            handleAdminLogin(input, password, errorDiv);
+            await handleAdminLogin(input, password, errorDiv);
         } else {
             // Login de Cliente
-            handleClientLogin(input, password, errorDiv);
+            await handleClientLogin(input, password, errorDiv);
         }
     });
 }
@@ -92,7 +92,7 @@ function setupUnifiedLogin() {
 /**
  * Processa login de administrador
  */
-function handleAdminLogin(phone, password, errorDiv) {
+async function handleAdminLogin(phone, password, errorDiv) {
     // Validar credenciais
     if (!validateAdminLogin(phone, password)) {
         showError('Telefone ou senha incorretos', errorDiv);
@@ -110,7 +110,7 @@ function handleAdminLogin(phone, password, errorDiv) {
 /**
  * Processa login de cliente
  */
-function handleClientLogin(phone, password, errorDiv) {
+async function handleClientLogin(phone, password, errorDiv) {
     // Validar formato do telefone
     if (!validatePhone(phone)) {
         showError('Telefone inválido. Formato: (XX) 9 XXXX-XXXX', errorDiv);
@@ -118,11 +118,11 @@ function handleClientLogin(phone, password, errorDiv) {
     }
 
     // Validar login (telefone + senha)
-    const client = validateClientLogin(phone, password);
-    
+    const client = await validateClientLogin(phone, password);
+
     if (!client) {
         // Verificar se é porque cliente não existe ou senha está errada
-        const existingClient = getClientByPhone(phone);
+        const existingClient = await getClientByPhone(phone);
         if (!existingClient) {
             showError('Telefone não encontrado. Crie uma conta!', errorDiv);
         } else {
@@ -143,7 +143,7 @@ function handleClientLogin(phone, password, errorDiv) {
 // REGISTRO DE CLIENTE
 // ========================================
 
-function setupClientRegister() {
+async function setupClientRegister() {
     const form = document.getElementById('clientRegisterForm');
     const loginForm = document.getElementById('unifiedLoginForm');
     const nameInput = document.getElementById('registerName');
@@ -169,7 +169,7 @@ function setupClientRegister() {
         });
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errorDiv.style.display = 'none';
         successDiv.style.display = 'none';
@@ -215,14 +215,15 @@ function setupClientRegister() {
         const normalizedPhone = sanitizePhone(phone);
 
         // Verificar se cliente já existe
-        if (getClientByPhone(normalizedPhone)) {
+        const existingClient = await getClientByPhone(normalizedPhone);
+        if (existingClient) {
             showError('Este telefone já está registrado', errorDiv);
             return;
         }
 
         // Criar novo cliente (usar telefone formatado para exibição)
         try {
-            const newClient = addClient({
+            const newClient = await addClient({
                 name,
                 phone: formatPhone(normalizedPhone),
                 password, // Usar senha fornecida pelo cliente
