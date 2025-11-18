@@ -11,7 +11,9 @@ import {
     validateClientLogin,
     addClient,
     setCurrentSession,
-    getCurrentSession
+    getCurrentSession,
+    getSettings,
+    recordTransaction
 } from './storage.js';
 
 import {
@@ -238,14 +240,27 @@ async function setupClientRegister() {
 
         // Criar cliente
         try {
+            // Obter configurações para bônus dinâmico
+            const settings = await getSettings();
+            const bonusPoints = settings.bonusRegistration || 50;
+
             const newClient = await addClient({
                 name,
                 phone: formatPhone(normalizedPhone),
                 password,
-                points: 50
+                points: bonusPoints
             });
 
-            showSuccess('Conta criada com sucesso! +50 pontos 🎉', successDiv);
+            // Registrar transação de bônus de cadastro
+            await recordTransaction({
+                clientId: newClient.id,
+                points: bonusPoints,
+                type: 'ganho',
+                reason: 'cadastro',
+                timestamp: new Date().toISOString()
+            });
+
+            showSuccess(`Conta criada com sucesso! +${bonusPoints} pontos 🎉`, successDiv);
 
             form.reset();
 

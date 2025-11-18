@@ -1,58 +1,59 @@
-# TODO - Correção Completa do Projeto Joburguers
+# TODO: Implementação e Testes - Criação de Conta Cliente na Página de Login
 
-## ✅ Concluído
-- [x] Análise completa do projeto e identificação de problemas
-- [x] Criação do plano de correção
-- [x] Corrigir storage.js - Normalizar tipos de IDs e garantir consistência
+## ✅ Implementação Concluída
+- [x] Formulário de registro já existe em `login.html`
+- [x] Lógica de registro já implementada em `js/login.js`
+- [x] Validações básicas implementadas
+- [x] Integração com `addClient` do `storage.js`
 
-## 🔄 Em Andamento
-- [x] Adicionar exports faltantes em storage.js (addPromotion, updatePromotion, deletePromotion)
-- [x] Refatorar admin.js - Adicionar import renderPromocoes e corrigir event listeners
-- [x] Corrigir cliente.js - Promises não aguardadas
-- [x] Corrigir app.js - Chamadas assíncronas
-- [x] Corrigir produto.js - Funções assíncronas
-- [x] Mover promocoes.js para js/promocoes.js
-- [ ] Testar todas as funcionalidades CRUD
-- [ ] Adicionar validações e fallbacks
+## 🔧 Correções Necessárias
+- [ ] Usar `bonusRegistration` dinâmico das configurações (atualmente hardcoded 50 pontos)
+- [ ] Registrar transação de bônus de cadastro
+- [ ] Verificar compatibilidade com Firebase/localStorage
 
-## 📋 Detalhes das Correções
+## 🧪 Testes a Serem Executados
 
-### storage.js
-- [x] Normalizar IDs para sempre serem strings
-- [x] Garantir consistência entre Firebase e localStorage
-- [x] Adicionar try/catch em todas as operações
-- [x] Melhorar logs de erro com contexto
-- [ ] Adicionar exports faltantes: addPromotion, updatePromotion, deletePromotion
+### Testes Funcionais
+- [ ] **Cadastro bem-sucedido**: Criar conta com dados válidos
+- [ ] **Validações de erro**:
+  - [ ] Telefone já existente
+  - [ ] Campos obrigatórios vazios
+  - [ ] Telefone inválido
+  - [ ] Confirmação de telefone incorreta
+  - [ ] Nome muito curto (< 3 caracteres)
+  - [ ] Senha muito curta (< 4 caracteres)
+  - [ ] Confirmação de senha incorreta
+- [ ] **Fluxo de navegação**: Login ↔ Registro
+- [ ] **Redirecionamento**: Após cadastro → painel cliente
+- [ ] **Bônus de pontos**: Verificar se pontos são creditados corretamente
+- [ ] **Transação registrada**: Verificar se transação de cadastro é criada
 
-### admin.js
-- [x] Já usa await corretamente
-- [ ] Adicionar import de renderPromocoes
-- [ ] Corrigir event listeners para usar async/await
+### Testes de Integração
+- [ ] **Firebase vs localStorage**: Testar em ambos os modos
+- [ ] **Persistência**: Verificar se dados persistem após reload
+- [ ] **Sessão**: Verificar se login automático após cadastro funciona
 
-### cliente.js
-- [x] Corrigir currentClient = getClientById() → await getClientById()
-- [x] Corrigir loadResgates() → await loadResgates()
-- [x] Corrigir getAllRedeems() → await getAllRedeems()
+### Testes de Segurança
+- [ ] **Validação de entrada**: Prevenção de XSS/SQL injection
+- [ ] **Rate limiting**: Evitar cadastros em massa (não implementado ainda)
+- [ ] **Dados sensíveis**: Verificar se senha é armazenada corretamente
 
-### app.js
-- [x] Corrigir getAllProducts() → await getAllProducts()
-- [x] Corrigir getActivePromotions() → await getActivePromotions()
-- [x] Corrigir getSettings() → await getSettings()
+### Testes de UX/UI
+- [ ] **Responsividade**: Funcionar em mobile/desktop
+- [ ] **Feedback visual**: Mensagens de erro/sucesso claras
+- [ ] **Acessibilidade**: Labels, foco, navegação por teclado
 
-### produto.js
-- [x] Corrigir getProductById(parseInt(productId)) → await getProductById(String(productId))
-- [x] Corrigir getAllProducts() → await getAllProducts()
-- [x] Corrigir getSettings() → await getSettings()
+## 📋 Checklist de Validação
+- [ ] Código revisado para bugs lógicos
+- [ ] Compatibilidade com versões anteriores
+- [ ] Performance não degradada
+- [ ] Documentação atualizada se necessário
 
-### promocoes.js
-- [ ] Mover arquivo da raiz para js/promocoes.js
-- [ ] Atualizar imports
-
-## 🧪 Testes Necessários
-- [ ] CRUD de Produtos (criar, editar, excluir)
-- [ ] CRUD de Clientes (criar, editar, excluir)
-- [ ] Sistema de Promoções
-- [ ] Sistema de Resgates
-- [ ] Painel Admin funcionando
-- [ ] Painel Cliente funcionando
-- [ ] Sincronização Firebase/localStorage
+## 🚀 Próximos Passos
+1. Corrigir uso de `bonusRegistration` dinâmico
+2. Adicionar registro de transação
+3. Executar testes funcionais
+4. Executar testes de integração
+5. Executar testes de segurança
+6. Executar testes de UX/UI
+7. Validar checklist completo
