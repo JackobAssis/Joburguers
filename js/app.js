@@ -24,9 +24,9 @@ import {
 // INICIALIZAÇÃO
 // ========================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeStorage();
-    
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeStorage();
+
     setupMenuToggle();
     setupCardapio();
     setupFilters();
@@ -160,7 +160,10 @@ async function setupFilters() {
 
             // Filtrar produtos
             const category = btn.dataset.category;
-            getProductsByCategory(category).then(products => renderProducts(products));
+            (async () => {
+                const products = await getProductsByCategory(category);
+                renderProducts(products);
+            })();
         });
     });
 }

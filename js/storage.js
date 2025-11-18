@@ -623,6 +623,77 @@ async function getActivePromotions() {
     return promotions.filter(p => p.active === true);
 }
 
+async function addPromotion(promotionData) {
+    const newPromotion = {
+        ...promotionData,
+        createdAt: useFirebase ? serverTimestamp() : new Date().toISOString()
+    };
+
+    if (useFirebase) {
+        try {
+            const docRef = await addDoc(collection(db, COLLECTIONS.PROMOTIONS), newPromotion);
+            newPromotion.id = docRef.id;
+            return newPromotion;
+        } catch (error) {
+            console.error('Erro ao adicionar promoção no Firebase:', error);
+            // fallback to local below
+        }
+    }
+
+    // Fallback para localStorage
+    const promotions = await getAllPromotions();
+    const nextId = generateNextIdAsString(promotions);
+    newPromotion.id = nextId;
+    newPromotion.createdAt = new Date().toISOString();
+    promotions.push(newPromotion);
+    localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(promotions));
+    return newPromotion;
+}
+
+async function updatePromotion(id, promotionData) {
+    const normalizedId = normalizeId(id);
+
+    if (useFirebase) {
+        try {
+            await updateDoc(doc(db, COLLECTIONS.PROMOTIONS, normalizedId), promotionData);
+            return { id: normalizedId, ...promotionData };
+        } catch (error) {
+            console.error('Erro ao atualizar promoção no Firebase:', error);
+            // fallback to local below
+        }
+    }
+
+    // Fallback para localStorage
+    const promotions = await getAllPromotions();
+    const index = promotions.findIndex(p => normalizeId(p.id) === normalizedId);
+    if (index !== -1) {
+        promotions[index] = { ...promotions[index], ...promotionData };
+        localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(promotions));
+        return promotions[index];
+    }
+    return null;
+}
+
+async function deletePromotion(id) {
+    const normalizedId = normalizeId(id);
+
+    if (useFirebase) {
+        try {
+            await deleteDoc(doc(db, COLLECTIONS.PROMOTIONS, normalizedId));
+            return true;
+        } catch (error) {
+            console.error('Erro ao deletar promoção do Firebase:', error);
+            // fallback to local below
+        }
+    }
+
+    // Fallback para localStorage
+    const promotions = await getAllPromotions();
+    const filtered = promotions.filter(p => normalizeId(p.id) !== normalizedId);
+    localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(filtered));
+    return true;
+}
+
 // ========================================
 // FUNÇÕES DE STORAGE PARA IMAGENS (FIREBASE STORAGE)
 // ========================================
@@ -686,9 +757,7 @@ async function uploadProductPhoto(file) {
     }
 }
 
-// ========================================
-// FUNÇÕES DE PROMOÇÕES (CRUD acima) já implementadas
-// ========================================
+
 
 // ========================================
 // FUNÇÕES DE RESGATES

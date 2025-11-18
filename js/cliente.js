@@ -29,8 +29,8 @@ import { getLevelLabel } from './storage.js';
 
 let currentClient = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeStorage();
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeStorage();
 
     const session = getCurrentSession();
     if (!session || session.userType !== 'cliente') {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    currentClient = getClientById(session.userId);
+    currentClient = await getClientById(session.userId);
     if (!currentClient) {
         clearSession();
         window.location.href = 'login.html';
@@ -107,8 +107,8 @@ function setupLogout() {
 // DASHBOARD
 // ========================================
 
-function loadDashboard() {
-    const settings = getSettings();
+async function loadDashboard() {
+    const settings = await getSettings();
     
     // Informações do cliente
     document.getElementById('clientName').textContent = currentClient.name;
@@ -203,8 +203,8 @@ function loadPontos() {
     loadResgates();
 }
 
-function loadResgates() {
-    const redeems = getAllRedeems();
+async function loadResgates() {
+    const redeems = await getAllRedeems();
     const grid = document.getElementById('resgatesGrid');
 
     if (redeems.length === 0) {
@@ -230,8 +230,9 @@ function loadResgates() {
         `).join('');
 }
 
-window.resgatarPontos = function(redeemId) {
-    const redeem = getAllRedeems().find(r => r.id === redeemId);
+window.resgatarPontos = async function(redeemId) {
+    const redeems = await getAllRedeems();
+    const redeem = redeems.find(r => r.id === redeemId);
     if (!redeem) return;
 
     showConfirmDialog(

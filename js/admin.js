@@ -51,6 +51,7 @@ import {
     readJSONFile,
     truncateText
 } from './utils.js';
+import renderPromocoes from './promocoes.js';
 
 // ========================================
 // INICIALIZAÇÃO

@@ -19,8 +19,8 @@ import {
 // INICIALIZAÇÃO
 // ========================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeStorage();
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeStorage();
     loadProductDetails();
     setupRecommendations();
 });
@@ -29,16 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // CARREGAR DETALHES DO PRODUTO
 // ========================================
 
-function loadProductDetails() {
+async function loadProductDetails() {
     const params = new URLSearchParams(window.location.search);
-    const productId = parseInt(params.get('id'));
+    const productId = String(params.get('id'));
 
     if (!productId) {
         window.location.href = 'index.html';
         return;
     }
 
-    const product = getProductById(productId);
+    const product = await getProductById(productId);
     if (!product) {
         window.location.href = 'index.html';
         return;
@@ -71,7 +71,7 @@ function loadProductDetails() {
 
     // WhatsApp - usar número a partir das configurações
     const whatsappBtn = document.getElementById('whatsappBtn');
-    const settings = getSettings();
+    const settings = await getSettings();
     const waNumber = settings && settings.storeWhatsApp ? settings.storeWhatsApp : '5585999999999';
     whatsappBtn.addEventListener('click', () => {
         const message = `Olá! Quero fazer um pedido do produto: ${product.name} (${formatCurrency(product.price)})`;
@@ -112,14 +112,14 @@ function getCategoryLabel(category) {
 // RECOMENDAÇÕES
 // ========================================
 
-function setupRecommendations() {
+async function setupRecommendations() {
     const params = new URLSearchParams(window.location.search);
-    const productId = parseInt(params.get('id'));
-    const product = getProductById(productId);
+    const productId = String(params.get('id'));
+    const product = await getProductById(productId);
 
     if (!product) return;
 
-    const allProducts = getAllProducts();
+    const allProducts = await getAllProducts();
     const recommended = allProducts
         .filter(p => p.category === product.category && p.id !== productId)
         .slice(0, 3);
