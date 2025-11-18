@@ -1,540 +1,272 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - Joburguers</title>
-    <link rel="stylesheet" href="css/globals.css">
-    <link rel="stylesheet" href="css/admin.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Painel Admin - Joburguers</title>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
-    <!-- Header Admin -->
-    <header class="admin-header">
-        <div class="admin-header__container">
-            <h1 class="admin-header__title">🍔 Joburguers Administrador</h1>
-            <div class="admin-header__actions">
-                <span id="adminUsername" class="admin-header__user"></span>
-                <button id="adminLogoutBtn" class="btn btn--danger btn--small">Sair</button>
-            </div>
-        </div>
-    </header>
+  <header class="admin-header">
+    <div class="admin-header__container">
+      <div class="admin-header__left">
+        <button id="hamburgerBtn" class="hamburger-btn" aria-label="Abrir menu">
+          <span class="hamburger-icon" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span style="font-size:0.95rem; color:#fff;">Menu</span>
+        </button>
+        <h1 class="admin-header__title">🍔 Joburguers - Admin</h1>
+      </div>
 
-    <div class="admin-layout">
-        <!-- Sidebar de Navegação -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard">
-                    📊 Dashboard
-                </button>
-                <button class="admin-nav__item" data-section="produtos">
-                    🍔 Produtos
-                </button>
-                <button class="admin-nav__item" data-section="clientes">
-                    👥 Clientes
-                </button>
-                <button class="admin-nav__item" data-section="promocoes">
-                    🎉 Promoções
-                </button>
-                <button class="admin-nav__item" data-section="resgates">
-                    🎁 Resgates
-                </button>
-                <button class="admin-nav__item" data-section="configuracoes">
-                    ⚙️ Configurações
-                </button>
-            </nav>
-        </aside>
-
-        <!-- Conteúdo Principal -->
-        <main class="admin-content">
-            <!-- Dashboard -->
-            <section id="dashboard" class="admin-section admin-section--active">
-                <h2>Dashboard</h2>
-                
-                <div class="dashboard-stats">
-                    <div class="stat-box">
-                        <span class="stat-box__icon">🍔</span>
-                        <div>
-                            <p class="stat-box__label">Produtos Ativos</p>
-                            <p class="stat-box__value" id="totalProducts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-box__icon">👥</span>
-                        <div>
-                            <p class="stat-box__label">Clientes</p>
-                            <p class="stat-box__value" id="totalClientes">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-box__icon">⭐</span>
-                        <div>
-                            <p class="stat-box__label">Pontos em Circulação</p>
-                            <p class="stat-box__value" id="totalPoints">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-box__icon">📈</span>
-                        <div>
-                            <p class="stat-box__label">Últimas Transações</p>
-                            <p class="stat-box__value" id="recentTransactions">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Atividades Recentes -->
-                <div class="dashboard-recent">
-                    <h3>Atividades Recentes</h3>
-                    <div id="recentActivities" class="activities-list">
-                        <!-- Atividades serão carregadas aqui -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Gerenciar Produtos -->
-            <section id="produtos" class="admin-section">
-                <div class="section-header">
-                    <h2>Gerenciar Produtos</h2>
-                    <button id="addProductBtn" class="btn btn--primary">+ Novo Produto</button>
-                </div>
-
-                <div class="admin-filters">
-                    <input type="text" id="productSearch" placeholder="Buscar produto...">
-                    <select id="productCategoryFilter">
-                        <option value="">Todas as Categorias</option>
-                        <option value="hamburguer">Hambúrgueres</option>
-                        <option value="bebida">Bebidas</option>
-                        <option value="combo">Combos</option>
-                        <option value="acompanhamento">Acompanhamentos</option>
-                    </select>
-                </div>
-
-                <div id="productsList" class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Imagem</th>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Preço</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody">
-                            <!-- Produtos serão carregados aqui -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="emptyProducts" class="empty-state" style="display: none;">
-                    <p>Nenhum produto cadastrado</p>
-                    <button id="emptyAddProductBtn" class="btn btn--primary">Adicionar Primeiro Produto</button>
-                </div>
-            </section>
-
-            <!-- Gerenciar Clientes -->
-            <section id="clientes" class="admin-section">
-                <div class="section-header">
-                    <h2>Gerenciar Clientes</h2>
-                    <button id="addClientBtn" class="btn btn--primary">+ Novo Cliente</button>
-                </div>
-
-                <div class="admin-filters">
-                    <input type="text" id="clientSearch" placeholder="Buscar cliente...">
-                    <select id="clientStatusFilter">
-                        <option value="">Todos os Status</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                    </select>
-                </div>
-
-                <div id="clientsList" class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Telefone</th>
-                                <th>Pontos Totais</th>
-                                <th>Nível</th>
-                                <th>Data de Cadastro</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clientsTableBody">
-                            <!-- Clientes serão carregados aqui -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="emptyClients" class="empty-state" style="display: none;">
-                    <p>Nenhum cliente cadastrado</p>
-                </div>
-            </section>
-
-            <!-- Gerenciar Promoções -->
-            <section id="promocoes" class="admin-section">
-                <div class="section-header">
-                    <h2>Gerenciar Promoções</h2>
-                    <button id="addPromotionBtn" class="btn btn--primary">+ Nova Promoção</button>
-                </div>
-
-                <div id="promotionsList" class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Imagem</th>
-                                <th>Nome</th>
-                                <th>Valor</th>
-                                <th>Descrição</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="promotionsTableBody">
-                            <!-- Promoções serão carregadas aqui -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Gerenciar Resgates -->
-            <section id="resgates" class="admin-section">
-                <div class="section-header">
-                    <h2>Gerenciar Resgates</h2>
-                    <button id="addRedeemBtn" class="btn btn--primary">+ Novo Resgate</button>
-                </div>
-
-                <div id="redeemList" class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Pontos Necessários</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="redeemsTableBody">
-                            <!-- Resgates serão carregados aqui -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Configurações -->
-            <section id="configuracoes" class="admin-section">
-                <h2>Configurações do Sistema</h2>
-                
-                <div class="settings-group">
-                    <h3>Regras de Pontuação</h3>
-                    <form id="pointsSettingsForm" class="settings-form">
-                        <div class="form-group">
-                            <label for="pointsPerReal">Pontos por R$ gasto</label>
-                            <input type="number" id="pointsPerReal" min="0.1" step="0.1" value="0.1" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="bonusRegistration">Pontos Bônus para Novo Cliente</label>
-                            <input type="number" id="bonusRegistration" min="0" step="1" value="50" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="referralBonus">Pontos por Indicação</label>
-                            <input type="number" id="referralBonus" min="0" step="1" value="50" required>
-                        </div>
-
-                        <button type="submit" class="btn btn--primary">Salvar</button>
-                    </form>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Níveis de Recompensa</h3>
-                    <form id="levelsSettingsForm" class="settings-form">
-                        <div class="level-input">
-                            <label>Bronze (0 pontos)</label>
-                            <input type="hidden" value="0">
-                        </div>
-                        <div class="level-input">
-                            <label for="silverLevel">Prata (começa em)</label>
-                            <input type="number" id="silverLevel" min="1" step="1" value="100" required>
-                        </div>
-                        <div class="level-input">
-                            <label for="goldLevel">Ouro (começa em)</label>
-                            <input type="number" id="goldLevel" min="1" step="1" value="300" required>
-                        </div>
-                        <div class="level-input">
-                            <label for="platinumLevel">Platina (começa em)</label>
-                            <input type="number" id="platinumLevel" min="1" step="1" value="500" required>
-                        </div>
-
-                        <button type="submit" class="btn btn--primary">Salvar Níveis</button>
-                    </form>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Informações da Loja</h3>
-                    <form id="storeInfoForm" class="settings-form">
-                        <div class="form-group">
-                            <label for="storeName">Nome da Loja</label>
-                            <input type="text" id="storeName" value="Joburguers" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="storeAddress">Endereço</label>
-                            <input type="text" id="storeAddress" value="Rua das Hambúrgueres, 123 - Fortaleza, CE" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="storePhone">Telefone</label>
-                            <input type="tel" id="storePhone" value="(85) 99999-9999" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="storeHours">Horário de Funcionamento</label>
-                            <input type="text" id="storeHours" value="Seg-Dom 11h às 23h" required>
-                        </div>
-
-                        <button type="submit" class="btn btn--primary">Salvar Informações</button>
-                    </form>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Dados do Banco</h3>
-                    <button id="exportDataBtn" class="btn btn--secondary">📥 Exportar Dados (JSON)</button>
-                    <button id="importDataBtn" class="btn btn--secondary">📤 Importar Dados</button>
-                    <input type="file" id="importFile" accept=".json" style="display: none;">
-                    <button id="resetDataBtn" class="btn btn--danger">🗑️ Limpar Todos os Dados</button>
-                </div>
-            </section>
-        </main>
+      <div class="admin-header__actions">
+        <span id="adminUsername" class="admin-header__user">Admin</span>
+        <button id="adminLogoutBtn" class="btn btn--danger">Sair</button>
+      </div>
     </div>
+  </header>
 
-    <!-- Modal para Produtos -->
-    <div id="productModal" class="modal" style="display:none;">
-        <div class="modal__content modal__content--large">
-            <h2 id="productModalTitle">Novo Produto</h2>
-            <form id="productForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="productName">Nome</label>
-                        <input type="text" id="productName" required>
-                    </div>
+  <!-- overlay for mobile sidebar -->
+  <div id="sidebarOverlay" class="sidebar-overlay" style="display:none;"></div>
 
-                    <div class="form-group">
-                        <label for="productCategory">Categoria</label>
-                        <select id="productCategory" required>
-                            <option value="">Selecione uma categoria</option>
-                            <option value="hamburguer">Hambúrguer</option>
-                            <option value="bebida">Bebida</option>
-                            <option value="combo">Combo</option>
-                            <option value="acompanhamento">Acompanhamento</option>
-                        </select>
-                    </div>
+  <!-- Sidebar (desktop visible, mobile will be toggled) -->
+  <aside id="adminSidebar" class="admin-sidebar" role="navigation" aria-label="Navegação admin">
+    <nav class="admin-nav">
+      <button class="admin-nav__item admin-nav__item--active" data-section="dashboard">📊 Dashboard</button>
+      <button class="admin-nav__item" data-section="produtos">🍔 Produtos</button>
+      <button class="admin-nav__item" data-section="clientes">👥 Clientes</button>
+      <button class="admin-nav__item" data-section="promocoes">🎉 Promoções</button>
+      <button class="admin-nav__item" data-section="resgates">🎁 Resgates</button>
+      <button class="admin-nav__item" data-section="configuracoes">⚙️ Configurações</button>
+    </nav>
+  </aside>
 
-                    <div class="form-group">
-                        <label for="productPrice">Preço (R$)</label>
-                        <input type="number" id="productPrice" min="0" step="0.01" required>
-                    </div>
+  <main class="admin-content">
+    <!-- Dashboard -->
+    <section id="dashboard" class="admin-section admin-section--active">
+      <h2>Dashboard</h2>
+      <div class="dashboard-stats">
+        <div class="stat-box"><div><p class="stat-box__label">Produtos</p><p id="totalProducts" class="stat-box__value">0</p></div></div>
+        <div class="stat-box"><div><p class="stat-box__label">Clientes</p><p id="totalClientes" class="stat-box__value">0</p></div></div>
+        <div class="stat-box"><div><p class="stat-box__label">Pontos</p><p id="totalPoints" class="stat-box__value">0</p></div></div>
+        <div class="stat-box"><div><p class="stat-box__label">Transações</p><p id="recentTransactions" class="stat-box__value">0</p></div></div>
+      </div>
 
-                    <div class="form-group">
-                        <label for="productImage">Imagem (URL ou upload) — opcional</label>
-                        <input type="url" id="productImage" placeholder="https://exemplo.com/imagem.jpg">
-                        <small style="display:block; color:#9aa4b6; margin-top:6px;">Ou faça upload abaixo (preferível para imagens locais)</small>
-                        <input type="file" id="productImageFile" accept="image/*" style="margin-top:8px;">
-                    </div>
-                </div>
+      <div class="dashboard-recent">
+        <h3>Atividades Recentes</h3>
+        <div id="recentActivities" class="activities-list"></div>
+      </div>
+    </section>
 
-                <div class="form-group">
-                    <label for="productDescription">Descrição</label>
-                    <textarea id="productDescription" rows="4" placeholder="Descreva o produto..." required></textarea>
-                </div>
+    <!-- Produtos -->
+    <section id="produtos" class="admin-section">
+      <div class="section-header">
+        <h2>Gerenciar Produtos</h2>
+        <button id="addProductBtn" class="btn btn--primary">+ Novo Produto</button>
+      </div>
 
-                <div class="form-group">
-                    <label for="productIngredients">Ingredientes (opcional)</label>
-                    <textarea id="productIngredients" rows="3" placeholder="Liste os ingredientes separados por vírgula..."></textarea>
-                </div>
+      <div class="admin-filters">
+        <input id="productSearch" type="text" placeholder="Buscar produto...">
+        <select id="productCategoryFilter">
+          <option value="">Todas as categorias</option>
+          <option value="hamburguer">Hambúrguer</option>
+          <option value="bebida">Bebida</option>
+          <option value="combo">Combo</option>
+          <option value="acompanhamento">Acompanhamento</option>
+        </select>
+      </div>
 
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="productAvailable" checked>
-                        Produto Disponível
-                    </label>
-                </div>
+      <div id="productsList" class="admin-table-container">
+        <table class="admin-table">
+          <thead><tr><th>Imagem</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyProducts" style="display:none; padding:1rem;">Nenhum produto cadastrado</div>
+    </section>
 
-                <div class="modal__actions">
-                    <button type="submit" class="btn btn--primary">Salvar Produto</button>
-                    <button type="button" class="btn btn--secondary" id="closeProductModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
+    <!-- Clientes -->
+    <section id="clientes" class="admin-section">
+      <div class="section-header">
+        <h2>Gerenciar Clientes</h2>
+        <button id="addClientBtn" class="btn btn--primary">+ Novo Cliente</button>
+      </div>
+
+      <div class="admin-filters">
+        <input id="clientSearch" type="text" placeholder="Buscar cliente...">
+      </div>
+
+      <div id="clientsList" class="admin-table-container">
+        <table class="admin-table">
+          <thead><tr><th>Nome</th><th>Telefone</th><th>Pontos</th><th>Nível</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody id="clientsTableBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyClients" style="display:none; padding:1rem;">Nenhum cliente cadastrado</div>
+    </section>
+
+    <!-- Promoções -->
+    <section id="promocoes" class="admin-section">
+      <div class="section-header">
+        <h2>Gerenciar Promoções</h2>
+        <button id="addPromotionBtn" class="btn btn--primary">+ Nova Promoção</button>
+      </div>
+
+      <div id="promotionsList" class="admin-table-container">
+        <table class="admin-table">
+          <thead><tr><th>Imagem</th><th>Nome</th><th>Valor</th><th>Descrição</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="promotionsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Resgates -->
+    <section id="resgates" class="admin-section">
+      <div class="section-header">
+        <h2>Gerenciar Resgates</h2>
+        <button id="addRedeemBtn" class="btn btn--primary">+ Novo Resgate</button>
+      </div>
+
+      <div id="redeemList" class="admin-table-container">
+        <table class="admin-table">
+          <thead><tr><th>Produto</th><th>Pontos</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="redeemsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Configurações -->
+    <section id="configuracoes" class="admin-section">
+      <h2>Configurações</h2>
+      <div class="settings-group">
+        <form id="pointsSettingsForm" class="settings-form">
+          <label>Pontos por R$ <input id="pointsPerReal" type="number" step="0.1" min="0.1"></label>
+          <label>Pontos por cadastro <input id="bonusRegistration" type="number"></label>
+          <label>Pontos por indicação <input id="referralBonus" type="number"></label>
+          <button type="submit" class="btn btn--primary">Salvar</button>
+        </form>
+      </div>
+
+      <div class="settings-group">
+        <form id="storeInfoForm" class="settings-form">
+          <label>Nome da loja <input id="storeName" type="text"></label>
+          <label>Endereço <input id="storeAddress" type="text"></label>
+          <label>Telefone <input id="storePhone" type="tel"></label>
+          <label>Horário <input id="storeHours" type="text"></label>
+          <button type="submit" class="btn btn--primary">Salvar</button>
+        </form>
+      </div>
+
+      <div class="settings-group">
+        <button id="exportDataBtn" class="btn">Exportar JSON</button>
+        <button id="importDataBtn" class="btn">Importar JSON</button>
+        <input id="importFile" type="file" accept=".json" style="display:none;">
+        <button id="resetDataBtn" class="btn btn--danger">Limpar dados</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Overlays / Modals -->
+
+  <!-- Product view modal (opens when clicking row) -->
+  <div id="productViewModal" class="modal" aria-hidden="true">
+    <div class="modal__content">
+      <h2 id="productViewTitle">Produto</h2>
+      <div class="modal-product-image-container" id="productViewImageContainer">
+        <img id="productViewImage" src="" alt="Imagem do produto">
+      </div>
+      <p id="productViewCategory" style="color:#9aa4b6"></p>
+      <p id="productViewPrice" style="font-weight:700; color:var(--accent)"></p>
+      <p id="productViewDescription"></p>
+      <p id="productViewIngredients" style="color:#9aa4b6"></p>
+      <p id="productViewAvailable" style="margin-top:.5rem;"></p>
+
+      <div style="display:flex; gap:.5rem; margin-top:1rem;">
+        <button id="productViewEditBtn" class="table-btn table-btn--edit">Editar</button>
+        <button id="productViewDeleteBtn" class="table-btn table-btn--delete">Deletar</button>
+        <button id="productViewClose" class="btn">Fechar</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Modal para Clientes -->
-    <div id="clientModal" class="modal" style="display: none;">
-        <div class="modal__content">
-            <h2 id="clientModalTitle">Novo Cliente</h2>
-            <form id="clientForm">
-                <div class="form-group">
-                    <label for="clientName">Nome</label>
-                    <input type="text" id="clientName" required>
-                </div>
+  <!-- Generic form modals (product, client, promotion, redeem) -->
+  <!-- Product Form Modal -->
+  <div id="productModal" class="modal"><div class="modal__content">
+    <h2 id="productModalTitle">Novo Produto</h2>
+    <form id="productForm">
+      <div style="display:grid; gap:12px;">
+        <label>Nome <input id="productName" required></label>
+        <label>Categoria
+          <select id="productCategory" required>
+            <option value="">Selecione</option>
+            <option value="hamburguer">Hambúrguer</option>
+            <option value="bebida">Bebida</option>
+            <option value="combo">Combo</option>
+            <option value="acompanhamento">Acompanhamento</option>
+          </select>
+        </label>
+        <label>Preço <input id="productPrice" type="number" step="0.01" required></label>
+        <label>Imagem (URL) — opcional <input id="productImage" type="url"></label>
+        <label>Upload imagem opcional <input id="productImageFile" type="file" accept="image/*"></label>
+        <label>Descrição <textarea id="productDescription" rows="3" required></textarea></label>
+        <label>Ingredientes (vírgula) <input id="productIngredients" type="text"></label>
+        <label><input id="productAvailable" type="checkbox" checked> Disponível</label>
+      </div>
+      <div style="display:flex; gap:.5rem; margin-top:12px;">
+        <button type="submit" class="btn btn--primary">Salvar</button>
+        <button type="button" id="closeProductModal" class="btn">Cancelar</button>
+      </div>
+    </form>
+  </div></div>
 
-                <div class="form-group">
-                    <label for="clientPhone">Telefone</label>
-                    <input type="tel" id="clientPhone" required>
-                </div>
+  <!-- Client Form Modal -->
+  <div id="clientModal" class="modal"><div class="modal__content">
+    <h2 id="clientModalTitle">Novo Cliente</h2>
+    <form id="clientForm">
+      <label>Nome <input id="clientName" required></label>
+      <label>Telefone <input id="clientPhone" required></label>
+      <label>Email <input id="clientEmail" type="email"></label>
+      <label>Senha <input id="clientPassword" type="text"></label>
+      <label>Pontos iniciais <input id="clientPoints" type="number" value="0"></label>
+      <label><input id="clientActive" type="checkbox" checked> Ativo</label>
+      <div style="display:flex; gap:.5rem; margin-top:12px;">
+        <button type="submit" class="btn btn--primary">Salvar</button>
+        <button type="button" id="closeClientModal" class="btn">Cancelar</button>
+      </div>
+    </form>
+  </div></div>
 
-                <div class="form-group">
-                    <label for="clientEmail">Email (opcional)</label>
-                    <input type="email" id="clientEmail">
-                </div>
+  <!-- Promotion Modal -->
+  <div id="promotionModal" class="modal"><div class="modal__content">
+    <h2 id="promotionModalTitle">Nova Promoção</h2>
+    <form id="promotionForm">
+      <label>Nome <input id="promotionName" required></label>
+      <label>Valor <input id="promotionValue" required></label>
+      <label>Descrição <textarea id="promotionDescription" required></textarea></label>
+      <label>Foto (upload) <input id="promotionPhoto" type="file" accept="image/*"></label>
+      <label>Instagram <input id="promotionInstagramLink" type="url"></label>
+      <label><input id="promotionActive" type="checkbox" checked> Ativa</label>
+      <div style="display:flex; gap:.5rem; margin-top:12px;">
+        <button type="submit" class="btn btn--primary">Salvar</button>
+        <button type="button" id="closePromotionModal" class="btn">Cancelar</button>
+      </div>
+    </form>
+  </div></div>
 
-                <div class="form-group">
-                    <label for="clientPassword">
-                        Senha 
-                        <span id="passwordHint" style="font-size: 0.85rem; color: #888;">
-                            (Se vazio, será os últimos 6 dígitos do telefone)
-                        </span>
-                    </label>
-                    <input type="text" id="clientPassword" placeholder="Deixe vazio para usar padrão">
-                </div>
+  <!-- Redeem Modal -->
+  <div id="redeemModal" class="modal"><div class="modal__content">
+    <h2 id="redeemModalTitle">Novo Resgate</h2>
+    <form id="redeemForm">
+      <label>Produto <select id="redeemProduct"></select></label>
+      <label>Pontos necessários <input id="redeemPointsRequired" type="number" min="1"></label>
+      <label><input id="redeemActive" type="checkbox" checked> Ativo</label>
+      <div style="display:flex; gap:.5rem; margin-top:12px;">
+        <button type="submit" class="btn btn--primary">Salvar</button>
+        <button type="button" id="closeRedeemModal" class="btn">Cancelar</button>
+      </div>
+    </form>
+  </div></div>
 
-                <div class="form-group">
-                    <label for="clientPoints">Pontos Iniciais</label>
-                    <input type="number" id="clientPoints" min="0" step="1" value="0">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="clientActive" checked>
-                        Cliente Ativo
-                    </label>
-                </div>
-
-                <div class="modal__actions">
-                    <button type="submit" class="btn btn--primary">Salvar Cliente</button>
-                    <button type="button" class="btn btn--secondary" id="closeClientModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Edição de Pontos -->
-    <div id="pointsModal" class="modal" style="display: none;">
-        <div class="modal__content">
-            <h2>Gerenciar Pontos</h2>
-            <form id="pointsForm">
-                <input type="hidden" id="pointsClientId">
-
-                <div class="form-group">
-                    <p id="pointsClientInfo"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="pointsAmount">Quantidade de Pontos</label>
-                    <input type="number" id="pointsAmount" min="-10000" max="10000" step="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="pointsReason">Motivo</label>
-                    <select id="pointsReason" required>
-                        <option value="">Selecione um motivo</option>
-                        <option value="compra">Compra</option>
-                        <option value="bono">Bônus</option>
-                        <option value="resgate">Resgate</option>
-                        <option value="ajuste">Ajuste Manual</option>
-                    </select>
-                </div>
-
-                <div class="modal__actions">
-                    <button type="submit" class="btn btn--primary">Adicionar Pontos</button>
-                    <button type="button" class="btn btn--secondary" id="closePointsModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Promoções -->
-    <div id="promotionModal" class="modal" style="display:none;">
-        <div class="modal__content modal__content--large">
-            <h2 id="promotionModalTitle">Nova Promoção</h2>
-            <form id="promotionForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="promotionName">Nome</label>
-                        <input type="text" id="promotionName" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="promotionValue">Valor</label>
-                        <input type="text" id="promotionValue" placeholder="Ex: 20% OFF, R$ 5 OFF" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="promotionDescription">Descrição</label>
-                    <textarea id="promotionDescription" rows="3" placeholder="Descreva a promoção..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="promotionPhoto">Foto (upload) — opcional</label>
-                    <input type="file" id="promotionPhoto" accept="image/*">
-                    <small style="display:block; color:#9aa4b6; margin-top:6px;">Selecione uma imagem para a promoção (opcional)</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="promotionInstagramLink">Link do Instagram (opcional)</label>
-                    <input type="url" id="promotionInstagramLink" placeholder="https://instagram.com/...">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="promotionActive" checked>
-                        Promoção Ativa
-                    </label>
-                </div>
-
-                <div class="modal__actions">
-                    <button type="submit" class="btn btn--primary">Salvar Promoção</button>
-                    <button type="button" class="btn btn--secondary" id="closePromotionModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Resgates -->
-    <div id="redeemModal" class="modal" style="display:none;">
-        <div class="modal__content">
-            <h2 id="redeemModalTitle">Novo Resgate</h2>
-            <form id="redeemForm">
-                <div class="form-group">
-                    <label for="redeemProduct">Produto</label>
-                    <select id="redeemProduct" required>
-                        <option value="">Selecione um produto</option>
-                        <!-- Produtos serão carregados aqui -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="redeemPointsRequired">Pontos Necessários</label>
-                    <input type="number" id="redeemPointsRequired" min="1" step="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="redeemActive" checked>
-                        Resgate Ativo
-                    </label>
-                </div>
-
-                <div class="modal__actions">
-                    <button type="submit" class="btn btn--primary">Salvar Resgate</button>
-                    <button type="button" class="btn btn--secondary" id="closeRedeemModal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/admin.js"></script>
 </body>
 </html>
