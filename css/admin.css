@@ -288,6 +288,15 @@
     background-color: #d68910;
 }
 
+.table-btn--duplicate {
+    background-color: #9b59b6;
+    color: #fff;
+}
+
+.table-btn--duplicate:hover {
+    background-color: #8e44ad;
+}
+
 /* Status */
 .status-badge {
     display: inline-block;
