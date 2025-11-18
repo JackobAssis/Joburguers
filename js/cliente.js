@@ -13,7 +13,8 @@ import {
     addPointsToClient,
     getSettings,
     calculateLevel,
-    getPointsUntilNextLevel
+    getPointsUntilNextLevel,
+    getProductById
 } from './storage.js';
 import {
     formatCurrency,
@@ -212,22 +213,28 @@ async function loadResgates() {
         return;
     }
 
-    grid.innerHTML = redeems
+    const redeemCards = await Promise.all(redeems
         .filter(r => r.active)
-        .map(redeem => `
-            <div class="resgate-card">
-                <h4>${redeem.name}</h4>
-                <p>${redeem.points} pontos</p>
-                <p style="color: #ff9500; font-weight: 600;">
-                    ${redeem.type === 'percentage' ? redeem.value + '%' : formatCurrency(redeem.value)}
-                </p>
-                <button class="btn ${currentClient.points >= redeem.points ? 'btn--primary' : 'btn--secondary'} btn--small" 
-                        ${currentClient.points < redeem.points ? 'disabled' : ''}
-                        onclick="resgatarPontos(${redeem.id})">
-                    ${currentClient.points >= redeem.points ? 'Resgatar' : 'Pontos Insuficientes'}
-                </button>
-            </div>
-        `).join('');
+        .map(async redeem => {
+            const product = await getProductById(redeem.productId);
+            const productName = product ? product.name : 'Produto não encontrado';
+            return `
+                <div class="resgate-card">
+                    <h4>${productName}</h4>
+                    <p>${redeem.pointsRequired} pontos</p>
+                    <p style="color: #ff9500; font-weight: 600;">
+                        ${product ? formatCurrency(product.price) : 'N/A'}
+                    </p>
+                    <button class="btn ${currentClient.points >= redeem.pointsRequired ? 'btn--primary' : 'btn--secondary'} btn--small"
+                            ${currentClient.points < redeem.pointsRequired ? 'disabled' : ''}
+                            onclick="resgatarPontos('${redeem.id}')">
+                        ${currentClient.points >= redeem.pointsRequired ? 'Resgatar' : 'Pontos Insuficientes'}
+                    </button>
+                </div>
+            `;
+        }));
+
+    grid.innerHTML = redeemCards.join('');
 }
 
 window.resgatarPontos = async function(redeemId) {
@@ -235,15 +242,18 @@ window.resgatarPontos = async function(redeemId) {
     const redeem = redeems.find(r => r.id === redeemId);
     if (!redeem) return;
 
+    const product = await getProductById(redeem.productId);
+    const productName = product ? product.name : 'Produto não encontrado';
+
     showConfirmDialog(
         'Confirmar Resgate',
-        `Deseja resgatar "${redeem.name}" por ${redeem.points} pontos?`,
+        `Deseja resgatar "${productName}" por ${redeem.pointsRequired} pontos?`,
         () => {
-            if (currentClient.points >= redeem.points) {
-                addPointsToClient(currentClient.id, -redeem.points, 'resgate');
-                currentClient.points -= redeem.points;
-                
-                showNotification(`✓ Resgate realizado! Você ganhou ${redeem.value}% de desconto!`, 'success');
+            if (currentClient.points >= redeem.pointsRequired) {
+                addPointsToClient(currentClient.id, -redeem.pointsRequired, 'resgate');
+                currentClient.points -= redeem.pointsRequired;
+
+                showNotification(`✓ Resgate realizado! Você ganhou ${productName} gratuitamente!`, 'success');
                 loadPontos();
                 loadDashboard();
             }

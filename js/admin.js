@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await setupClientsSection();
     await setupPromotionsSection();
     await setupRedeemSection();
-    await setupSettings();
+    setupSettings();
 });
 
 // ========================================
