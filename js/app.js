@@ -152,7 +152,7 @@ async function setupFilters() {
     if (filterBtns.length === 0) return;
 
     filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             // Remover active de todos
             filterBtns.forEach(b => b.classList.remove('filter-btn--active'));
             // Adicionar ao clicado
@@ -160,10 +160,8 @@ async function setupFilters() {
 
             // Filtrar produtos
             const category = btn.dataset.category;
-            (async () => {
-                const products = await getProductsByCategory(category);
-                renderProducts(products);
-            })();
+            const products = await getProductsByCategory(category);
+            renderProducts(products);
         });
     });
 }

@@ -1,59 +1,52 @@
-# TODO: Implementação e Testes - Criação de Conta Cliente na Página de Login
+# TODO - Correção Completa do Projeto Joburguers
 
-## ✅ Implementação Concluída
-- [x] Formulário de registro já existe em `login.html`
-- [x] Lógica de registro já implementada em `js/login.js`
-- [x] Validações básicas implementadas
-- [x] Integração com `addClient` do `storage.js`
+## ✅ Concluído
+- [x] Análise completa do projeto e identificação de problemas
+- [x] Criação do plano de correção
+- [x] Fix Syntax Errors: Remove NaN literals from app.js, admin.js, cliente.js
+- [x] Update app.js: Ensure all async calls are properly awaited
+- [x] Update cliente.js: Await getClientById and loadResgates, fix async issues
+- [x] Update produto.js: Ensure all async calls are properly awaited
 
-## 🔧 Correções Necessárias
-- [ ] Usar `bonusRegistration` dinâmico das configurações (atualmente hardcoded 50 pontos)
-- [ ] Registrar transação de bônus de cadastro
-- [ ] Verificar compatibilidade com Firebase/localStorage
+## 🔄 Em Andamento
+- [ ] Refactor storage.js: Normalize IDs to strings, add try/catch, ensure await on async ops
+- [ ] Update admin.js: Add await to all getAll* calls, fix async function calls
+- [ ] Add Error Handling: Implement fallbacks and user notifications
+- [ ] Test CRUD Operations: Verify all create/read/update/delete functions work
 
-## 🧪 Testes a Serem Executados
+## 📋 Detalhes das Correções
 
-### Testes Funcionais
-- [ ] **Cadastro bem-sucedido**: Criar conta com dados válidos
-- [ ] **Validações de erro**:
-  - [ ] Telefone já existente
-  - [ ] Campos obrigatórios vazios
-  - [ ] Telefone inválido
-  - [ ] Confirmação de telefone incorreta
-  - [ ] Nome muito curto (< 3 caracteres)
-  - [ ] Senha muito curta (< 4 caracteres)
-  - [ ] Confirmação de senha incorreta
-- [ ] **Fluxo de navegação**: Login ↔ Registro
-- [ ] **Redirecionamento**: Após cadastro → painel cliente
-- [ ] **Bônus de pontos**: Verificar se pontos são creditados corretamente
-- [ ] **Transação registrada**: Verificar se transação de cadastro é criada
+### Syntax Errors
+- [ ] app.js: Remove NaN literal in renderProducts function
+- [ ] admin.js: Remove NaN literal in navigation setup
+- [ ] cliente.js: Remove NaN literal in logout setup
 
-### Testes de Integração
-- [ ] **Firebase vs localStorage**: Testar em ambos os modos
-- [ ] **Persistência**: Verificar se dados persistem após reload
-- [ ] **Sessão**: Verificar se login automático após cadastro funciona
+### storage.js Refactoring
+- [ ] Normalize all IDs to strings consistently
+- [ ] Add try/catch to all Firebase operations
+- [ ] Ensure await on all async database calls
+- [ ] Improve error logging with context
 
-### Testes de Segurança
-- [ ] **Validação de entrada**: Prevenção de XSS/SQL injection
-- [ ] **Rate limiting**: Evitar cadastros em massa (não implementado ainda)
-- [ ] **Dados sensíveis**: Verificar se senha é armazenada corretamente
+### admin.js Updates
+- [ ] Add await to getAllProducts(), getAllClients(), etc.
+- [ ] Fix window.editProduct, deleteProductItem calls
+- [ ] Treat Promises correctly in CRUD operations
 
-### Testes de UX/UI
-- [ ] **Responsividade**: Funcionar em mobile/desktop
-- [ ] **Feedback visual**: Mensagens de erro/sucesso claras
-- [ ] **Acessibilidade**: Labels, foco, navegação por teclado
+### cliente.js Updates
+- [ ] Await getClientById() call
+- [ ] Await loadResgates() function
+- [ ] Fix other async function calls
 
-## 📋 Checklist de Validação
-- [ ] Código revisado para bugs lógicos
-- [ ] Compatibilidade com versões anteriores
-- [ ] Performance não degradada
-- [ ] Documentação atualizada se necessário
+### app.js and produto.js Updates
+- [ ] Ensure getAllProducts() is awaited before rendering
+- [ ] Fix other async calls without await
 
-## 🚀 Próximos Passos
-1. Corrigir uso de `bonusRegistration` dinâmico
-2. Adicionar registro de transação
-3. Executar testes funcionais
-4. Executar testes de integração
-5. Executar testes de segurança
-6. Executar testes de UX/UI
-7. Validar checklist completo
+## 🧪 Testes Necessários
+- [ ] CRUD de Produtos (criar, editar, excluir, duplicar)
+- [ ] CRUD de Clientes (criar, editar, excluir)
+- [ ] Sistema de Promoções
+- [ ] Sistema de Resgates
+- [ ] Painel Admin funcionando
+- [ ] Painel Cliente funcionando
+- [ ] Sincronização Firebase/localStorage
+- [ ] Responsividade mobile/desktop
