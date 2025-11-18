@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+consegue ,e<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
             <h1 class="admin-header__title">🍔 Joburguers Adiministrador</h1>
             <div class="admin-header__actions">
                 <span id="adminUsername" class="admin-header__user"></span>
-                <button id="adminLogoutBtn" class="btn btn--danger btn--small">Sair</button>
+                <button id="adminLogoutBtn" class="btn btn--danger btn--small" onclick="logoutAdmin()">Sair</button>
             </div>
         </div>
     </header>
@@ -23,22 +23,22 @@
         <!-- Sidebar de Navegação -->
         <aside class="admin-sidebar">
             <nav class="admin-nav">
-                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard">
+                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard" onclick="navigateToSection('dashboard')">
                     📊 Dashboard
                 </button>
-                <button class="admin-nav__item" data-section="produtos">
+                <button class="admin-nav__item" data-section="produtos" onclick="navigateToSection('produtos')">
                     🍔 Produtos
                 </button>
-                <button class="admin-nav__item" data-section="clientes">
+                <button class="admin-nav__item" data-section="clientes" onclick="navigateToSection('clientes')">
                     👥 Clientes
                 </button>
-                <button class="admin-nav__item" data-section="promocoes">
+                <button class="admin-nav__item" data-section="promocoes" onclick="navigateToSection('promocoes')">
                     🎉 Promoções
                 </button>
-                <button class="admin-nav__item" data-section="resgates">
+                <button class="admin-nav__item" data-section="resgates" onclick="navigateToSection('resgates')">
                     🎁 Resgates
                 </button>
-                <button class="admin-nav__item" data-section="configuracoes">
+                <button class="admin-nav__item" data-section="configuracoes" onclick="navigateToSection('configuracoes')">
                     ⚙️ Configurações
                 </button>
             </nav>
@@ -535,5 +535,38 @@
     </div>
 
     <script type="module" src="js/admin.js"></script>
+    <script>
+        // Fallback functions for when JS module fails to load
+        function logoutAdmin() {
+            if (typeof clearSession === 'function') {
+                clearSession();
+            }
+            window.location.href = 'index.html';
+        }
+
+        function navigateToSection(section) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.admin-nav__item').forEach(item => {
+                item.classList.remove('admin-nav__item--active');
+            });
+
+            // Add active class to clicked item
+            const clickedItem = document.querySelector(`[data-section="${section}"]`);
+            if (clickedItem) {
+                clickedItem.classList.add('admin-nav__item--active');
+            }
+
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(sec => {
+                sec.classList.remove('admin-section--active');
+            });
+
+            // Show selected section
+            const sectionEl = document.getElementById(section);
+            if (sectionEl) {
+                sectionEl.classList.add('admin-section--active');
+            }
+        }
+    </script>
 </body>
 </html>
