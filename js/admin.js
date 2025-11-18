@@ -1,5 +1,6 @@
 /**
- * ADMIN.JS - Painel Administrativo Completo (corrigido)
+ * admin.js — versão unificada e corrigida
+ * Combina o melhor do antigo e do novo, corrige listeners e torna imagens opcionais.
  */
 
 import {
@@ -24,7 +25,6 @@ import {
     addPromotion,
     updatePromotion,
     deletePromotion,
-    uploadPromotionPhoto,
     // Redeems
     getAllRedeems,
     addRedeem,
@@ -40,6 +40,7 @@ import {
     importAllData,
     clearAllData
 } from './storage.js';
+
 import {
     formatCurrency,
     formatDate,
@@ -48,17 +49,30 @@ import {
     showNotification,
     showConfirmDialog,
     downloadJSON,
-    readJSONFile,
-    truncateText
+    readJSONFile
 } from './utils.js';
-import renderPromocoes from './promocoes.js';
 
-// ========================================
-// INICIALIZAÇÃO
-// ========================================
+// Default placeholders
+const DEFAULT_PRODUCT_IMG = 'https://via.placeholder.com/400x300?text=Sem+Imagem';
+const DEFAULT_THUMB = 'https://via.placeholder.com/50?text=Sem+Imagem';
+const DEFAULT_PROMO_IMG = 'https://via.placeholder.com/100x60?text=Sem+Imagem';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await initializeStorage();
+// Helper: safe query
+function $id(id) { return document.getElementById(id); }
+
+// Read file to dataURL (used for images)
+async function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeStorage();
 
     const session = getCurrentSession();
     if (!session || session.userType !== 'admin') {
@@ -66,29 +80,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const adminUsernameEl = document.getElementById('adminUsername');
-    if (adminUsernameEl) adminUsernameEl.textContent = 'Admin';
+    const adminUserEl = $id('adminUsername');
+    if (adminUserEl) adminUserEl.textContent = 'Admin';
 
     setupNavigation();
     setupLogout();
-    await loadDashboard();
-    await setupProductsSection();
-    await setupClientsSection();
-    await setupPromotionsSection();
-    await setupRedeemSection();
+
+    // Load sections
+    loadDashboard();
+    setupProductsSection();
+    setupClientsSection();
+    setupPromotionsSection();
+    setupRedeemSection();
     setupSettings();
 });
 
-// ========================================
-// NAVEGAÇÃO
-// ========================================
-
+// ================================
+// Navigation
+// ================================
 function setupNavigation() {
     const navItems = document.querySelectorAll('.admin-nav__item');
+    if (!navItems || navItems.length === 0) return;
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const section = item.dataset.section;
+            if (!section) return;
 
             navItems.forEach(i => i.classList.remove('admin-nav__item--active'));
             item.classList.add('admin-nav__item--active');
@@ -96,189 +113,161 @@ function setupNavigation() {
             document.querySelectorAll('.admin-section').forEach(sec => {
                 sec.classList.remove('admin-section--active');
             });
-
-            const sectionEl = document.getElementById(section);
-            if (sectionEl) {
-                sectionEl.classList.add('admin-section--active');
-            }
+            const target = $id(section);
+            if (target) target.classList.add('admin-section--active');
         });
     });
 }
 
-// ========================================
-// LOGOUT
-// ========================================
-
+// ================================
+// Logout
+// ================================
 function setupLogout() {
-    const logoutBtn = document.getElementById('adminLogoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            clearSession();
-            window.location.href = 'index.html';
-        });
+    const logoutBtn = $id('adminLogoutBtn');
+    if (!logoutBtn) return;
+    logoutBtn.addEventListener('click', () => {
+        clearSession();
+        window.location.href = 'index.html';
+    });
+}
+
+// ================================
+// Dashboard
+// ================================
+function loadDashboard() {
+    try {
+        const products = getAllProducts() || [];
+        const clients = getAllClients() || [];
+        const transactions = getAllTransactions() || [];
+        const settings = getSettings() || {};
+
+        if ($id('totalProducts')) $id('totalProducts').textContent = products.length;
+        if ($id('totalClientes')) $id('totalClientes').textContent = clients.length;
+
+        let totalPoints = 0;
+        clients.forEach(c => totalPoints += (c.points || 0));
+        if ($id('totalPoints')) $id('totalPoints').textContent = totalPoints;
+
+        if ($id('recentTransactions')) $id('recentTransactions').textContent = (transactions.slice(-10).length);
+
+        const recentActivities = $id('recentActivities');
+        if (recentActivities) {
+            const recent = transactions.slice(-5).reverse();
+            if (recent.length === 0) {
+                recentActivities.innerHTML = '<p style="text-align:center; color:#808080;">Nenhuma atividade recente</p>';
+            } else {
+                recentActivities.innerHTML = recent.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-item__time">${formatDate(activity.timestamp)}</div>
+                        <div class="activity-item__desc">
+                            ${activity.type === 'ganho' ? '✓ Pontos ganhos' : '📊 Resgate'}: 
+                            ${activity.points > 0 ? '+' : ''}${activity.points} pontos
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (err) {
+        console.warn('Erro ao carregar dashboard:', err);
     }
 }
 
-// ========================================
-// DASHBOARD
-// ========================================
+// ================================
+// PRODUCTS
+// ================================
+function setupProductsSection() {
+    const addBtn = $id('addProductBtn');
+    const searchInput = $id('productSearch');
+    const categoryFilter = $id('productCategoryFilter');
+    const modal = $id('productModal');
+    const form = $id('productForm');
+    const closeBtn = $id('closeProductModal');
+    const emptyAddBtn = $id('emptyAddProductBtn');
 
-async function loadDashboard() {
-    const products = Array.isArray(await getAllProducts()) ? await getAllProducts() : [];
-    const clientsObj = await getAllClients();
-    const clients = Array.isArray(clientsObj) ? clientsObj : (clientsObj ? Object.values(clientsObj) : []);
-    const transactions = getAllTransactions() || [];
-    const settings = await getSettings();
+    if (!form || !addBtn) return;
 
-    // Stats
-    const totalProductsEl = document.getElementById('totalProducts');
-    if (totalProductsEl) totalProductsEl.textContent = products.length;
+    // Open modal
+    addBtn.addEventListener('click', () => openModal('productModal', 'Novo Produto', form));
+    if (emptyAddBtn) emptyAddBtn.addEventListener('click', () => openModal('productModal', 'Novo Produto', form));
 
-    const totalClientesEl = document.getElementById('totalClientes');
-    if (totalClientesEl) totalClientesEl.textContent = clients.length;
+    if (closeBtn) closeBtn.addEventListener('click', () => closeModal('productModal'));
 
-    let totalPoints = 0;
-    clients.forEach(c => totalPoints += Number(c.points || 0));
-    const totalPointsEl = document.getElementById('totalPoints');
-    if (totalPointsEl) totalPointsEl.textContent = totalPoints;
+    // Submit product form
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const recentTransactionsEl = document.getElementById('recentTransactions');
-    if (recentTransactionsEl) recentTransactionsEl.textContent = (transactions.slice(-10) || []).length;
+        const fileInput = $id('productImageFile');
+        let imageValue = ($id('productImage') && $id('productImage').value) ? $id('productImage').value.trim() : '';
 
-    // Atividades recentes
-    const recentActivities = document.getElementById('recentActivities');
-    const recent = (transactions.slice(-5) || []).reverse();
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+                const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+                imageValue = dataUrl;
+            } catch (err) {
+                console.warn('Falha ao processar arquivo de imagem:', err);
+                showNotification('Erro ao ler imagem, produto será salvo sem imagem.', 'warning');
+            }
+        }
 
-    if (!recentActivities) return;
+        // If still empty, keep as empty string (optional image)
+        if (!imageValue) imageValue = '';
 
-    if (recent.length === 0) {
-        recentActivities.innerHTML = '<p style="text-align:center; color:#808080;">Nenhuma atividade recente</p>';
-    } else {
-        recentActivities.innerHTML = recent.map(activity => `
-            <div class="activity-item">
-                <div class="activity-item__time">${formatDate(activity.timestamp)}</div>
-                <div class="activity-item__desc">
-                    ${activity.type === 'ganho' ? '✓ Pontos ganhos' : '📊 Resgate'}: 
-                    ${activity.points > 0 ? '+' : ''}${activity.points} pontos
-                </div>
-            </div>
-        `).join('');
-    }
-}
+        const productData = {
+            name: ($id('productName') && $id('productName').value) ? $id('productName').value.trim() : '',
+            category: ($id('productCategory') && $id('productCategory').value) ? $id('productCategory').value : '',
+            price: parseFloat($id('productPrice') ? $id('productPrice').value : 0) || 0,
+            image: imageValue,
+            description: ($id('productDescription') && $id('productDescription').value) ? $id('productDescription').value.trim() : '',
+            ingredients: ($id('productIngredients') && $id('productIngredients').value)
+                ? $id('productIngredients').value.split(',').map(i => i.trim()).filter(i => i)
+                : [],
+            available: !!($id('productAvailable') && $id('productAvailable').checked)
+        };
 
-// ========================================
-// PRODUTOS
-// ========================================
+        const productId = form.dataset.productId;
+        if (productId) {
+            updateProduct(parseInt(productId), productData);
+            showNotification('✓ Produto atualizado!', 'success');
+        } else {
+            addProduct(productData);
+            showNotification('✓ Produto criado!', 'success');
+        }
 
-async function setupProductsSection() {
-    const addBtn = document.getElementById('addProductBtn');
-    const searchInput = document.getElementById('productSearch');
-    const categoryFilter = document.getElementById('productCategoryFilter');
-    const modal = document.getElementById('productModal');
-    const form = document.getElementById('productForm');
-    const closeBtn = document.getElementById('closeProductModal');
+        // reset file input to avoid reuse
+        if (fileInput) fileInput.value = '';
 
-    if (!addBtn) return;
-
-    // Carregar produtos
-    const products = await getAllProducts();
-    loadProductsTable(Array.isArray(products) ? products : []);
-
-    // Adicionar novo
-    addBtn.addEventListener('click', () => {
-        const titleEl = document.getElementById('productModalTitle');
-        if (titleEl) titleEl.textContent = 'Novo Produto';
-        if (form) form.reset();
-        if (form) form.dataset.productId = '';
-        if (modal) modal.style.display = 'flex';
+        closeModal('productModal');
+        loadProductsTable();
+        loadRedeemProductOptions(); // update product select for redeems
+        loadDashboard();
     });
 
-    // Fechar modal
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            if (modal) modal.style.display = 'none';
-        });
-    }
+    // Filters
+    if (searchInput) searchInput.addEventListener('input', filterProducts);
+    if (categoryFilter) categoryFilter.addEventListener('change', filterProducts);
 
-    // Função para ler arquivo como DataURL
-    async function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // Salvar produto
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Verificar se foi feito upload de arquivo
-            const fileInput = document.getElementById('productImageFile');
-            let imageValue = document.getElementById('productImage').value || '';
-
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                try {
-                    const dataUrl = await readFileAsDataURL(fileInput.files[0]);
-                    imageValue = dataUrl; // sobrescreve com data URL
-                } catch (err) {
-                    console.warn('Falha ao processar arquivo de imagem:', err);
-                    showNotification('Erro ao ler imagem enviada. Tente novamente.', 'error');
-                    return;
-                }
-            }
-
-            // Se ainda não tiver imagem, usar placeholder
-            if (!imageValue) {
-                imageValue = `https://via.placeholder.com/400x300?text=${encodeURIComponent('Sem Imagem')}`;
-            }
-
-            const productData = {
-                name: (document.getElementById('productName') && document.getElementById('productName').value) || '',
-                category: (document.getElementById('productCategory') && document.getElementById('productCategory').value) || '',
-                price: parseFloat((document.getElementById('productPrice') && document.getElementById('productPrice').value) || 0),
-                image: imageValue,
-                description: (document.getElementById('productDescription') && document.getElementById('productDescription').value) || '',
-                ingredients: ((document.getElementById('productIngredients') && document.getElementById('productIngredients').value) || '')
-                    .split(',')
-                    .map(ing => ing.trim())
-                    .filter(ing => ing),
-                available: !!(document.getElementById('productAvailable') && document.getElementById('productAvailable').checked)
-            };
-
-            const productId = form.dataset.productId;
-            if (productId) {
-                await updateProduct(String(productId), productData);
-                showNotification('✓ Produto atualizado!', 'success');
-            } else {
-                await addProduct(productData);
-                showNotification('✓ Produto criado!', 'success');
-            }
-
-            // Resetar input de arquivo para evitar reuso não intencional
-            if (fileInput) fileInput.value = '';
-
-            if (modal) modal.style.display = 'none';
-            loadProductsTable(await getAllProducts());
-        });
-    }
-
-    // Filtros e busca (chamadas async)
-    if (searchInput) searchInput.addEventListener('input', async () => await filterProducts());
-    if (categoryFilter) categoryFilter.addEventListener('change', async () => await filterProducts());
+    loadProductsTable();
 }
 
-function buildProductRowHtml(product) {
-    // usaremos JSON.stringify para garantir que a string de ID seja colocada corretamente nos handlers inline
-    const safeId = JSON.stringify(String(product.id));
-    const imgSrc = product.image ? String(product.image) : `https://via.placeholder.com/400x300?text=${encodeURIComponent('Sem Imagem')}`;
-    // fallback onerror altera para thumbnail
-    return `
+function loadProductsTable() {
+    const tbody = $id('productsTableBody');
+    if (!tbody) return;
+    const products = getAllProducts() || [];
+
+    if (products.length === 0) {
+        if ($id('productsList')) $id('productsList').style.display = 'none';
+        if ($id('emptyProducts')) $id('emptyProducts').style.display = 'block';
+        tbody.innerHTML = '';
+        return;
+    }
+
+    if ($id('productsList')) $id('productsList').style.display = 'block';
+    if ($id('emptyProducts')) $id('emptyProducts').style.display = 'none';
+
+    tbody.innerHTML = products.map(product => `
         <tr>
-            <td><img src="${imgSrc}" alt="${product.name}" class="table-image" onerror="this.onerror=null;this.src='https://via.placeholder.com/50'"></td>
-            <td>${product.name}</td>
+            <td><img src="${product.image || DEFAULT_THUMB}" alt="${escapeHtml(product.name)}" class="table-image" onerror="this.src='${DEFAULT_THUMB}'"></td>
+            <td>${escapeHtml(product.name)}</td>
             <td>${getCategoryLabel(product.category)}</td>
             <td>${formatCurrency(product.price)}</td>
             <td>
@@ -288,49 +277,61 @@ function buildProductRowHtml(product) {
             </td>
             <td>
                 <div class="table-actions">
-                    <button class="table-btn table-btn--edit" onclick="editProduct(${safeId})">Editar</button>
-                    <button class="table-btn table-btn--duplicate" onclick="duplicateProduct(${safeId})">Duplicar</button>
-                    <button class="table-btn table-btn--delete" onclick="deleteProductItem(${safeId})">Deletar</button>
+                    <button class="table-btn table-btn--edit" data-id="${product.id}" data-action="edit-product">Editar</button>
+                    <button class="table-btn table-btn--delete" data-id="${product.id}" data-action="delete-product">Deletar</button>
                 </div>
             </td>
         </tr>
-    `;
+    `).join('');
+
+    // Attach delegated listeners for edit/delete
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const id = parseInt(btn.dataset.id);
+        if (action === 'edit-product') {
+            btn.onclick = () => openEditProduct(id);
+        } else if (action === 'delete-product') {
+            btn.onclick = () => {
+                showConfirmDialog('Deletar Produto?', 'Esta ação não pode ser desfeita.', () => {
+                    deleteProduct(id);
+                    showNotification('✓ Produto deletado!', 'success');
+                    loadProductsTable();
+                    loadRedeemProductOptions();
+                    loadDashboard();
+                });
+            };
+        }
+    });
 }
 
-function loadProductsTable(products) {
-    const tbody = document.getElementById('productsTableBody');
-    const list = Array.isArray(products) ? products : [];
+function openEditProduct(productId) {
+    const product = getProductById(productId);
+    if (!product) return;
+    const form = $id('productForm');
+    if (!form) return;
 
-    const productsListEl = document.getElementById('productsList');
-    const emptyProductsEl = document.getElementById('emptyProducts');
+    $id('productModalTitle').textContent = 'Editar Produto';
+    if ($id('productName')) $id('productName').value = product.name || '';
+    if ($id('productCategory')) $id('productCategory').value = product.category || '';
+    if ($id('productPrice')) $id('productPrice').value = product.price || 0;
+    if ($id('productImage')) $id('productImage').value = product.image || '';
+    const fileInput = $id('productImageFile');
+    if (fileInput) fileInput.value = '';
+    if ($id('productDescription')) $id('productDescription').value = product.description || '';
+    if ($id('productIngredients')) $id('productIngredients').value = (product.ingredients || []).join(', ');
+    if ($id('productAvailable')) $id('productAvailable').checked = !!product.available;
 
-    if (!tbody) return;
-
-    if (list.length === 0) {
-        if (productsListEl) productsListEl.style.display = 'none';
-        if (emptyProductsEl) emptyProductsEl.style.display = 'block';
-        tbody.innerHTML = '';
-        return;
-    }
-
-    if (productsListEl) productsListEl.style.display = 'block';
-    if (emptyProductsEl) emptyProductsEl.style.display = 'none';
-
-    tbody.innerHTML = list.map(product => buildProductRowHtml(product)).join('');
+    form.dataset.productId = productId;
+    openModal('productModal');
 }
 
-async function filterProducts() {
-    const searchEl = document.getElementById('productSearch');
-    const categoryEl = document.getElementById('productCategoryFilter');
-    const search = (searchEl && searchEl.value.toLowerCase()) || '';
-    const category = (categoryEl && categoryEl.value) || '';
-
-    let products = await getAllProducts();
-    products = Array.isArray(products) ? products : [];
+function filterProducts() {
+    const search = ($id('productSearch') && $id('productSearch').value.toLowerCase()) || '';
+    const category = ($id('productCategoryFilter') && $id('productCategoryFilter').value) || '';
+    let products = getAllProducts() || [];
 
     products = products.filter(p => {
-        const name = (p.name || '').toLowerCase();
-        const matchSearch = name.includes(search);
+        const matchSearch = (p.name || '').toLowerCase().includes(search);
         const matchCategory = !category || p.category === category;
         return matchSearch && matchCategory;
     });
@@ -339,75 +340,45 @@ async function filterProducts() {
 }
 
 function renderFilteredProducts(products) {
-    const tbody = document.getElementById('productsTableBody');
+    const tbody = $id('productsTableBody');
     if (!tbody) return;
-    const list = Array.isArray(products) ? products : [];
-    tbody.innerHTML = list.map(product => buildProductRowHtml(product)).join('');
+
+    tbody.innerHTML = products.map(product => `
+        <tr>
+            <td><img src="${product.image || DEFAULT_THUMB}" alt="${escapeHtml(product.name)}" class="table-image" onerror="this.src='${DEFAULT_THUMB}'"></td>
+            <td>${escapeHtml(product.name)}</td>
+            <td>${getCategoryLabel(product.category)}</td>
+            <td>${formatCurrency(product.price)}</td>
+            <td>
+                <span class="status-badge status-badge--${product.available ? 'disponivel' : 'indisponivel'}">
+                    ${product.available ? 'Disponível' : 'Indisponível'}
+                </span>
+            </td>
+            <td>
+                <div class="table-actions">
+                    <button class="table-btn table-btn--edit" data-id="${product.id}" data-action="edit-product">Editar</button>
+                    <button class="table-btn table-btn--delete" data-id="${product.id}" data-action="delete-product">Deletar</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    // re-bind delegated listeners
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const id = parseInt(btn.dataset.id);
+        if (action === 'edit-product') btn.onclick = () => openEditProduct(id);
+        if (action === 'delete-product') btn.onclick = () => {
+            showConfirmDialog('Deletar Produto?', 'Esta ação não pode ser desfeita.', () => {
+                deleteProduct(id);
+                showNotification('✓ Produto deletado!', 'success');
+                loadProductsTable();
+                loadRedeemProductOptions();
+                loadDashboard();
+            });
+        };
+    });
 }
-
-window.editProduct = async function(productId) {
-    // Não converter para número (IDs do Firestore são strings)
-    const pid = String(productId);
-    const product = await getProductById(pid);
-    if (!product) return;
-
-    const titleEl = document.getElementById('productModalTitle');
-    if (titleEl) titleEl.textContent = 'Editar Produto';
-
-    const setIf = (selector, value) => {
-        const el = document.getElementById(selector);
-        if (!el) return;
-        if ('value' in el) el.value = value;
-        else el.textContent = value;
-    };
-
-    setIf('productName', product.name || '');
-    setIf('productCategory', product.category || '');
-    setIf('productPrice', product.price || 0);
-    setIf('productImage', product.image || '');
-    const fileInput = document.getElementById('productImageFile');
-    if (fileInput) fileInput.value = '';
-    setIf('productDescription', product.description || '');
-    setIf('productIngredients', (product.ingredients || []).join(', '));
-    const availableEl = document.getElementById('productAvailable');
-    if (availableEl) availableEl.checked = !!product.available;
-    const form = document.getElementById('productForm');
-    if (form) form.dataset.productId = pid;
-
-    const modal = document.getElementById('productModal');
-    if (modal) modal.style.display = 'flex';
-};
-
-window.deleteProductItem = async function(productId) {
-    const pid = String(productId);
-    showConfirmDialog(
-        'Deletar Produto?',
-        'Esta ação não pode ser desfeita.',
-        async () => {
-            await deleteProduct(pid);
-            showNotification('✓ Produto deletado!', 'success');
-            loadProductsTable(await getAllProducts());
-        }
-    );
-};
-
-window.duplicateProduct = async function(productId) {
-    const pid = String(productId);
-    const product = await getProductById(pid);
-    if (!product) return;
-
-    const duplicatedProduct = {
-        ...product,
-        name: `${product.name} (Cópia)`
-    };
-
-    // Remove id so addProduct creates a new one
-    delete duplicatedProduct.id;
-
-    await addProduct(duplicatedProduct);
-    showNotification('✓ Produto duplicado!', 'success');
-    loadProductsTable(await getAllProducts());
-};
 
 function getCategoryLabel(category) {
     const labels = {
@@ -416,578 +387,590 @@ function getCategoryLabel(category) {
         combo: 'Combo',
         acompanhamento: 'Acompanhamento'
     };
-    return labels[category] || category;
+    return labels[category] || (category || '—');
 }
 
-// ========================================
-// CLIENTES
-// ========================================
+// ================================
+// CLIENTS
+// ================================
+function setupClientsSection() {
+    const addBtn = $id('addClientBtn');
+    const searchInput = $id('clientSearch');
+    const modal = $id('clientModal');
+    const form = $id('clientForm');
+    const closeBtn = $id('closeClientModal');
 
-async function setupClientsSection() {
-    const addBtn = document.getElementById('addClientBtn');
-    const searchInput = document.getElementById('clientSearch');
-    const modal = document.getElementById('clientModal');
-    const form = document.getElementById('clientForm');
-    const closeBtn = document.getElementById('closeClientModal');
-
-    if (!addBtn) return;
-
-    await loadClientsTable();
+    if (!form || !addBtn) return;
 
     addBtn.addEventListener('click', () => {
-        const titleEl = document.getElementById('clientModalTitle');
-        if (titleEl) titleEl.textContent = 'Novo Cliente';
-        if (form) form.reset();
-        if (form) form.dataset.clientId = '';
-        if (modal) modal.style.display = 'flex';
+        if (form) {
+            form.reset();
+            form.dataset.clientId = '';
+            $id('passwordHint').textContent = '(Se vazio, será os últimos 6 dígitos do telefone)';
+            openModal('clientModal', 'Novo Cliente', form);
+        }
     });
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            if (modal) modal.style.display = 'none';
-        });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', () => closeModal('clientModal'));
 
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-            const clientData = {
-                name: (document.getElementById('clientName') && document.getElementById('clientName').value) || '',
-                phone: formatPhone((document.getElementById('clientPhone') && document.getElementById('clientPhone').value) || ''),
-                email: (document.getElementById('clientEmail') && document.getElementById('clientEmail').value) || '',
-                password: (document.getElementById('clientPassword') && document.getElementById('clientPassword').value) || null,
-                points: parseInt((document.getElementById('clientPoints') && document.getElementById('clientPoints').value) || 0) || 0,
-                active: !!(document.getElementById('clientActive') && document.getElementById('clientActive').checked)
-            };
+        const clientData = {
+            name: ($id('clientName') && $id('clientName').value) ? $id('clientName').value.trim() : '',
+            phone: ($id('clientPhone') && $id('clientPhone').value) ? formatPhone($id('clientPhone').value) : '',
+            email: ($id('clientEmail') && $id('clientEmail').value) ? $id('clientEmail').value.trim() : '',
+            password: ($id('clientPassword') && $id('clientPassword').value) ? $id('clientPassword').value : null,
+            points: parseInt($id('clientPoints') ? $id('clientPoints').value : 0) || 0,
+            active: !!($id('clientActive') && $id('clientActive').checked)
+        };
 
-            const clientId = form.dataset.clientId;
-            if (clientId) {
-                // Ao editar, não sobrescrever senha se estiver vazia
-                if (!clientData.password) {
-                    delete clientData.password;
-                }
-                await updateClient(String(clientId), clientData);
-                showNotification('✓ Cliente atualizado!', 'success');
-            } else {
-                await addClient(clientData);
-                showNotification('✓ Cliente criado com sucesso! Pode fazer login agora.', 'success');
-            }
+        const clientId = form.dataset.clientId;
+        if (clientId) {
+            if (!clientData.password) delete clientData.password;
+            updateClient(parseInt(clientId), clientData);
+            showNotification('✓ Cliente atualizado!', 'success');
+        } else {
+            addClient(clientData);
+            showNotification('✓ Cliente criado com sucesso! Pode fazer login agora.', 'success');
+        }
 
-            if (modal) modal.style.display = 'none';
-            await loadClientsTable();
-        });
-    }
+        closeModal('clientModal');
+        loadClientsTable();
+        loadDashboard();
+    });
 
-    if (searchInput) searchInput.addEventListener('input', async () => await filterClients());
+    if (searchInput) searchInput.addEventListener('input', filterClients);
 
+    // Sync between tabs: reload clients table when storage changes related to clients
     window.addEventListener('storage', (ev) => {
         try {
             if (!ev.key) return;
-            if (ev.key === 'clients_data') {
-                setTimeout(async () => {
-                    await loadClientsTable();
+            if (ev.key.includes('clients')) {
+                setTimeout(() => {
+                    loadClientsTable();
                     showNotification('Lista de clientes atualizada (sincronização entre abas).', 'info');
+                }, 100);
+            }
+            // also update products if needed
+            if (ev.key.includes('products')) {
+                setTimeout(() => {
+                    loadProductsTable();
+                    loadRedeemProductOptions();
                 }, 100);
             }
         } catch (err) {
             console.warn('Erro ao processar storage event (clients):', err);
         }
     });
+
+    loadClientsTable();
 }
 
-async function loadClientsTable() {
-    const tbody = document.getElementById('clientsTableBody');
-    let clients = await getAllClients();
-    clients = Array.isArray(clients) ? clients : [];
-
-    const clientsListEl = document.getElementById('clientsList');
-    const emptyClientsEl = document.getElementById('emptyClients');
-
+function loadClientsTable() {
+    const tbody = $id('clientsTableBody');
     if (!tbody) return;
+    const clients = getAllClients() || [];
 
     if (clients.length === 0) {
-        if (clientsListEl) clientsListEl.style.display = 'none';
-        if (emptyClientsEl) emptyClientsEl.style.display = 'block';
+        if ($id('clientsList')) $id('clientsList').style.display = 'none';
+        if ($id('emptyClients')) $id('emptyClients').style.display = 'block';
         tbody.innerHTML = '';
         return;
     }
 
-    if (clientsListEl) clientsListEl.style.display = 'block';
-    if (emptyClientsEl) emptyClientsEl.style.display = 'none';
+    if ($id('clientsList')) $id('clientsList').style.display = 'block';
+    if ($id('emptyClients')) $id('emptyClients').style.display = 'none';
 
     tbody.innerHTML = clients.map(client => `
         <tr>
-            <td>${client.name}</td>
-            <td>${client.phone}</td>
-            <td>${client.points}</td>
+            <td>${escapeHtml(client.name)}</td>
+            <td>${escapeHtml(client.phone)}</td>
+            <td>${client.points || 0}</td>
             <td>${getLevelLabel(client.level)}</td>
             <td>${formatDateOnly(client.createdAt)}</td>
             <td>
                 <div class="table-actions">
-                    <button class="table-btn table-btn--manage" onclick="managePoints(${JSON.stringify(String(client.id))})">Pontos</button>
-                    <button class="table-btn table-btn--edit" onclick="editClient(${JSON.stringify(String(client.id))})">Editar</button>
-                    <button class="table-btn table-btn--delete" onclick="deleteClientItem(${JSON.stringify(String(client.id))})">Deletar</button>
+                    <button class="table-btn table-btn--manage" data-action="manage-points" data-id="${client.id}">Pontos</button>
+                    <button class="table-btn table-btn--edit" data-action="edit-client" data-id="${client.id}">Editar</button>
+                    <button class="table-btn table-btn--delete" data-action="delete-client" data-id="${client.id}">Deletar</button>
                 </div>
             </td>
         </tr>
     `).join('');
+
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const id = parseInt(btn.dataset.id);
+        if (action === 'manage-points') btn.onclick = () => managePoints(id);
+        if (action === 'edit-client') btn.onclick = () => editClient(id);
+        if (action === 'delete-client') btn.onclick = () => {
+            showConfirmDialog('Deletar Cliente?', 'Esta ação não pode ser desfeita e todos os pontos serão perdidos.', () => {
+                deleteClient(id);
+                showNotification('✓ Cliente deletado!', 'success');
+                loadClientsTable();
+                loadDashboard();
+            });
+        };
+    });
 }
 
-async function filterClients() {
-    const search = (document.getElementById('clientSearch') && document.getElementById('clientSearch').value.toLowerCase()) || '';
-    let clients = await getAllClients();
-    clients = Array.isArray(clients) ? clients : [];
-
-    clients = clients.filter(c =>
-        (c.name || '').toLowerCase().includes(search) ||
-        (c.phone || '').includes(search)
-    );
-
-    renderFilteredClients(clients);
-}
-
-function renderFilteredClients(clients) {
-    const tbody = document.getElementById('clientsTableBody');
-    if (!tbody) return;
-    const list = Array.isArray(clients) ? clients : [];
-    tbody.innerHTML = list.map(client => `
-        <tr>
-            <td>${client.name}</td>
-            <td>${client.phone}</td>
-            <td>${client.points}</td>
-            <td>${getLevelLabel(client.level)}</td>
-            <td>${formatDateOnly(client.createdAt)}</td>
-            <td>
-                <div class="table-actions">
-                    <button class="table-btn table-btn--manage" onclick="managePoints(${JSON.stringify(String(client.id))})">Pontos</button>
-                    <button class="table-btn table-btn--edit" onclick="editClient(${JSON.stringify(String(client.id))})">Editar</button>
-                    <button class="table-btn table-btn--delete" onclick="deleteClientItem(${JSON.stringify(String(client.id))})">Deletar</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-window.editClient = async function(clientId) {
-    const cid = String(clientId);
-    const client = await getClientById(cid);
+window.editClient = function(clientId) {
+    const client = getClientById(clientId);
     if (!client) return;
+    const form = $id('clientForm');
+    if (!form) return;
 
-    const setIf = (selector, value) => {
-        const el = document.getElementById(selector);
-        if (!el) return;
-        if ('value' in el) el.value = value;
-        else el.textContent = value;
+    $id('clientModalTitle').textContent = 'Editar Cliente';
+    if ($id('clientName')) $id('clientName').value = client.name || '';
+    if ($id('clientPhone')) $id('clientPhone').value = client.phone || '';
+    if ($id('clientEmail')) $id('clientEmail').value = client.email || '';
+    if ($id('clientPassword')) $id('clientPassword').value = client.password || '';
+    if ($id('clientPoints')) $id('clientPoints').value = client.points || 0;
+    if ($id('clientActive')) $id('clientActive').checked = !!client.active;
+
+    form.dataset.clientId = clientId;
+    const hint = $id('passwordHint');
+    if (hint) hint.textContent = '(Deixe em branco para manter a senha atual)';
+    openModal('clientModal');
+};
+
+window.managePoints = function(clientId) {
+    const client = getClientById(clientId);
+    if (!client) return;
+    const modal = $id('pointsModal');
+    const form = $id('pointsForm');
+    if (!modal || !form) return;
+
+    if ($id('pointsClientId')) $id('pointsClientId').value = clientId;
+    if ($id('pointsClientInfo')) $id('pointsClientInfo').textContent = `${client.name} - Saldo atual: ${client.points} pontos`;
+    if ($id('pointsAmount')) $id('pointsAmount').value = '';
+    if ($id('pointsReason')) $id('pointsReason').value = '';
+
+    const closeBtn = $id('closePointsModal');
+    if (closeBtn) closeBtn.onclick = () => closeModal('pointsModal');
+
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        const amount = parseInt($id('pointsAmount').value) || 0;
+        const reason = $id('pointsReason').value || '';
+        addPointsToClient(clientId, amount, reason);
+        showNotification('✓ Pontos atualizados!', 'success');
+        closeModal('pointsModal');
+        loadClientsTable();
+        loadDashboard();
     };
 
-    setIf('clientName', client.name || '');
-    setIf('clientPhone', client.phone || '');
-    setIf('clientEmail', client.email || '');
-    setIf('clientPassword', client.password || '');
-    setIf('clientPoints', client.points || 0);
-    const activeEl = document.getElementById('clientActive');
-    if (activeEl) activeEl.checked = !!client.active;
-    const form = document.getElementById('clientForm');
-    if (form) form.dataset.clientId = cid;
-
-    const hint = document.getElementById('passwordHint');
-    if (hint) hint.textContent = '(Deixe em branco para manter a senha atual)';
-
-    const modal = document.getElementById('clientModal');
-    if (modal) modal.style.display = 'flex';
-};
-
-window.deleteClientItem = async function(clientId) {
-    const cid = String(clientId);
-    showConfirmDialog(
-        'Deletar Cliente?',
-        'Esta ação não pode ser desfeita e todos os pontos serão perdidos.',
-        async () => {
-            await deleteClient(cid);
-            showNotification('✓ Cliente deletado!', 'success');
-            await loadClientsTable();
-        }
-    );
-};
-
-window.managePoints = async function(clientId) {
-    const cid = String(clientId);
-    const client = await getClientById(cid);
-    if (!client) return;
-
-    const modal = document.getElementById('pointsModal');
-    const form = document.getElementById('pointsForm');
-
-    const clientIdInput = document.getElementById('pointsClientId');
-    if (clientIdInput) clientIdInput.value = cid;
-    const pointsInfo = document.getElementById('pointsClientInfo');
-    if (pointsInfo) pointsInfo.textContent = `${client.name} - Saldo atual: ${client.points} pontos`;
-    if (document.getElementById('pointsAmount')) document.getElementById('pointsAmount').value = '';
-    if (document.getElementById('pointsReason')) document.getElementById('pointsReason').value = '';
-
-    const closeBtn = document.getElementById('closePointsModal');
-    if (closeBtn) {
-        closeBtn.onclick = () => { if (modal) modal.style.display = 'none'; };
-    }
-
-    if (form) {
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const amount = parseInt((document.getElementById('pointsAmount') && document.getElementById('pointsAmount').value) || 0) || 0;
-            await addPointsToClient(cid, amount, (document.getElementById('pointsReason') && document.getElementById('pointsReason').value) || '');
-            showNotification('✓ Pontos atualizados!', 'success');
-            if (modal) modal.style.display = 'none';
-            await loadClientsTable();
-        };
-    }
-
-    if (modal) modal.style.display = 'flex';
+    openModal('pointsModal');
 };
 
 function formatDateOnly(dateString) {
     try {
+        if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('pt-BR');
     } catch (err) {
-        return '';
+        return '-';
     }
 }
 
-// ========================================
-// PROMOÇÕES
-// ========================================
+function getLevelLabel(level) {
+    const labels = {
+        bronze: '🥉 Bronze',
+        silver: '🥈 Prata',
+        gold: '🥇 Ouro',
+        platinum: '💎 Platina'
+    };
+    return labels[level] || 'Bronze';
+}
 
-async function setupPromotionsSection() {
-    const addBtn = document.getElementById('addPromotionBtn');
-    const modal = document.getElementById('promotionModal');
-    const form = document.getElementById('promotionForm');
-    const closeBtn = document.getElementById('closePromotionModal');
+// ================================
+// PROMOTIONS
+// ================================
+function setupPromotionsSection() {
+    const addBtn = $id('addPromotionBtn');
+    const modal = $id('promotionModal');
+    const form = $id('promotionForm');
+    const closeBtn = $id('closePromotionModal');
 
-    if (!addBtn) return;
-
-    await loadPromotionsTable();
+    if (!form || !addBtn) return;
 
     addBtn.addEventListener('click', () => {
-        const titleEl = document.getElementById('promotionModalTitle');
-        if (titleEl) titleEl.textContent = 'Nova Promoção';
-        if (form) form.reset();
-        if (form) form.dataset.promotionId = '';
-        if (modal) modal.style.display = 'flex';
+        form.reset();
+        form.dataset.promotionId = '';
+        if ($id('promotionModalTitle')) $id('promotionModalTitle').textContent = 'Nova Promoção';
+        openModal('promotionModal');
     });
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            if (modal) modal.style.display = 'none';
-        });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', () => closeModal('promotionModal'));
 
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    // submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            const fileInput = document.getElementById('promotionPhoto');
-            let photoValue = '';
+        const fileInput = $id('promotionPhoto');
+        let photoValue = '';
 
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                try {
-                    photoValue = await uploadPromotionPhoto(fileInput.files[0]);
-                } catch (err) {
-                    console.warn('Falha no upload da promoção:', err);
-                    showNotification('Erro ao fazer upload da imagem. Tente novamente.', 'error');
-                    return;
-                }
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            try {
+                photoValue = await readFileAsDataURL(fileInput.files[0]);
+            } catch (err) {
+                console.warn('Falha ao processar arquivo de imagem:', err);
+                showNotification('Erro ao ler imagem, promoção será salva sem imagem.', 'warning');
             }
+        }
 
-            const promotionData = {
-                name: (document.getElementById('promotionName') && document.getElementById('promotionName').value) || '',
-                value: (document.getElementById('promotionValue') && document.getElementById('promotionValue').value) || '',
-                description: (document.getElementById('promotionDescription') && document.getElementById('promotionDescription').value) || '',
-                photo: photoValue,
-                instagramLink: (document.getElementById('promotionInstagramLink') && document.getElementById('promotionInstagramLink').value) || '',
-                active: !!(document.getElementById('promotionActive') && document.getElementById('promotionActive').checked)
-            };
+        // image optional: keep '' if none
+        if (!photoValue) photoValue = '';
 
-            const promotionId = form.dataset.promotionId;
-            if (promotionId) {
-                await updatePromotion(String(promotionId), promotionData);
-                showNotification('✓ Promoção atualizada!', 'success');
-            } else {
-                await addPromotion(promotionData);
-                showNotification('✓ Promoção criada!', 'success');
-            }
+        const promotionData = {
+            name: ($id('promotionName') && $id('promotionName').value) ? $id('promotionName').value.trim() : '',
+            value: ($id('promotionValue') && $id('promotionValue').value) ? $id('promotionValue').value.trim() : '',
+            description: ($id('promotionDescription') && $id('promotionDescription').value) ? $id('promotionDescription').value.trim() : '',
+            photo: photoValue,
+            instagramLink: ($id('promotionInstagramLink') && $id('promotionInstagramLink').value) ? $id('promotionInstagramLink').value.trim() : '',
+            active: !!($id('promotionActive') && $id('promotionActive').checked)
+        };
 
-            if (fileInput) fileInput.value = '';
+        const promotionId = form.dataset.promotionId;
+        if (promotionId) {
+            updatePromotion(parseInt(promotionId), promotionData);
+            showNotification('✓ Promoção atualizada!', 'success');
+        } else {
+            addPromotion(promotionData);
+            showNotification('✓ Promoção criada!', 'success');
+        }
 
-            if (modal) modal.style.display = 'none';
-            await loadPromotionsTable();
-        });
-    }
+        if (fileInput) fileInput.value = '';
+        closeModal('promotionModal');
+        loadPromotionsTable();
+    });
+
+    loadPromotionsTable();
 }
 
-async function loadPromotionsTable() {
-    const tbody = document.getElementById('promotionsTableBody');
-    let data = await getAllPromotions();
-    data = Array.isArray(data) ? data : [];
-
+function loadPromotionsTable() {
+    const tbody = $id('promotionsTableBody');
     if (!tbody) return;
 
-    tbody.innerHTML = data.map(promo => `
+    const promotions = getAllPromotions() || [];
+    tbody.innerHTML = promotions.map(promo => `
         <tr>
-            <td>${promo.name}</td>
-            <td>${promo.value}</td>
+            <td>${promo.photo ? `<img src="${promo.photo}" class="table-image-small" onerror="this.src='${DEFAULT_PROMO_IMG}'">` : `<span style="color:#777">Sem imagem</span>`}</td>
+            <td>${escapeHtml(promo.name)}</td>
+            <td>${escapeHtml(promo.value)}</td>
             <td>${truncateText(promo.description || '', 50)}</td>
             <td><span class="status-badge ${promo.active ? 'status-badge--ativo' : 'status-badge--inativo'}">${promo.active ? 'Ativa' : 'Inativa'}</span></td>
             <td>
                 <div class="table-actions">
-                    <button class="table-btn table-btn--delete" onclick="deletePromoItem(${JSON.stringify(String(promo.id))})">Deletar</button>
+                    <button class="table-btn table-btn--edit" data-action="edit-promo" data-id="${promo.id}">Editar</button>
+                    <button class="table-btn table-btn--delete" data-action="delete-promo" data-id="${promo.id}">Deletar</button>
                 </div>
             </td>
         </tr>
     `).join('');
+
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const id = parseInt(btn.dataset.id);
+        if (action === 'edit-promo') btn.onclick = () => openEditPromotion(id);
+        if (action === 'delete-promo') btn.onclick = () => {
+            showConfirmDialog('Deletar Promoção?', 'Esta ação não pode ser desfeita.', () => {
+                deletePromotion(id);
+                showNotification('✓ Promoção deletada!', 'success');
+                loadPromotionsTable();
+            });
+        };
+    });
 }
 
-window.deletePromoItem = async function(promoId) {
-    const pid = String(promoId);
-    await deletePromotion(pid);
-    showNotification('✓ Promoção deletada!', 'success');
-    await loadPromotionsTable();
-};
+function openEditPromotion(promoId) {
+    const promo = getAllPromotions().find(p => p.id === promoId);
+    if (!promo) return;
+    const form = $id('promotionForm');
+    if (!form) return;
 
-// ========================================
-// RESGATES
-// ========================================
+    $id('promotionModalTitle').textContent = 'Editar Promoção';
+    if ($id('promotionName')) $id('promotionName').value = promo.name || '';
+    if ($id('promotionValue')) $id('promotionValue').value = promo.value || '';
+    if ($id('promotionDescription')) $id('promotionDescription').value = promo.description || '';
+    if ($id('promotionInstagramLink')) $id('promotionInstagramLink').value = promo.instagramLink || '';
+    if ($id('promotionActive')) $id('promotionActive').checked = !!promo.active;
 
-async function setupRedeemSection() {
-    const addBtn = document.getElementById('addRedeemBtn');
-    const modal = document.getElementById('redeemModal');
-    const form = document.getElementById('redeemForm');
-    const closeBtn = document.getElementById('closeRedeemModal');
-    const productSelect = document.getElementById('redeemProduct');
+    form.dataset.promotionId = promoId;
+    openModal('promotionModal');
+}
 
-    if (!addBtn) return;
+function truncateText(text, max) {
+    if (!text) return '';
+    return text.length > max ? text.substring(0, max) + '...' : text;
+}
 
-    await loadRedeemsTable();
+// ================================
+// REDEEMS
+// ================================
+function setupRedeemSection() {
+    const addBtn = $id('addRedeemBtn');
+    const modal = $id('redeemModal');
+    const form = $id('redeemForm');
+    const closeBtn = $id('closeRedeemModal');
+    const productSelect = $id('redeemProduct');
 
-    // Carregar produtos no select
-    let products = await getAllProducts();
-    products = Array.isArray(products) ? products : [];
-    if (productSelect) {
-        productSelect.innerHTML = '<option value="">Selecione um produto</option>' +
-            products.map(product => `<option value=${JSON.stringify(String(product.id))}>${product.name}</option>`).join('');
-    }
+    if (!form || !addBtn) return;
 
-    // Adicionar novo resgate
+    loadRedeemsTable();
+    loadRedeemProductOptions();
+
     addBtn.addEventListener('click', () => {
-        const titleEl = document.getElementById('redeemModalTitle');
-        if (titleEl) titleEl.textContent = 'Novo Resgate';
-        if (form) form.reset();
-        if (form) form.dataset.redeemId = '';
-        if (modal) modal.style.display = 'flex';
+        form.reset();
+        form.dataset.redeemId = '';
+        openModal('redeemModal');
     });
 
-    // Fechar modal
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            if (modal) modal.style.display = 'none';
-        });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', () => closeModal('redeemModal'));
 
-    // Salvar resgate
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedProductId = $id('redeemProduct') ? $id('redeemProduct').value : '';
+        if (!selectedProductId) {
+            showNotification('Selecione um produto válido.', 'error');
+            return;
+        }
+        const selectedProduct = getProductById(parseInt(selectedProductId));
+        if (!selectedProduct) {
+            showNotification('Produto selecionado não encontrado.', 'error');
+            return;
+        }
 
-            const selectedProductId = (document.getElementById('redeemProduct') && document.getElementById('redeemProduct').value) || '';
-            if (!selectedProductId) {
-                showNotification('Selecione um produto válido.', 'error');
-                return;
-            }
+        const redeemData = {
+            productId: parseInt(selectedProductId),
+            pointsRequired: parseInt($id('redeemPointsRequired') ? $id('redeemPointsRequired').value : 0) || 0,
+            active: !!($id('redeemActive') && $id('redeemActive').checked)
+        };
 
-            const selectedProduct = await getProductById(String(selectedProductId));
-            if (!selectedProduct) {
-                showNotification('Selecione um produto válido.', 'error');
-                return;
-            }
+        const redeemId = form.dataset.redeemId;
+        if (redeemId) {
+            updateRedeem(parseInt(redeemId), redeemData);
+            showNotification('✓ Resgate atualizado!', 'success');
+        } else {
+            addRedeem(redeemData);
+            showNotification('✓ Resgate criado!', 'success');
+        }
 
-            const redeemData = {
-                productId: String(selectedProductId),
-                pointsRequired: parseInt((document.getElementById('redeemPointsRequired') && document.getElementById('redeemPointsRequired').value) || 0) || 0,
-                active: !!(document.getElementById('redeemActive') && document.getElementById('redeemActive').checked)
-            };
-
-            const redeemId = form.dataset.redeemId;
-            if (redeemId) {
-                await updateRedeem(String(redeemId), redeemData);
-                showNotification('✓ Resgate atualizado!', 'success');
-            } else {
-                await addRedeem(redeemData);
-                showNotification('✓ Resgate criado!', 'success');
-            }
-
-            if (modal) modal.style.display = 'none';
-            await loadRedeemsTable();
-        });
-    }
+        closeModal('redeemModal');
+        loadRedeemsTable();
+    });
 }
 
-async function loadRedeemsTable() {
-    const tbody = document.getElementById('redeemsTableBody');
-    let redeems = await getAllRedeems();
-    redeems = Array.isArray(redeems) ? redeems : [];
-
+function loadRedeemsTable() {
+    const tbody = $id('redeemsTableBody');
     if (!tbody) return;
+    const redeems = getAllRedeems() || [];
 
-    if (redeems.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#808080;">Nenhum resgate cadastrado</td></tr>';
-        return;
-    }
-
-    const rows = await Promise.all(redeems.map(async redeem => {
-        const product = await getProductById(redeem.productId);
+    tbody.innerHTML = redeems.map(redeem => {
+        const product = getProductById(redeem.productId);
         const productName = product ? product.name : 'Produto não encontrado';
-
         return `
             <tr>
-                <td>${productName}</td>
+                <td>${escapeHtml(productName)}</td>
                 <td>${redeem.pointsRequired}</td>
                 <td><span class="status-badge ${redeem.active ? 'status-badge--ativo' : 'status-badge--inativo'}">${redeem.active ? 'Ativo' : 'Inativo'}</span></td>
                 <td>
                     <div class="table-actions">
-                        <button class="table-btn table-btn--delete" onclick="deleteRedeemItem(${JSON.stringify(String(redeem.id))})">Deletar</button>
+                        <button class="table-btn table-btn--edit" data-action="edit-redeem" data-id="${redeem.id}">Editar</button>
+                        <button class="table-btn table-btn--delete" data-action="delete-redeem" data-id="${redeem.id}">Deletar</button>
                     </div>
                 </td>
             </tr>
         `;
-    }));
+    }).join('');
 
-    tbody.innerHTML = rows.join('');
+    tbody.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.dataset.action;
+        const id = parseInt(btn.dataset.id);
+        if (action === 'edit-redeem') btn.onclick = () => openEditRedeem(id);
+        if (action === 'delete-redeem') btn.onclick = () => {
+            showConfirmDialog('Deletar Resgate?', 'Esta ação não pode ser desfeita.', () => {
+                deleteRedeem(id);
+                showNotification('✓ Resgate deletado!', 'success');
+                loadRedeemsTable();
+            });
+        };
+    });
 }
 
-window.deleteRedeemItem = async function(redeemId) {
-    const rid = String(redeemId);
-    await deleteRedeem(rid);
-    showNotification('✓ Resgate deletado!', 'success');
-    await loadRedeemsTable();
-};
+function openEditRedeem(redeemId) {
+    const redeem = getAllRedeems().find(r => r.id === redeemId);
+    if (!redeem) return;
+    const form = $id('redeemForm');
+    if (!form) return;
 
-// ========================================
-// CONFIGURAÇÕES
-// ========================================
+    if ($id('redeemProduct')) $id('redeemProduct').value = redeem.productId || '';
+    if ($id('redeemPointsRequired')) $id('redeemPointsRequired').value = redeem.pointsRequired || 0;
+    if ($id('redeemActive')) $id('redeemActive').checked = !!redeem.active;
 
+    form.dataset.redeemId = redeemId;
+    openModal('redeemModal');
+}
+
+function loadRedeemProductOptions() {
+    const productSelect = $id('redeemProduct');
+    if (!productSelect) return;
+    const products = getAllProducts() || [];
+    productSelect.innerHTML = '<option value="">Selecione um produto</option>' +
+        products.map(product => `<option value="${product.id}">${escapeHtml(product.name)}</option>`).join('');
+}
+
+// ================================
+// SETTINGS
+// ================================
 function setupSettings() {
-    // getSettings is async - but we will fetch when necessary
-    (async () => {
-        const settings = await getSettings();
+    const settings = getSettings() || {};
 
-        // Pontos
-        if (document.getElementById('pointsPerReal')) document.getElementById('pointsPerReal').value = settings.pointsPerReal;
-        if (document.getElementById('bonusRegistration')) document.getElementById('bonusRegistration').value = settings.bonusRegistration;
-        if (document.getElementById('referralBonus')) document.getElementById('referralBonus').value = settings.referralBonus;
+    if ($id('pointsPerReal')) $id('pointsPerReal').value = settings.pointsPerReal || 0.1;
+    if ($id('bonusRegistration')) $id('bonusRegistration').value = settings.bonusRegistration || 50;
+    if ($id('referralBonus')) $id('referralBonus').value = settings.referralBonus || 50;
 
-        const pointsForm = document.getElementById('pointsSettingsForm');
-        if (pointsForm) {
-            pointsForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await updateSettings({
-                    pointsPerReal: parseFloat(document.getElementById('pointsPerReal').value),
-                    bonusRegistration: parseInt(document.getElementById('bonusRegistration').value),
-                    referralBonus: parseInt(document.getElementById('referralBonus').value)
-                });
-                showNotification('✓ Configurações de pontos salvas!', 'success');
-            });
-        }
+    const pointsForm = $id('pointsSettingsForm');
+    if (pointsForm) pointsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        updateSettings({
+            pointsPerReal: parseFloat($id('pointsPerReal').value),
+            bonusRegistration: parseInt($id('bonusRegistration').value),
+            referralBonus: parseInt($id('referralBonus').value)
+        });
+        showNotification('✓ Configurações de pontos salvas!', 'success');
+    });
 
-        // Níveis
-        if (document.getElementById('silverLevel')) document.getElementById('silverLevel').value = settings.levels.silver;
-        if (document.getElementById('goldLevel')) document.getElementById('goldLevel').value = settings.levels.gold;
-        if (document.getElementById('platinumLevel')) document.getElementById('platinumLevel').value = settings.levels.platinum;
+    if ($id('silverLevel')) $id('silverLevel').value = settings.levels?.silver || 100;
+    if ($id('goldLevel')) $id('goldLevel').value = settings.levels?.gold || 300;
+    if ($id('platinumLevel')) $id('platinumLevel').value = settings.levels?.platinum || 500;
 
-        const levelsForm = document.getElementById('levelsSettingsForm');
-        if (levelsForm) {
-            levelsForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await updateSettings({
-                    levels: {
-                        bronze: 0,
-                        silver: parseInt(document.getElementById('silverLevel').value),
-                        gold: parseInt(document.getElementById('goldLevel').value),
-                        platinum: parseInt(document.getElementById('platinumLevel').value)
-                    }
-                });
-                showNotification('✓ Níveis atualizados!', 'success');
-            });
-        }
+    const levelsForm = $id('levelsSettingsForm');
+    if (levelsForm) levelsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        updateSettings({
+            levels: {
+                bronze: 0,
+                silver: parseInt($id('silverLevel').value),
+                gold: parseInt($id('goldLevel').value),
+                platinum: parseInt($id('platinumLevel').value)
+            }
+        });
+        showNotification('✓ Níveis atualizados!', 'success');
+    });
 
-        // Informações da Loja
-        if (document.getElementById('storeName')) document.getElementById('storeName').value = settings.storeName;
-        if (document.getElementById('storeAddress')) document.getElementById('storeAddress').value = settings.storeAddress;
-        if (document.getElementById('storePhone')) document.getElementById('storePhone').value = settings.storePhone;
-        if (document.getElementById('storeHours')) document.getElementById('storeHours').value = settings.storeHours;
+    if ($id('storeName')) $id('storeName').value = settings.storeName || '';
+    if ($id('storeAddress')) $id('storeAddress').value = settings.storeAddress || '';
+    if ($id('storePhone')) $id('storePhone').value = settings.storePhone || '';
+    if ($id('storeHours')) $id('storeHours').value = settings.storeHours || '';
 
-        const storeInfoForm = document.getElementById('storeInfoForm');
-        if (storeInfoForm) {
-            storeInfoForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await updateSettings({
-                    storeName: document.getElementById('storeName').value,
-                    storeAddress: document.getElementById('storeAddress').value,
-                    storePhone: document.getElementById('storePhone').value,
-                    storeHours: document.getElementById('storeHours').value
-                });
-                showNotification('✓ Informações salvas!', 'success');
-            });
-        }
+    const storeForm = $id('storeInfoForm');
+    if (storeForm) storeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        updateSettings({
+            storeName: $id('storeName').value,
+            storeAddress: $id('storeAddress').value,
+            storePhone: $id('storePhone').value,
+            storeHours: $id('storeHours').value
+        });
+        showNotification('✓ Informações salvas!', 'success');
+    });
 
-        // Export/Import
-        const exportBtn = document.getElementById('exportDataBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', async () => {
-                const data = await exportAllData();
-                downloadJSON(data, `joburguers-backup-${new Date().toISOString().split('T')[0]}.json`);
-                showNotification('✓ Dados exportados!', 'success');
-            });
-        }
+    const exportBtn = $id('exportDataBtn');
+    if (exportBtn) exportBtn.addEventListener('click', () => {
+        const data = exportAllData();
+        downloadJSON(data, `joburguers-backup-${new Date().toISOString().split('T')[0]}.json`);
+        showNotification('✓ Dados exportados!', 'success');
+    });
 
-        const importBtn = document.getElementById('importDataBtn');
-        if (importBtn) {
-            importBtn.addEventListener('click', () => {
-                const importFile = document.getElementById('importFile');
-                if (importFile) importFile.click();
-            });
-        }
+    const importBtn = $id('importDataBtn');
+    if (importBtn) importBtn.addEventListener('click', () => {
+        if ($id('importFile')) $id('importFile').click();
+    });
 
-        const importFileEl = document.getElementById('importFile');
-        if (importFileEl) {
-            importFileEl.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                try {
-                    const data = await readJSONFile(file);
-                    importAllData(data);
-                    showNotification('✓ Dados importados com sucesso!', 'success');
-                    location.reload();
-                } catch (error) {
-                    showNotification('✗ Erro ao importar dados', 'error');
-                }
-            });
-        }
-
-        const resetBtn = document.getElementById('resetDataBtn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                clearAllData();
+    const importFile = $id('importFile');
+    if (importFile) {
+        importFile.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const data = await readJSONFile(file);
+                importAllData(data);
+                showNotification('✓ Dados importados com sucesso!', 'success');
                 location.reload();
-            });
-        }
-    })();
+            } catch (error) {
+                showNotification('✗ Erro ao importar dados', 'error');
+            }
+        });
+    }
+
+    const resetBtn = $id('resetDataBtn');
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+        showConfirmDialog('Limpar todos os dados?', 'Isso removerá TODOS os dados. Deseja continuar?', () => {
+            clearAllData();
+            location.reload();
+        });
+    });
 }
 
-// ========================================
-// HELPERS
-// ========================================
+// ================================
+// Utilities e helpers
+// ================================
+function openModal(id, title) {
+    const modal = $id(id);
+    if (!modal) return;
+    modal.style.display = 'flex';
+    modal.setAttribute('data-open', 'true');
+    if (title) {
+        const titleEl = modal.querySelector('h2');
+        if (titleEl) titleEl.textContent = title;
+    }
+}
 
-function truncateTextLocal(text, max) {
+function closeModal(id) {
+    const modal = $id(id);
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.removeAttribute('data-open');
+    // clear dataset of any forms inside (optional)
+    const form = modal.querySelector('form');
+    if (form) form.removeAttribute('data-id');
+}
+
+function escapeHtml(unsafe) {
+    if (!unsafe && unsafe !== 0) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function truncateText(text, max) {
     if (!text) return '';
     return text.length > max ? text.substring(0, max) + '...' : text;
+}
+
+// basic sanity: text only
+function formatDate(date) {
+    try {
+        return new Date(date).toLocaleString('pt-BR');
+    } catch (err) {
+        return '-';
+    }
+}
+
+// small helper for escaping when injecting into attributes/text
+function getProductPlaceholder() {
+    return DEFAULT_THUMB;
+}
+
+// Ensure redeem product options updated (call after products change)
+loadRedeemProductOptions(); // initial attempt (no-op if missing)
+
+// small helper to escape and shorten
+function truncateTextInline(s, n = 30) {
+    if (!s) return '';
+    return s.length > n ? s.slice(0, n) + '...' : s;
 }

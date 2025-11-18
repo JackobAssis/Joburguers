@@ -1,4 +1,4 @@
-consegue ,e<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -11,10 +11,10 @@ consegue ,e<!DOCTYPE html>
     <!-- Header Admin -->
     <header class="admin-header">
         <div class="admin-header__container">
-            <h1 class="admin-header__title">🍔 Joburguers Adiministrador</h1>
+            <h1 class="admin-header__title">🍔 Joburguers Administrador</h1>
             <div class="admin-header__actions">
                 <span id="adminUsername" class="admin-header__user"></span>
-                <button id="adminLogoutBtn" class="btn btn--danger btn--small" onclick="logoutAdmin()">Sair</button>
+                <button id="adminLogoutBtn" class="btn btn--danger btn--small">Sair</button>
             </div>
         </div>
     </header>
@@ -23,22 +23,22 @@ consegue ,e<!DOCTYPE html>
         <!-- Sidebar de Navegação -->
         <aside class="admin-sidebar">
             <nav class="admin-nav">
-                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard" onclick="navigateToSection('dashboard')">
+                <button class="admin-nav__item admin-nav__item--active" data-section="dashboard">
                     📊 Dashboard
                 </button>
-                <button class="admin-nav__item" data-section="produtos" onclick="navigateToSection('produtos')">
+                <button class="admin-nav__item" data-section="produtos">
                     🍔 Produtos
                 </button>
-                <button class="admin-nav__item" data-section="clientes" onclick="navigateToSection('clientes')">
+                <button class="admin-nav__item" data-section="clientes">
                     👥 Clientes
                 </button>
-                <button class="admin-nav__item" data-section="promocoes" onclick="navigateToSection('promocoes')">
+                <button class="admin-nav__item" data-section="promocoes">
                     🎉 Promoções
                 </button>
-                <button class="admin-nav__item" data-section="resgates" onclick="navigateToSection('resgates')">
+                <button class="admin-nav__item" data-section="resgates">
                     🎁 Resgates
                 </button>
-                <button class="admin-nav__item" data-section="configuracoes" onclick="navigateToSection('configuracoes')">
+                <button class="admin-nav__item" data-section="configuracoes">
                     ⚙️ Configurações
                 </button>
             </nav>
@@ -128,7 +128,7 @@ consegue ,e<!DOCTYPE html>
 
                 <div id="emptyProducts" class="empty-state" style="display: none;">
                     <p>Nenhum produto cadastrado</p>
-                    <button class="btn btn--primary">Adicionar Primeiro Produto</button>
+                    <button id="emptyAddProductBtn" class="btn btn--primary">Adicionar Primeiro Produto</button>
                 </div>
             </section>
 
@@ -182,6 +182,7 @@ consegue ,e<!DOCTYPE html>
                     <table class="admin-table">
                         <thead>
                             <tr>
+                                <th>Imagem</th>
                                 <th>Nome</th>
                                 <th>Valor</th>
                                 <th>Descrição</th>
@@ -309,7 +310,7 @@ consegue ,e<!DOCTYPE html>
     </div>
 
     <!-- Modal para Produtos -->
-    <div id="productModal" class="modal">
+    <div id="productModal" class="modal" style="display:none;">
         <div class="modal__content modal__content--large">
             <h2 id="productModalTitle">Novo Produto</h2>
             <form id="productForm">
@@ -336,7 +337,7 @@ consegue ,e<!DOCTYPE html>
                     </div>
 
                     <div class="form-group">
-                        <label for="productImage">Imagem (URL ou upload)</label>
+                        <label for="productImage">Imagem (URL ou upload) — opcional</label>
                         <input type="url" id="productImage" placeholder="https://exemplo.com/imagem.jpg">
                         <small style="display:block; color:#9aa4b6; margin-top:6px;">Ou faça upload abaixo (preferível para imagens locais)</small>
                         <input type="file" id="productImageFile" accept="image/*" style="margin-top:8px;">
@@ -454,7 +455,7 @@ consegue ,e<!DOCTYPE html>
     </div>
 
     <!-- Modal para Promoções -->
-    <div id="promotionModal" class="modal">
+    <div id="promotionModal" class="modal" style="display:none;">
         <div class="modal__content modal__content--large">
             <h2 id="promotionModalTitle">Nova Promoção</h2>
             <form id="promotionForm">
@@ -476,9 +477,9 @@ consegue ,e<!DOCTYPE html>
                 </div>
 
                 <div class="form-group">
-                    <label for="promotionPhoto">Foto (upload)</label>
-                    <input type="file" id="promotionPhoto" accept="image/*" required>
-                    <small style="display:block; color:#9aa4b6; margin-top:6px;">Selecione uma imagem para a promoção</small>
+                    <label for="promotionPhoto">Foto (upload) — opcional</label>
+                    <input type="file" id="promotionPhoto" accept="image/*">
+                    <small style="display:block; color:#9aa4b6; margin-top:6px;">Selecione uma imagem para a promoção (opcional)</small>
                 </div>
 
                 <div class="form-group">
@@ -502,7 +503,7 @@ consegue ,e<!DOCTYPE html>
     </div>
 
     <!-- Modal para Resgates -->
-    <div id="redeemModal" class="modal">
+    <div id="redeemModal" class="modal" style="display:none;">
         <div class="modal__content">
             <h2 id="redeemModalTitle">Novo Resgate</h2>
             <form id="redeemForm">
@@ -535,38 +536,5 @@ consegue ,e<!DOCTYPE html>
     </div>
 
     <script type="module" src="js/admin.js"></script>
-    <script>
-        // Fallback functions for when JS module fails to load
-        function logoutAdmin() {
-            if (typeof clearSession === 'function') {
-                clearSession();
-            }
-            window.location.href = 'index.html';
-        }
-
-        function navigateToSection(section) {
-            // Remove active class from all nav items
-            document.querySelectorAll('.admin-nav__item').forEach(item => {
-                item.classList.remove('admin-nav__item--active');
-            });
-
-            // Add active class to clicked item
-            const clickedItem = document.querySelector(`[data-section="${section}"]`);
-            if (clickedItem) {
-                clickedItem.classList.add('admin-nav__item--active');
-            }
-
-            // Hide all sections
-            document.querySelectorAll('.admin-section').forEach(sec => {
-                sec.classList.remove('admin-section--active');
-            });
-
-            // Show selected section
-            const sectionEl = document.getElementById(section);
-            if (sectionEl) {
-                sectionEl.classList.add('admin-section--active');
-            }
-        }
-    </script>
 </body>
 </html>
