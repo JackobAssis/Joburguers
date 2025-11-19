@@ -113,7 +113,7 @@ async function handleAdminLogin(phone, password, errorDiv) {
     }
 
     // Login bem-sucedido
-    setCurrentSession('admin', admin.id || 'admin');
+    setCurrentSession({ userType: 'admin', userId: admin.id || 'admin', username: admin.name || 'Admin' });
     showNotification('Login de Administrador realizado!', 'success');
 
     setTimeout(() => {
@@ -147,7 +147,7 @@ async function handleClientLogin(phone, password, errorDiv) {
     }
 
     // Login ok
-    setCurrentSession('cliente', client.id);
+    setCurrentSession({ userType: 'cliente', userId: client.id, username: client.name });
     showNotification('Login realizado com sucesso! 🎉', 'success');
 
     setTimeout(() => {
@@ -265,7 +265,7 @@ async function setupClientRegister() {
             form.reset();
 
             setTimeout(() => {
-                setCurrentSession('cliente', newClient.id);
+                setCurrentSession({ userType: 'cliente', userId: newClient.id, username: newClient.name });
                 window.location.href = 'cliente.html';
             }, 2000);
 
