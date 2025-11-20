@@ -1,3 +1,12 @@
+// ------------------- Níveis de Cliente -------------------
+export async function calculateLevel(points) {
+    const settings = await getSettings();
+    const levels = settings.levels || { bronze: 0, silver: 100, gold: 300, platinum: 500 };
+    if (points >= levels.platinum) return 'platinum';
+    if (points >= levels.gold) return 'gold';
+    if (points >= levels.silver) return 'silver';
+    return 'bronze';
+}
 // ------------------- Products by Category -------------------
 export async function getProductsByCategory(category) {
     const products = await getAllProducts();
