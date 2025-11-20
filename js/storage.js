@@ -1,3 +1,24 @@
+// ------------------- Transactions -------------------
+export async function recordTransaction(transactionData) {
+    // Gera um id único para a transação
+    const id = generateId('tx');
+    const tx = {
+        id,
+        ...transactionData,
+        timestamp: new Date().toISOString()
+    };
+    // Salva no Firestore se possível, senão localStorage
+    try {
+        // Se houver coleção de transações no Firestore
+        await firebaseAdd(COLLECTIONS.TRANSACTIONS, tx);
+    } catch (err) {
+        // Fallback localStorage
+        const arr = await readLocal(KEY_TRANSACTIONS) || [];
+        arr.push(tx);
+        await writeLocal(KEY_TRANSACTIONS, arr);
+    }
+    return tx;
+}
 // storage.js
 // Backend simples usando localStorage. Todas as funções são async e retornam valores consistentes.
 // IDs têm prefixos por tipo: product_, client_, promotion_, redeem_, tx_
