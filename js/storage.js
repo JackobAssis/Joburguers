@@ -510,6 +510,11 @@ export async function addRedeem(redeem) {
     try {
         const created = { ...redeem, createdAt: new Date().toISOString() };
         const result = await firebaseAdd(COLLECTIONS.REDEEMS, created);
+        // persist a local copy so other tabs/pages receive a storage event
+        try {
+            const all = await firebaseGet(COLLECTIONS.REDEEMS) || [];
+            await writeLocal(KEY_REDEEMS, all);
+        } catch (e) { console.warn('[storage] addRedeem: could not persist local copy after firebaseAdd', e); }
         return result;
     } catch (err) {
         console.error('addRedeem Firebase error, falling back to localStorage', err);
@@ -526,6 +531,11 @@ export async function updateRedeem(id, updatedData) {
     try {
         const success = await firebaseUpdate(COLLECTIONS.REDEEMS, id, updatedData);
         if (success) {
+            // update local copy for cross-tab sync
+            try {
+                const all = await firebaseGet(COLLECTIONS.REDEEMS) || [];
+                await writeLocal(KEY_REDEEMS, all);
+            } catch (e) { console.warn('[storage] updateRedeem: could not persist local copy after firebaseUpdate', e); }
             return await firebaseGet(COLLECTIONS.REDEEMS, id);
         }
         return null;

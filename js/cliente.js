@@ -141,11 +141,24 @@ async function loadDashboard() {
     // Progresso
     const levelPoints = getPointsForLevel(level, settings);
     const nextLevelPoints = getPointsForNextLevel(level, settings);
+
+    // Determine next redeem threshold (menor pointsRequired entre resgates ativos)
+    let nextRedeemPoints = 0;
+    try {
+        const redeems = await getAllRedeems();
+        const active = (redeems || []).filter(r => r && r.active && typeof r.pointsRequired === 'number');
+        if (active.length > 0) {
+            nextRedeemPoints = active.map(r => r.pointsRequired).reduce((a, b) => Math.min(a, b), Infinity);
+            if (!isFinite(nextRedeemPoints)) nextRedeemPoints = 0;
+        }
+    } catch (e) { console.warn('[cliente] could not fetch redeems to compute nextRedeemPoints', e); }
+
     const progress = Math.min(100, ((currentClient.points - levelPoints) / (nextLevelPoints - levelPoints)) * 100);
-    
+
     document.getElementById('progressBar').style.width = progress + '%';
     document.getElementById('currentPoints').textContent = currentClient.points;
-    document.getElementById('levelTarget').textContent = nextLevelPoints;
+    // show next redeem points if available, otherwise show next level threshold
+    document.getElementById('levelTarget').textContent = nextRedeemPoints > 0 ? nextRedeemPoints : nextLevelPoints;
 }
 
 function getNextLevel(currentLevel) {
@@ -254,14 +267,31 @@ window.resgatarPontos = async function(redeemId) {
     showConfirmDialog(
         'Confirmar Resgate',
         `Deseja resgatar "${productName}" por ${redeem.pointsRequired} pontos?`,
-        () => {
+        async () => {
             if (currentClient.points >= redeem.pointsRequired) {
-                addPointsToClient(currentClient.id, -redeem.pointsRequired, 'resgate');
+                // Registrar resgate
+                await addPointsToClient(currentClient.id, -redeem.pointsRequired, 'resgate');
                 currentClient.points -= redeem.pointsRequired;
 
                 showNotification(`✓ Resgate realizado! Você ganhou ${productName} gratuitamente!`, 'success');
-                loadPontos();
-                loadDashboard();
+                await loadPontos();
+                await loadDashboard();
+
+                // Buscar número do WhatsApp da loja nas settings
+                let waNumber = '5581989334497'; // padrão se não configurado
+                let lojaNome = 'Joburguers';
+                try {
+                    const settings = await getSettings();
+                    if (settings && settings.storeWhatsApp) waNumber = settings.storeWhatsApp.replace(/\D/g, '');
+                    if (settings && settings.storeName) lojaNome = settings.storeName;
+                } catch (e) {}
+
+                // Montar mensagem automática
+                const msg = encodeURIComponent(
+                    `Olá! Gostaria de resgatar o produto "${productName}" usando meus pontos no programa de fidelidade do ${lojaNome}.`
+                );
+                const waUrl = `https://wa.me/${waNumber}?text=${msg}`;
+                window.open(waUrl, '_blank');
             }
         }
     );
