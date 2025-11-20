@@ -1,3 +1,16 @@
+// ------------------- Pontos até o próximo nível -------------------
+export async function getPointsUntilNextLevel(currentPoints) {
+    const settings = await getSettings();
+    const levels = settings.levels || { bronze: 0, silver: 100, gold: 300, platinum: 500 };
+    if (currentPoints < levels.silver) {
+        return levels.silver - currentPoints;
+    } else if (currentPoints < levels.gold) {
+        return levels.gold - currentPoints;
+    } else if (currentPoints < levels.platinum) {
+        return levels.platinum - currentPoints;
+    }
+    return 0;
+}
 // ------------------- Rótulo do Nível -------------------
 export function getLevelLabel(level) {
     const labels = {
