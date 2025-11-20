@@ -59,11 +59,11 @@
 
 .hero__logo {
     font-size: 4rem;
-    color: #0f0f0f;
+    color: #ffffff;
     background: linear-gradient(135deg, #FFD700 0%, #FF6B35 100%);
-    padding: 2rem 2.5rem;
-    border-radius: 16px;
-    margin-bottom: 1.5rem;
+    padding: 1.2rem 1.6rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
     font-weight: 900;
     line-height: 1.1;
     box-shadow: 0 10px 40px rgba(255, 107, 53, 0.5);
@@ -274,7 +274,7 @@
 
     .products-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
+        gap: 1rem;
     }
 
     .product-card__name {
@@ -283,6 +283,10 @@
 
     .product-card__price {
         font-size: 1.2rem;
+    }
+
+    .product-card__image {
+        height: 160px;
     }
 }
 
@@ -314,6 +318,10 @@
 
     .products-grid {
         grid-template-columns: 1fr;
+    }
+
+    .product-card__image {
+        height: 140px;
     }
 
     .promotions-grid {

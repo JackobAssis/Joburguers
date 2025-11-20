@@ -515,6 +515,12 @@
         padding: 1.5rem;
     }
 
+    /* Make primary action buttons full-width on mobile for easier tapping */
+    .btn--primary, .btn--responsive {
+        width: 100%;
+        display: block;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
     }

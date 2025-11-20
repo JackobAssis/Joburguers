@@ -20,6 +20,13 @@ body {
     font-size: 16px;
 }
 
+/* Make images and media scale responsively */
+img, picture, video, iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
     color: #ffffff;
@@ -118,6 +125,11 @@ a:hover {
 .btn--small {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
+}
+
+/* Utility: force full-width buttons on small screens when needed */
+.btn--responsive {
+    width: auto;
 }
 
 .btn:disabled {
@@ -351,4 +363,20 @@ textarea {
     .modal__actions .btn {
         flex: none;
     }
+
+    /* Make buttons more thumb-friendly on mobile */
+    .btn {
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    html { font-size: 15px; }
+
+    /* Helpful defaults for very small screens */
+    .container { padding-left: 1rem; padding-right: 1rem; }
+
+    /* On very small widths, make responsive buttons full width */
+    .btn--responsive, .btn--full { width: 100%; display: block; }
 }

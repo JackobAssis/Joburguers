@@ -16,8 +16,8 @@
     margin: 0 auto;
     padding: 1rem 1.5rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .header__logo h1 {
@@ -30,9 +30,8 @@
     display: flex;
     gap: 2rem;
     align-items: center;
-    position: absolute;
-    right: 1.5rem; /* mover os botões para o lado direito */
-    left: auto;
+    margin-left: auto;
+    position: static;
 }
 
 .header__link {
@@ -141,9 +140,16 @@
 
     .header__menu-toggle {
         display: flex;
+        margin-left: 0.5rem;
+        z-index: 1200;
     }
 
     .header__logo h1 {
         font-size: 1.1rem;
+    }
+
+    .header__link--login {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.95rem;
     }
 }
