@@ -1,3 +1,13 @@
+// ------------------- Rótulo do Nível -------------------
+export function getLevelLabel(level) {
+    const labels = {
+        bronze: 'Bronze 🥉',
+        silver: 'Prata 🥈',
+        gold: 'Ouro 🥇',
+        platinum: 'Platina 💎'
+    };
+    return labels[level] || 'Bronze 🥉';
+}
 // ------------------- Transações do Cliente -------------------
 export async function getClientTransactions(clientId) {
     const transactions = await getAllTransactions();
