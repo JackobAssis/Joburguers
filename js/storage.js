@@ -23,8 +23,26 @@ export function getLevelLabel(level) {
 }
 // ------------------- Transações do Cliente -------------------
 export async function getClientTransactions(clientId) {
-    const transactions = await getAllTransactions();
-    return transactions.filter(t => t.clientId === clientId).reverse();
+    try {
+        let transactions = await getAllTransactions();
+
+        // Normalize to array if something returned an object or unexpected shape
+        if (!Array.isArray(transactions)) {
+            console.warn('[storage] getClientTransactions: transactions is not an array, normalizing...', transactions);
+            if (transactions && typeof transactions === 'object') {
+                // Convert object map to array
+                transactions = Object.keys(transactions).map(k => transactions[k]);
+            } else {
+                transactions = [];
+            }
+        }
+
+        const filtered = transactions.filter(t => t && t.clientId === clientId);
+        return Array.isArray(filtered) ? filtered.reverse() : [];
+    } catch (err) {
+        console.error('[storage] getClientTransactions error', err);
+        return [];
+    }
 }
 // ------------------- Níveis de Cliente -------------------
 export async function calculateLevel(points) {

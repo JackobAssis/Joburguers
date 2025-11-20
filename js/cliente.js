@@ -265,19 +265,21 @@ window.resgatarPontos = async function(redeemId) {
 // HISTÓRICO
 // ========================================
 
-function loadHistorico() {
-    const transactions = getClientTransactions(currentClient.id);
+async function loadHistorico() {
+    const transactions = await getClientTransactions(currentClient.id) || [];
     const list = document.getElementById('historicoList');
     const empty = document.getElementById('emptyHistorico');
 
-    if (transactions.length === 0) {
-        list.style.display = 'none';
-        empty.style.display = 'block';
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+        if (list) list.style.display = 'none';
+        if (empty) empty.style.display = 'block';
+        // still ensure filters are initialized with empty array
+        setupHistoricoFilters([]);
         return;
     }
 
-    empty.style.display = 'none';
-    list.style.display = 'block';
+    if (empty) empty.style.display = 'none';
+    if (list) list.style.display = 'block';
 
     list.innerHTML = transactions.map(trans => `
         <div class="historico-item">
