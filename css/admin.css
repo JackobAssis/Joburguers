@@ -77,7 +77,7 @@ body, html { margin:0; padding:0; font-family: Inter, system-ui, -apple-system, 
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.6);
+    background:rgba(0,0,0,.7);
     z-index:1090;
 }
 
@@ -86,12 +86,14 @@ body, html { margin:0; padding:0; font-family: Inter, system-ui, -apple-system, 
     position:fixed;
     top:70px;
     left:0;
-    width:260px;
+    width:280px;
     height:calc(100vh - 70px);
     background:var(--panel);
     border-right:1px solid var(--border);
     overflow-y:auto;
-    display:block;
+    display:block !important;
+    z-index:1100;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
 }
 
 /* Nav */
@@ -174,12 +176,47 @@ body, html { margin:0; padding:0; font-family: Inter, system-ui, -apple-system, 
 
 /* Responsive - convert sidebar to overlay and show hamburger */
 @media (max-width: 768px) {
-  .admin-sidebar { display:none; } /* desktop sidebar hidden on mobile */
-  .admin-content { margin-left:0; padding:1rem; }
-  .sidebar-overlay { display:none; } /* will be toggled visible when open */
-  .admin-nav { flex-direction:column; }
-  .admin-nav__item { min-width:0; border-left:none; border-bottom:3px solid transparent; }
-  .admin-header__container { width:100%; }
+  .admin-sidebar { 
+    display:none !important; /* desktop sidebar hidden on mobile */
+  }
+  .admin-content { 
+    margin-left:0; 
+    padding:1rem; 
+  }
+  .sidebar-overlay { 
+    display:none; /* will be toggled visible when open */
+  }
+  .admin-nav { 
+    flex-direction:column;
+    padding:1rem 0.5rem;
+  }
+  .admin-nav__item { 
+    min-width:0; 
+    border-left:none; 
+    border-bottom:1px solid var(--border);
+    padding:1rem 1.5rem;
+    margin-bottom:0;
+  }
+  .admin-nav__item:last-child {
+    border-bottom:none;
+  }
+  .admin-nav__item--active {
+    background:var(--accent);
+    color:#000;
+    border-left:none;
+  }
+  .admin-header__container { 
+    width:100%; 
+    flex-wrap:nowrap;
+  }
+  .admin-header__left {
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+  }
+  .admin-header__title {
+    font-size:1rem;
+  }
 }
 
 /* smaller phones */

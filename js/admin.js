@@ -124,11 +124,16 @@ function setupNavigation() {
       const el = $id(target);
       if (el) el.classList.add('admin-section--active');
 
-      // if mobile, close overlay/sidebar
-      const overlay = $id('sidebarOverlay');
-      const sidebar = $id('adminSidebar');
-      if (overlay) overlay.style.display = 'none';
-      if (sidebar) { sidebar.style.display = ''; sidebar.classList.remove('mobile'); }
+      // if mobile, close overlay/sidebar after navigation
+      if (window.innerWidth <= 768) {
+        const overlay = $id('sidebarOverlay');
+        const sidebar = $id('adminSidebar');
+        if (overlay) overlay.style.display = 'none';
+        if (sidebar) { 
+          sidebar.style.display = ''; 
+          sidebar.classList.remove('mobile');
+        }
+      }
     });
   });
 }
