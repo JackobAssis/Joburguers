@@ -491,19 +491,24 @@
         gap: 0;
         overflow-x: auto;
         margin: 0;
+        padding: 0;
     }
 
     .cliente-nav__item {
         flex: 1;
-        padding: 1rem;
+        padding: 0.8rem 0.5rem;
         border-left: none;
         border-bottom: 3px solid transparent;
-        min-width: 120px;
+        min-width: 100px;
+        font-size: 0.85rem;
+        text-align: center;
+        white-space: nowrap;
     }
 
     .cliente-nav__item--active {
         border-left: none;
         border-bottom-color: #ff9500;
+        background-color: rgba(255, 149, 0, 0.1);
     }
 
     .cliente-nav__logout {
@@ -542,11 +547,12 @@
 
 @media (max-width: 480px) {
     .cliente-content {
-        padding: 1rem;
+        padding: 0.8rem;
     }
 
     .cliente-section h2 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
     }
 
     .dashboard-card {
@@ -555,6 +561,7 @@
 
     .pontos-info {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .resgates-grid {
@@ -563,5 +570,12 @@
 
     .levels-grid {
         grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    .cliente-nav__item {
+        font-size: 0.75rem;
+        padding: 0.6rem 0.3rem;
+        min-width: 80px;
     }
 }

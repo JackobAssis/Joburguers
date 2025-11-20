@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     setupNavigation();
+    setupMenuToggle();
     setupLogout();
     loadDashboard();
     loadPontos();
@@ -91,11 +92,35 @@ function setupNavigation() {
 }
 
 // ========================================
+// MENU MOBILE
+// ========================================
+
+function setupMenuToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (!menuToggle || !mobileMenu) return;
+
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+    });
+
+    // Fechar menu ao clicar em um link
+    mobileMenu.querySelectorAll('a, button').forEach(link => {
+        link.addEventListener('click', () => {
+            menuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        });
+    });
+}
+
+// ========================================
 // LOGOUT
 // ========================================
 
 function setupLogout() {
-    const logoutBtns = document.querySelectorAll('#logoutBtn, #logoutBtnSidebar');
+    const logoutBtns = document.querySelectorAll('#logoutBtn, #logoutBtnSidebar, #logoutBtnMobile');
     logoutBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             showConfirmDialog(
