@@ -185,11 +185,11 @@ function formatPhone(phone) {
 // PONTOS
 // ========================================
 
-function loadPontos() {
+async function loadPontos() {
     // Saldos
     document.getElementById('saldoPontos').textContent = currentClient.points;
-    
-    const transactions = getClientTransactions(currentClient.id);
+
+    const transactions = await getClientTransactions(currentClient.id);
     const ganhos = transactions
         .filter(t => t.type === 'ganho' || t.points > 0)
         .reduce((sum, t) => sum + Math.abs(t.points), 0);
