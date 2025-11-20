@@ -1,3 +1,8 @@
+// ------------------- Active Promotions -------------------
+export async function getActivePromotions() {
+    const all = await getAllPromotions();
+    return all.filter(p => p.active !== false);
+}
 // ------------------- Transactions -------------------
 export async function recordTransaction(transactionData) {
     // Gera um id único para a transação
