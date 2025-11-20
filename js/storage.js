@@ -56,6 +56,16 @@ export async function initializeStorage() {
     if ((await read(KEY_TRANSACTIONS)) === null) await write(KEY_TRANSACTIONS, []);
     // Keep session null unless already set
     if ((await read(KEY_SESSION)) === null) await write(KEY_SESSION, null);
+    // Initialize admin if missing
+    if ((await read(KEY_ADMIN)) === null) {
+        await write(KEY_ADMIN, {
+            id: 'admin_1',
+            name: 'Administrador',
+            phone: '11999999999', // Default admin phone
+            password: 'admin123', // Default password
+            createdAt: new Date().toISOString()
+        });
+    }
     return true;
 }
 
@@ -300,5 +310,43 @@ export async function clearAllData() {
         storePhone: '',
         storeHours: ''
     });
+    await write(KEY_ADMIN, {
+        id: 'admin_1',
+        name: 'Administrador',
+        phone: '11999999999',
+        password: 'admin123',
+        createdAt: new Date().toISOString()
+    });
     return true;
+}
+
+// ------------------- Admin -------------------
+export async function getAdmin() {
+    return await read(KEY_ADMIN);
+}
+
+export async function updateAdmin(updatedData) {
+    const current = await getAdmin();
+    if (!current) return null;
+    const merged = { ...current, ...updatedData };
+    await write(KEY_ADMIN, merged);
+    return merged;
+}
+
+// ------------------- Client Login Helpers -------------------
+export async function getClientByPhone(phone) {
+    const all = await getAllClients();
+    return all.find(c => c.phone === phone) || null;
+}
+
+export async function validateClientLogin(phone, password) {
+    const client = await getClientByPhone(phone);
+    if (!client || !client.password) return null;
+    return client.password === password ? client : null;
+}
+
+export async function validateAdminLogin(phone, password) {
+    const admin = await getAdmin();
+    if (!admin) return null;
+    return (admin.phone === phone && admin.password === password) ? admin : null;
 }
