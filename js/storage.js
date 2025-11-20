@@ -1,3 +1,8 @@
+// ------------------- Transações do Cliente -------------------
+export async function getClientTransactions(clientId) {
+    const transactions = await getAllTransactions();
+    return transactions.filter(t => t.clientId === clientId).reverse();
+}
 // ------------------- Níveis de Cliente -------------------
 export async function calculateLevel(points) {
     const settings = await getSettings();
