@@ -1,3 +1,9 @@
+// ------------------- Products by Category -------------------
+export async function getProductsByCategory(category) {
+    const products = await getAllProducts();
+    if (category === 'todos') return products;
+    return products.filter(p => p.category === category);
+}
 // ------------------- Active Promotions -------------------
 export async function getActivePromotions() {
     const all = await getAllPromotions();

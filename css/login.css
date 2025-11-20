@@ -1,3 +1,6 @@
+.login-form--active {
+    display: block !important;
+}
 /* ====================================
    LOGIN - Estilos da Página de Login
    ==================================== */
