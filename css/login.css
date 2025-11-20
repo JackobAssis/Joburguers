@@ -80,8 +80,21 @@
     box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
 }
 
+
+/* Botões responsivos */
 .login-form .btn {
     margin-top: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    font-size: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.login-form .btn + .btn {
+    margin-top: 0.75rem;
 }
 
 .login-info {
@@ -140,5 +153,11 @@
 
     .login-form h2 {
         font-size: 1.2rem;
+    }
+
+    .login-form .btn {
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+        width: 100%;
     }
 }
