@@ -30,7 +30,7 @@ import {
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeStorage();
 
-    const session = getCurrentSession();
+    const session = await getCurrentSession();
     if (session) {
         if (session.userType === 'admin') {
             window.location.href = 'admin.html';
