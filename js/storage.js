@@ -570,6 +570,8 @@ export async function updateSettings(updated) {
         const merged = { ...current, ...updated };
         const success = await firebaseSet(COLLECTIONS.SETTINGS, 'main', merged);
         if (success) {
+            // also persist to localStorage so other tabs/pages receive the update via "storage" event
+            try { await writeLocal(KEY_SETTINGS, merged); } catch (e) { console.warn('[storage] updateSettings: could not write local copy', e); }
             return merged;
         }
         return null;

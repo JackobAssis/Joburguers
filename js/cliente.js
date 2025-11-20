@@ -52,6 +52,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadDashboard();
     loadPontos();
     loadHistorico();
+    // render dynamic 'Como Ganhar' based on settings
+    try {
+        const s = await getSettings();
+        renderComoGanhar(s);
+    } catch (e) { console.warn('[cliente] could not render Como Ganhar on init', e); }
     loadDados();
     setupChangePassword();
 });
@@ -400,6 +405,77 @@ function loadDados() {
         }
     });
 }
+
+// ========================================
+// COMO GANHAR - render dinamicamente a seção a partir das configurações
+// ========================================
+function renderComoGanhar(settings = {}) {
+    const container = document.querySelector('.como-ganhar');
+    if (!container) return;
+
+    const pointsPerReal = (settings.pointsPerReal !== undefined) ? settings.pointsPerReal : 0.1;
+    const bonusRegistration = settings.bonusRegistration || 50;
+    const referralBonus = settings.referralBonus || 50;
+
+    const lines = [
+        {
+            icon: '🍔',
+            title: 'Compre no cardápio',
+            desc: `${formatNumber(pointsPerReal)} ponto(s) por R$1 gasto (configurado: ${pointsPerReal} ponto(s)/R$)`
+        },
+        {
+            icon: '🎁',
+            title: 'Bônus de cadastro',
+            desc: `Ganhe ${bonusRegistration} pontos ao criar sua conta`
+        },
+        {
+            icon: '📱',
+            title: 'Indique amigos',
+            desc: `Ganhe ${referralBonus} pontos quando seu amigo se registrar`
+        },
+        {
+            icon: '🎉',
+            title: 'Promoções especiais',
+            desc: 'Pontos extras durante promoções — fique de olho nas ofertas!'
+        }
+    ];
+
+    const html = `
+        <h3>Como Ganhar Pontos?</h3>
+        <ul class="pontos-list">
+            ${lines.map(l => `
+                <li>
+                    <span class="icon">${l.icon}</span>
+                    <div>
+                        <strong>${l.title}</strong>
+                        <p>${l.desc}</p>
+                    </div>
+                </li>
+            `).join('')}
+        </ul>
+    `;
+
+    container.innerHTML = html;
+}
+
+function formatNumber(n) {
+    // Remove trailing zeros for nicer display
+    if (Number.isInteger(n)) return String(n);
+    return String(parseFloat(n));
+}
+
+// Atualizar quando as settings mudarem (outras abas)
+window.addEventListener('storage', async (ev) => {
+    try {
+        if (!ev.key) return;
+        if (ev.key === 'joburguers_settings_v1' || ev.key.includes('settings')) {
+            // obter as settings mais atuais via storage API
+            const s = await getSettings();
+            console.info('[cliente] settings changed via storage event, re-rendering Como Ganhar');
+            renderComoGanhar(s);
+        }
+    } catch (e) { console.warn('[cliente] error handling storage event for settings', e); }
+});
 
 // ========================================
 // ALTERAR SENHA
