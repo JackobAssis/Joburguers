@@ -685,10 +685,6 @@ async function fileToDataURL(file) {
   });
 }
 
-// small helpers for formatting
-function formatDate(d) {
-  try { return new Date(d).toLocaleString('pt-BR'); } catch(e) { return '-'; }
-}
 
 async function loadAllInitial() {
   await loadProductsTable();
