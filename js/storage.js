@@ -72,6 +72,7 @@ export async function recordTransaction(transactionData) {
 // IDs têm prefixos por tipo: product_, client_, promotion_, redeem_, tx_
 
 import { firebaseGet, firebaseAdd, firebaseUpdate, firebaseDelete, firebaseSet } from './firebase.js';
+import { sanitizePhone } from './utils.js';
 
 const COLLECTIONS = {
     PRODUCTS: 'products',
@@ -152,6 +153,35 @@ export async function initializeStorage() {
                 password: 'admin123',
                 createdAt: new Date().toISOString()
             });
+        }
+
+        // Seed sample clients in Firestore if collection empty (helps testing)
+        try {
+            const existingClients = await firebaseGet(COLLECTIONS.CLIENTS) || [];
+            if (!Array.isArray(existingClients) || existingClients.length === 0) {
+                const samples = [
+                    {
+                        name: 'Cliente Teste 1',
+                        phone: '81999999001',
+                        password: '1234',
+                        points: 0,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        name: 'Cliente Teste 2',
+                        phone: '81999999002',
+                        password: '1234',
+                        points: 0,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                for (const s of samples) {
+                    try { await firebaseAdd(COLLECTIONS.CLIENTS, s); } catch(e) { console.warn('seed client add failed', e); }
+                }
+                console.info('Seeded sample clients into Firestore (if permitted)');
+            }
+        } catch (seedErr) {
+            console.warn('Could not seed sample clients (permissions/network?):', seedErr);
         }
 
         // Keep session in localStorage for client-side state
@@ -278,10 +308,14 @@ export async function deleteProduct(id) {
 // ------------------- Clients -------------------
 export async function getAllClients() {
     try {
-        return await firebaseGet(COLLECTIONS.CLIENTS) || [];
+        console.info('[storage] getAllClients: fetching from Firestore...');
+        const clients = await firebaseGet(COLLECTIONS.CLIENTS) || [];
+        console.info(`[storage] getAllClients: fetched ${Array.isArray(clients) ? clients.length : 'unknown'} clients from Firestore`);
+        return clients;
     } catch (err) {
-        console.error('getAllClients Firebase error, falling back to localStorage', err);
+        console.warn('[storage] getAllClients: Firebase read failed, falling back to localStorage', err);
         const arr = await readLocal(KEY_CLIENTS);
+        console.info(`[storage] getAllClients: returning ${Array.isArray(arr) ? arr.length : 0} clients from localStorage`);
         return Array.isArray(arr) ? arr : [];
     }
 }
@@ -308,10 +342,12 @@ export async function addClient(client) {
             active: client.active !== undefined ? client.active : true,
             createdAt: new Date().toISOString()
         };
+        console.info('[storage] addClient: creating client in Firestore:', created);
         const result = await firebaseAdd(COLLECTIONS.CLIENTS, created);
+        console.info('[storage] addClient: client created in Firestore with id:', result && result.id ? result.id : '(no-id)');
         return result;
     } catch (err) {
-        console.error('addClient Firebase error, falling back to localStorage', err);
+        console.warn('[storage] addClient: Firebase write failed, using localStorage fallback', err);
         const all = await getAllClients();
         const id = generateId('client');
         const created = {
@@ -327,6 +363,7 @@ export async function addClient(client) {
         };
         all.push(created);
         await writeLocal(KEY_CLIENTS, all);
+        console.info('[storage] addClient: client saved to localStorage with id:', created.id);
         return created;
     }
 }
@@ -614,7 +651,14 @@ export async function updateAdmin(updatedData) {
 // ------------------- Client Login Helpers -------------------
 export async function getClientByPhone(phone) {
     const all = await getAllClients();
-    return all.find(c => c.phone === phone) || null;
+    if (!phone) return null;
+    const target = sanitizePhone(String(phone));
+    const found = all.find(c => {
+        if (!c || !c.phone) return false;
+        return sanitizePhone(String(c.phone)) === target;
+    }) || null;
+    console.info('[storage] getClientByPhone: lookup', phone, '->', found ? `found id=${found.id}` : 'not found');
+    return found;
 }
 
 export async function validateClientLogin(phone, password) {
