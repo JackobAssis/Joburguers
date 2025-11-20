@@ -90,6 +90,48 @@ function cleanupListeners() {
     listeners = {};
 }
 
+
+// Funções utilitárias para CRUD genérico
+async function firebaseAdd(collectionName, data) {
+    const col = collection(db, collectionName);
+    const docRef = await addDoc(col, data);
+    const snap = await getDoc(docRef);
+    return { id: docRef.id, ...snap.data() };
+}
+
+async function firebaseGet(collectionName, id = null) {
+    const col = collection(db, collectionName);
+    if (id) {
+        const docRef = doc(col, id);
+        const snap = await getDoc(docRef);
+        return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    } else {
+        const snap = await getDocs(col);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+}
+
+async function firebaseUpdate(collectionName, id, data) {
+    const col = collection(db, collectionName);
+    const docRef = doc(col, id);
+    await updateDoc(docRef, data);
+    return true;
+}
+
+async function firebaseDelete(collectionName, id) {
+    const col = collection(db, collectionName);
+    const docRef = doc(col, id);
+    await deleteDoc(docRef);
+    return true;
+}
+
+async function firebaseSet(collectionName, id, data) {
+    const col = collection(db, collectionName);
+    const docRef = doc(col, id);
+    await setDoc(docRef, data);
+    return true;
+}
+
 export {
     db,
     COLLECTIONS,
@@ -112,5 +154,10 @@ export {
     ref,
     uploadBytes,
     getDownloadURL,
-    deleteObject
+    deleteObject,
+    firebaseAdd,
+    firebaseGet,
+    firebaseUpdate,
+    firebaseDelete,
+    firebaseSet
 };
