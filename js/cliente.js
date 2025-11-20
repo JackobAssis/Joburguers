@@ -7,6 +7,7 @@ import {
     getCurrentSession,
     clearSession,
     getClientById,
+    setCurrentSession,
     updateClient,
     getClientTransactions,
     getAllRedeems,
@@ -266,22 +267,34 @@ window.resgatarPontos = async function(redeemId) {
 // ========================================
 
 async function loadHistorico() {
-    const transactions = await getClientTransactions(currentClient.id) || [];
-    const list = document.getElementById('historicoList');
-    const empty = document.getElementById('emptyHistorico');
+    try {
+        let transactions = await getClientTransactions(currentClient.id) || [];
+        const list = document.getElementById('historicoList');
+        const empty = document.getElementById('emptyHistorico');
 
-    if (!Array.isArray(transactions) || transactions.length === 0) {
-        if (list) list.style.display = 'none';
-        if (empty) empty.style.display = 'block';
-        // still ensure filters are initialized with empty array
-        setupHistoricoFilters([]);
-        return;
-    }
+        // Defensive logging for unexpected shapes
+        console.info('[cliente] loadHistorico: transactions type=', typeof transactions, 'isArray=', Array.isArray(transactions));
+        if (!Array.isArray(transactions)) {
+            if (transactions && typeof transactions === 'object') {
+                console.warn('[cliente] loadHistorico: normalizing transactions object to array', transactions);
+                transactions = Object.keys(transactions).map(k => transactions[k]);
+            } else {
+                transactions = [];
+            }
+        }
 
-    if (empty) empty.style.display = 'none';
-    if (list) list.style.display = 'block';
+        if (!Array.isArray(transactions) || transactions.length === 0) {
+            if (list) list.style.display = 'none';
+            if (empty) empty.style.display = 'block';
+            // still ensure filters are initialized with empty array
+            setupHistoricoFilters([]);
+            return;
+        }
 
-    list.innerHTML = transactions.map(trans => `
+        if (empty) empty.style.display = 'none';
+        if (list) list.style.display = 'block';
+
+        list.innerHTML = transactions.map(trans => `
         <div class="historico-item">
             <div class="historico-item__info">
                 <div class="historico-item__desc">${trans.reason || trans.type}</div>
@@ -295,6 +308,15 @@ async function loadHistorico() {
 
     // Filtros
     setupHistoricoFilters(transactions);
+    } catch (err) {
+        console.error('[cliente] loadHistorico error', err);
+        // Ensure UI doesn't break
+        const list = document.getElementById('historicoList');
+        const empty = document.getElementById('emptyHistorico');
+        if (list) list.style.display = 'none';
+        if (empty) empty.style.display = 'block';
+        setupHistoricoFilters([]);
+    }
 }
 
 function setupHistoricoFilters(allTransactions) {
@@ -343,20 +365,38 @@ function loadDados() {
     document.getElementById('editEmail').value = currentClient.email || '';
     document.getElementById('editBirthdate').value = currentClient.birthdate || '';
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const updated = updateClient(currentClient.id, {
-            name: document.getElementById('editName').value,
-            phone: document.getElementById('editPhone').value,
-            email: document.getElementById('editEmail').value,
-            birthdate: document.getElementById('editBirthdate').value
-        });
+        try {
+            const updated = await updateClient(currentClient.id, {
+                name: document.getElementById('editName').value,
+                phone: document.getElementById('editPhone').value,
+                email: document.getElementById('editEmail').value,
+                birthdate: document.getElementById('editBirthdate').value
+            });
 
-        if (updated) {
-            currentClient = updated;
-            showNotification('✓ Dados atualizados com sucesso!', 'success');
-            document.getElementById('clientName').textContent = currentClient.name;
+            if (updated) {
+                // Update in-memory client
+                currentClient = updated;
+
+                // Persist session info so other pages see updated name/phone
+                try { await setCurrentSession({ userType: 'cliente', userId: currentClient.id, username: currentClient.name }); } catch (e) { console.warn('[cliente] setCurrentSession failed', e); }
+
+                showNotification('✓ Dados atualizados com sucesso!', 'success');
+                document.getElementById('clientName').textContent = currentClient.name;
+                const phoneEl = document.getElementById('clientPhone');
+                if (phoneEl) phoneEl.textContent = formatPhone(currentClient.phone || '');
+
+                // Refresh UI dependent on client data
+                await loadDashboard();
+                await loadPontos();
+            } else {
+                showNotification('Erro ao atualizar os dados. Tente novamente.', 'error');
+            }
+        } catch (err) {
+            console.error('[cliente] erro ao submeter form de dados:', err);
+            showNotification('Erro ao atualizar os dados. Veja o console para detalhes.', 'error');
         }
     });
 }
