@@ -33,7 +33,7 @@ let currentClient = null;
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeStorage();
 
-    const session = getCurrentSession();
+    const session = await getCurrentSession();
     if (!session || session.userType !== 'cliente') {
         window.location.href = 'login.html';
         return;
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     currentClient = await getClientById(session.userId);
     if (!currentClient) {
-        clearSession();
+        await clearSession();
         window.location.href = 'login.html';
         return;
     }
