@@ -89,7 +89,7 @@ export async function recordTransaction(transactionData) {
 // Backend simples usando localStorage. Todas as funções são async e retornam valores consistentes.
 // IDs têm prefixos por tipo: product_, client_, promotion_, redeem_, tx_
 
-import { firebaseGet, firebaseAdd, firebaseUpdate, firebaseDelete, firebaseSet } from './firebase.js';
+import { firebaseGet, firebaseAdd, firebaseUpdate, firebaseDelete, firebaseSet, isOnline, cache } from './firebase.js';
 import { sanitizePhone } from './utils.js';
 
 // Performance logging wrapper
