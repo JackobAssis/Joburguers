@@ -305,11 +305,6 @@ async function setupProductsSection() {
       }
     }
   });
-    closeModal('productModal');
-    await loadProductsTable();
-    await loadRedeemOptions();
-    await loadDashboard();
-  });
 
   await loadProductsTable();
 }
@@ -586,6 +581,7 @@ async function setupPromotionsSection() {
       const promo = {
         name: $id('promotionName').value.trim(),
         value: $id('promotionValue').value.trim(),
+        price: parseFloat($id('promotionValue').value.trim()) || 0, // Adicionar price para compatibilidade
         description: $id('promotionDescription').value.trim(),
         photo: photo || '',
         instagramLink: $id('promotionInstagramLink').value || '',
@@ -610,7 +606,7 @@ async function loadPromotionsTable() {
     <tr>
       <td>${p.photo ? `<img src="${p.photo}" class="table-image-small" onerror="this.src='${DEFAULT_PROMO_IMG}'">` : `<span style="color:#777">Sem imagem</span>`}</td>
       <td>${escapeHtml(p.name)}</td>
-      <td>${escapeHtml(p.value)}</td>
+      <td>R$ ${(parseFloat(p.price || p.value || 0)).toFixed(2).replace('.', ',')}</td>
       <td>${escapeHtml((p.description||'').slice(0,50))}${(p.description||'').length>50?'...':''}</td>
       <td><span class="status-badge ${p.active?'status-badge--ativo':'status-badge--inativo'}">${p.active?'Ativa':'Inativa'}</span></td>
       <td>
@@ -638,7 +634,7 @@ async function openEditPromotion(id) {
   const promo = (await getAllPromotions()).find(p => p.id === id);
   if (!promo) return;
   $id('promotionName').value = promo.name || '';
-  $id('promotionValue').value = promo.value || '';
+  $id('promotionValue').value = promo.price || promo.value || '';
   $id('promotionDescription').value = promo.description || '';
   $id('promotionInstagramLink').value = promo.instagramLink || '';
   $id('promotionActive').checked = !!promo.active;

@@ -45,6 +45,13 @@ async function uploadImage(file, path) {
     try {
         if (!file) throw new Error('No file provided');
         
+        // Check if running on Vercel (CORS issues)
+        const isVercel = window.location.hostname.includes('vercel.app');
+        if (isVercel) {
+            console.warn('[Firebase] Running on Vercel, Firebase Storage may have CORS issues. Converting to base64 fallback.');
+            return await convertToBase64Fallback(file);
+        }
+        
         // Validate file type
         if (!file.type.startsWith('image/')) {
             throw new Error('File must be an image');
@@ -85,9 +92,36 @@ async function uploadImage(file, path) {
     }
 }
 
+// Fallback function for Vercel/CORS issues - converts to base64
+async function convertToBase64Fallback(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result;
+            console.info(`[Firebase] Using base64 fallback for image: ${file.name}`);
+            resolve({
+                url: base64,
+                path: `base64/${file.name}`,
+                size: file.size,
+                type: file.type,
+                name: file.name,
+                isBase64: true
+            });
+        };
+        reader.onerror = () => reject(new Error('Failed to convert image to base64'));
+        reader.readAsDataURL(file);
+    });
+}
+
 async function deleteImage(imagePath) {
     try {
         if (!imagePath) return true;
+        
+        // Skip deletion for base64 images
+        if (imagePath.startsWith('data:')) {
+            console.info('[Firebase] Skipping deletion of base64 image');
+            return true;
+        }
         
         // Extract path from URL if needed
         let path = imagePath;
