@@ -201,26 +201,6 @@
     }
   }
 
-    // Carregar (ou reutilizar) o script do Instagram e processar os embeds (apenas se há links do Instagram)
-    const hasInstagramLinks = promotions.some(p => p.instagramLink);
-    if (hasInstagramLinks) {
-      const instgrm = await loadInstagramEmbedScript();
-      if (instgrm && typeof instgrm.Embeds === 'object' && typeof instgrm.Embeds.process === 'function') {
-        try {
-          instgrm.Embeds.process();
-        } catch (err) {
-          // Em algumas circunstâncias o process pode falhar primeiro; tentar novamente
-          setTimeout(() => {
-            try { instgrm.Embeds.process(); } catch (e) { console.warn('instgrm process falhou', e); }
-          }, 500);
-        }
-      } else {
-        // Se não foi possível carregar a API, deixar os links clicáveis (fallback)
-        console.warn('Instagram embed script não disponível. As cards mostram link simples como fallback.');
-      }
-    }
-  }
-
   // Expor a função globalmente para uso direto em páginas que não usam módulos.
   global.renderPromocoes = renderPromocoes;
 
