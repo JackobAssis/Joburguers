@@ -145,69 +145,153 @@ async function writeLocal(key, value) {
 }
 
 export async function initializeStorage() {
-    try {
-        // Initialize default settings if missing
-        const settings = await firebaseGet(COLLECTIONS.SETTINGS, 'main');
-        if (!settings) {
-            await firebaseSet(COLLECTIONS.SETTINGS, 'main', {
-                pointsPerReal: 0.1,
-                bonusRegistration: 50,
-                referralBonus: 50,
-                levels: { bronze: 0, silver: 100, gold: 300, platinum: 500 },
-                storeName: 'Joburguers',
-                storeAddress: '',
-                storePhone: '',
-                storeHours: ''
-            });
-        }
-
-        // Initialize admin if missing
-        const admin = await firebaseGet(COLLECTIONS.ADMIN, 'main');
-        if (!admin) {
-            await firebaseSet(COLLECTIONS.ADMIN, 'main', {
-                id: 'admin_1',
-                name: 'Administrador',
-                phone: '11999999999',
-                password: 'admin123',
-                createdAt: new Date().toISOString()
-            });
-        }
-
-        // Seed sample clients in Firestore if collection empty (helps testing)
+    return withPerformanceLog(async () => {
         try {
-            const existingClients = await firebaseGet(COLLECTIONS.CLIENTS) || [];
-            if (!Array.isArray(existingClients) || existingClients.length === 0) {
-                const samples = [
+            console.info('[Storage] Initializing storage system...');
+            
+            // Check network connectivity
+            if (!isOnline) {
+                console.warn('[Storage] Starting in offline mode');
+            }
+            
+            // Initialize default settings if missing
+            const settings = await firebaseGet(COLLECTIONS.SETTINGS, 'main');
+            if (!settings) {
+                console.info('[Storage] Creating default settings...');
+                await firebaseSet(COLLECTIONS.SETTINGS, 'main', {
+                    pointsPerReal: 0.1,
+                    bonusRegistration: 50,
+                    referralBonus: 50,
+                    levels: { bronze: 0, silver: 100, gold: 300, platinum: 500 },
+                    storeName: 'Joburguers',
+                    storeAddress: '',
+                    storePhone: '',
+                    storeHours: ''
+                });
+            }
+
+            // Initialize admin if missing
+            const admin = await firebaseGet(COLLECTIONS.ADMIN, 'main');
+            if (!admin) {
+                console.info('[Storage] Creating default admin...');
+                await firebaseSet(COLLECTIONS.ADMIN, 'main', {
+                    id: 'admin_1',
+                    name: 'Administrador',
+                    phone: '11999999999',
+                    password: 'admin123',
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            // Seed sample clients in Firestore if collection empty
+            try {
+                const existingClients = await firebaseGet(COLLECTIONS.CLIENTS) || [];
+                if (!Array.isArray(existingClients) || existingClients.length === 0) {
+                    console.info('[Storage] Seeding sample clients...');
+                    const samples = [
+                        {
+                            name: 'Cliente Teste 1',
+                            phone: '81999999001',
+                            password: '1234',
+                            points: 0,
+                            level: 'bronze',
+                            active: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            name: 'Cliente Teste 2',
+                            phone: '81999999002',
+                            password: '1234',
+                            points: 150,
+                            level: 'silver',
+                            active: true,
+                            createdAt: new Date().toISOString()
+                        }
+                    ];
+                    for (const s of samples) {
+                        try { 
+                            await firebaseAdd(COLLECTIONS.CLIENTS, s); 
+                        } catch(e) { 
+                            console.warn('Seed client add failed', e); 
+                        }
+                    }
+                    console.info('[Storage] Sample clients seeded successfully');
+                }
+            } catch (seedErr) {
+                console.warn('Could not seed sample clients (permissions/network?):', seedErr);
+            }
+
+            // Keep session in localStorage for client-side state
+            if ((await readLocal(KEY_SESSION)) === null) await writeLocal(KEY_SESSION, null);
+            
+            console.info('[Storage] Storage system initialized successfully');
+            return true;
+        } catch (err) {
+            console.error('initializeStorage error, falling back to localStorage', err);
+            // Fallback to localStorage initialization
+            if ((await readLocal(KEY_PRODUCTS)) === null) await writeLocal(KEY_PRODUCTS, []);
+            if ((await readLocal(KEY_CLIENTS)) === null) await writeLocal(KEY_CLIENTS, []);
+            if ((await readLocal(KEY_PROMOTIONS)) === null) {
+                // Criar promoções de exemplo
+                const examplePromotions = [
                     {
-                        name: 'Cliente Teste 1',
-                        phone: '81999999001',
-                        password: '1234',
-                        points: 0,
+                        id: generateId('promotion'),
+                        name: 'Combo Mega Burguer',
+                        description: 'Hambúrguer artesanal de 200g com queijo, alface, tomate, cebola roxa e molho especial + Batata frita + Refrigerante 350ml. Uma refeição completa para matar a fome!',
+                        price: 18.90,
+                        photo: null,
+                        instagramLink: null,
+                        active: true,
+                        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                        terms: 'Válido apenas para delivery. Não cumulativo com outras promoções.',
                         createdAt: new Date().toISOString()
                     },
                     {
-                        name: 'Cliente Teste 2',
-                        phone: '81999999002',
-                        password: '1234',
-                        points: 0,
+                        id: generateId('promotion'),
+                        name: 'Terça do X-Tudo',
+                        description: 'Toda terça-feira: X-Tudo completo com hamburger, ovo, bacon, queijo, presunto, alface, tomate e molho especial por um preço especial!',
+                        price: 15.50,
+                        photo: null,
+                        instagramLink: null,
+                        active: true,
+                        validUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+                        terms: 'Promoção válida apenas às terças-feiras. Disponível para balcão e delivery.',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: generateId('promotion'),
+                        name: 'Família Feliz',
+                        description: '4 Hamburguers + 1 Porção grande de batata frita + 2 Refrigerantes 600ml. Perfeito para compartilhar!',
+                        price: 45.00,
+                        photo: null,
+                        instagramLink: null,
+                        active: true,
+                        validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+                        terms: 'Promoção válida para pedidos acima de R$ 40,00. Disponível para delivery e retirada.',
                         createdAt: new Date().toISOString()
                     }
                 ];
-                for (const s of samples) {
-                    try { await firebaseAdd(COLLECTIONS.CLIENTS, s); } catch(e) { console.warn('seed client add failed', e); }
-                }
-                console.info('Seeded sample clients into Firestore (if permitted)');
+                await writeLocal(KEY_PROMOTIONS, examplePromotions);
             }
-        } catch (seedErr) {
-            console.warn('Could not seed sample clients (permissions/network?):', seedErr);
+            if ((await readLocal(KEY_REDEEMS)) === null) await writeLocal(KEY_REDEEMS, []);
+            if ((await readLocal(KEY_SETTINGS)) === null) {
+                await writeLocal(KEY_SETTINGS, {
+                    pointsPerReal: 0.1,
+                    bonusRegistration: 50,
+                    referralBonus: 50,
+                    levels: { bronze: 0, silver: 100, gold: 300, platinum: 500 },
+                    storeName: 'Joburguers',
+                    storeAddress: '',
+                    storePhone: '',
+                    storeHours: ''
+                });
+            }
+            
+            console.warn('[Storage] Initialized in offline mode with localStorage fallback');
+            return true;
         }
-
-        // Keep session in localStorage for client-side state
-        if ((await readLocal(KEY_SESSION)) === null) await writeLocal(KEY_SESSION, null);
-
-        return true;
-    } catch (err) {
-        console.error('initializeStorage error, falling back to localStorage', err);
+    }, 'initializeStorage');
+}
         // Fallback to localStorage initialization
         if ((await readLocal(KEY_PRODUCTS)) === null) await writeLocal(KEY_PRODUCTS, []);
         if ((await readLocal(KEY_CLIENTS)) === null) await writeLocal(KEY_CLIENTS, []);
@@ -298,13 +382,35 @@ export async function clearSession() {
 
 // ------------------- Products -------------------
 export async function getAllProducts() {
-    try {
-        return await firebaseGet(COLLECTIONS.PRODUCTS) || [];
-    } catch (err) {
-        console.error('getAllProducts Firebase error, falling back to localStorage', err);
-        const arr = await readLocal(KEY_PRODUCTS);
-        return Array.isArray(arr) ? arr : [];
-    }
+    return withPerformanceLog(async () => {
+        try {
+            // Check if offline and try cache first
+            if (!isOnline) {
+                const cached = cache.get(COLLECTIONS.PRODUCTS);
+                if (cached) {
+                    console.info('[Storage] Using cached products (offline)');
+                    return cached;
+                }
+            }
+            
+            const products = await firebaseGet(COLLECTIONS.PRODUCTS) || [];
+            
+            // Validate and clean data
+            const validProducts = products.filter(p => 
+                p && typeof p === 'object' && p.name && p.price !== undefined
+            ).map(p => ({
+                ...p,
+                price: parseFloat(p.price) || 0,
+                active: p.active !== false // default to true
+            }));
+            
+            return validProducts;
+        } catch (err) {
+            console.error('getAllProducts Firebase error, falling back to localStorage', err);
+            const arr = await readLocal(KEY_PRODUCTS);
+            return Array.isArray(arr) ? arr : [];
+        }
+    }, 'getAllProducts');
 }
 
 export async function getProductById(id) {
@@ -536,15 +642,39 @@ export async function deletePromotion(id) {
     }
 }
 
-// ------------------- Redeems -------------------
-export async function getAllRedeems() {
-    try {
-        return await firebaseGet(COLLECTIONS.REDEEMS) || [];
-    } catch (err) {
-        console.error('getAllRedeems Firebase error, falling back to localStorage', err);
-        const arr = await readLocal(KEY_REDEEMS);
-        return Array.isArray(arr) ? arr : [];
-    }
+// ------------------- Clients -------------------
+export async function getAllClients() {
+    return withPerformanceLog(async () => {
+        try {
+            // Check offline cache first
+            if (!isOnline) {
+                const cached = cache.get(COLLECTIONS.CLIENTS);
+                if (cached) {
+                    console.info('[Storage] Using cached clients (offline)');
+                    return cached;
+                }
+            }
+            
+            const clients = await firebaseGet(COLLECTIONS.CLIENTS) || [];
+            
+            // Validate and normalize client data
+            const validClients = clients.filter(c => 
+                c && typeof c === 'object' && c.phone
+            ).map(c => ({
+                ...c,
+                points: parseInt(c.points) || 0,
+                level: c.level || 'bronze',
+                active: c.active !== false,
+                createdAt: c.createdAt || new Date().toISOString()
+            }));
+            
+            return validClients;
+        } catch (err) {
+            console.error('getAllClients Firebase error, falling back to localStorage', err);
+            const arr = await readLocal(KEY_CLIENTS);
+            return Array.isArray(arr) ? arr : [];
+        }
+    }, 'getAllClients');
 }
 
 export async function addRedeem(redeem) {

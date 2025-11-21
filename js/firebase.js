@@ -14,7 +14,8 @@ import {
     orderBy,
     onSnapshot,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    connectFirestoreEmulator
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
     getStorage,
@@ -36,6 +37,58 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Performance and timeout configurations
+const OPERATION_TIMEOUT = 10000; // 10 seconds
+const RETRY_ATTEMPTS = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+// Simple cache system
+const cache = {
+    data: new Map(),
+    timestamps: new Map(),
+    TTL: 5 * 60 * 1000, // 5 minutes
+    
+    set(key, value) {
+        this.data.set(key, value);
+        this.timestamps.set(key, Date.now());
+    },
+    
+    get(key) {
+        const timestamp = this.timestamps.get(key);
+        if (!timestamp || Date.now() - timestamp > this.TTL) {
+            this.data.delete(key);
+            this.timestamps.delete(key);
+            return null;
+        }
+        return this.data.get(key);
+    },
+    
+    clear() {
+        this.data.clear();
+        this.timestamps.clear();
+    },
+    
+    invalidate(pattern) {
+        for (const key of this.data.keys()) {
+            if (key.includes(pattern)) {
+                this.data.delete(key);
+                this.timestamps.delete(key);
+            }
+        }
+    }
+};
+
+// Network status tracking
+let isOnline = navigator.onLine;
+window.addEventListener('online', () => {
+    isOnline = true;
+    console.info('[Firebase] Network back online');
+});
+window.addEventListener('offline', () => {
+    isOnline = false;
+    console.warn('[Firebase] Network offline, using cache/localStorage fallback');
+});
 
 // Collections
 const COLLECTIONS = {
@@ -91,52 +144,211 @@ function cleanupListeners() {
 }
 
 
-// Funções utilitárias para CRUD genérico
+// Utility functions with retry logic and timeout
+async function withTimeout(promise, timeoutMs = OPERATION_TIMEOUT) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Operation timeout')), timeoutMs);
+        })
+    ]);
+}
+
+async function withRetry(operation, attempts = RETRY_ATTEMPTS) {
+    for (let i = 0; i < attempts; i++) {
+        try {
+            return await operation();
+        } catch (error) {
+            console.warn(`[Firebase] Attempt ${i + 1} failed:`, error.message);
+            if (i === attempts - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (i + 1)));
+        }
+    }
+}
+
+// Enhanced CRUD operations with performance improvements
 async function firebaseAdd(collectionName, data) {
-    const col = collection(db, collectionName);
-    const docRef = await addDoc(col, data);
-    const snap = await getDoc(docRef);
-    return { id: docRef.id, ...snap.data() };
+    if (!isOnline) {
+        throw new Error('Offline - cannot perform write operations');
+    }
+    
+    const operation = async () => {
+        const col = collection(db, collectionName);
+        const docRef = await addDoc(col, {
+            ...data,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        const snap = await getDoc(docRef);
+        const result = { id: docRef.id, ...snap.data() };
+        
+        // Invalidate related cache
+        cache.invalidate(collectionName);
+        
+        return result;
+    };
+    
+    return withTimeout(withRetry(operation));
 }
 
 async function firebaseGet(collectionName, id = null) {
-    const col = collection(db, collectionName);
-    if (id) {
-        const docRef = doc(col, id);
-        const snap = await getDoc(docRef);
-        return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    } else {
-        const snap = await getDocs(col);
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const cacheKey = id ? `${collectionName}:${id}` : collectionName;
+    
+    // Check cache first
+    const cached = cache.get(cacheKey);
+    if (cached && isOnline) {
+        return cached;
+    }
+    
+    const operation = async () => {
+        const col = collection(db, collectionName);
+        if (id) {
+            const docRef = doc(col, id);
+            const snap = await getDoc(docRef);
+            const result = snap.exists() ? { id: snap.id, ...snap.data() } : null;
+            
+            if (result) {
+                cache.set(cacheKey, result);
+            }
+            
+            return result;
+        } else {
+            const snap = await getDocs(col);
+            const result = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            // Cache individual items and collection
+            result.forEach(item => cache.set(`${collectionName}:${item.id}`, item));
+            cache.set(cacheKey, result);
+            
+            return result;
+        }
+    };
+    
+    try {
+        return await withTimeout(withRetry(operation));
+    } catch (error) {
+        console.warn(`[Firebase] Get operation failed for ${cacheKey}, returning cached data:`, error.message);
+        return cached || (id ? null : []);
     }
 }
 
 async function firebaseUpdate(collectionName, id, data) {
-    const col = collection(db, collectionName);
-    const docRef = doc(col, id);
-    await updateDoc(docRef, data);
-    return true;
+    if (!isOnline) {
+        throw new Error('Offline - cannot perform write operations');
+    }
+    
+    const operation = async () => {
+        const col = collection(db, collectionName);
+        const docRef = doc(col, id);
+        await updateDoc(docRef, {
+            ...data,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Invalidate cache for this item and collection
+        cache.invalidate(collectionName);
+        
+        return true;
+    };
+    
+    return withTimeout(withRetry(operation));
 }
 
 async function firebaseDelete(collectionName, id) {
-    const col = collection(db, collectionName);
-    const docRef = doc(col, id);
-    await deleteDoc(docRef);
-    return true;
+    if (!isOnline) {
+        throw new Error('Offline - cannot perform write operations');
+    }
+    
+    const operation = async () => {
+        const col = collection(db, collectionName);
+        const docRef = doc(col, id);
+        await deleteDoc(docRef);
+        
+        // Invalidate cache
+        cache.invalidate(collectionName);
+        
+        return true;
+    };
+    
+    return withTimeout(withRetry(operation));
 }
 
 async function firebaseSet(collectionName, id, data) {
-    const col = collection(db, collectionName);
-    const docRef = doc(col, id);
-    await setDoc(docRef, data);
-    return true;
+    if (!isOnline) {
+        throw new Error('Offline - cannot perform write operations');
+    }
+    
+    const operation = async () => {
+        const col = collection(db, collectionName);
+        const docRef = doc(col, id);
+        await setDoc(docRef, {
+            ...data,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Invalidate cache
+        cache.invalidate(collectionName);
+        
+        return true;
+    };
+    
+    return withTimeout(withRetry(operation));
+}
+
+// Enhanced real-time listeners with error handling
+function initializeRealtimeListeners(callbacks = {}) {
+    try {
+        // Clients listener
+        listeners.clients = onSnapshot(
+            collection(db, COLLECTIONS.CLIENTS),
+            (snapshot) => {
+                const clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                cache.set(COLLECTIONS.CLIENTS, clients);
+                if (callbacks.onClientsUpdate) callbacks.onClientsUpdate(clients);
+            },
+            (error) => {
+                console.error('[Firebase] Clients listener error:', error);
+                if (callbacks.onClientsUpdate) {
+                    const cached = cache.get(COLLECTIONS.CLIENTS);
+                    if (cached) callbacks.onClientsUpdate(cached);
+                }
+            }
+        );
+
+        // Products listener
+        listeners.products = onSnapshot(
+            collection(db, COLLECTIONS.PRODUCTS),
+            (snapshot) => {
+                const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                cache.set(COLLECTIONS.PRODUCTS, products);
+                if (callbacks.onProductsUpdate) callbacks.onProductsUpdate(products);
+            },
+            (error) => {
+                console.error('[Firebase] Products listener error:', error);
+                if (callbacks.onProductsUpdate) {
+                    const cached = cache.get(COLLECTIONS.PRODUCTS);
+                    if (cached) callbacks.onProductsUpdate(cached);
+                }
+            }
+        );
+
+        // Add other listeners with same pattern...
+        console.info('[Firebase] Real-time listeners initialized');
+        
+    } catch (error) {
+        console.error('[Firebase] Failed to initialize listeners:', error);
+    }
 }
 
 export {
     db,
     COLLECTIONS,
+    cache,
+    isOnline,
     initializeRealtimeListeners,
     cleanupListeners,
+    withTimeout,
+    withRetry,
     collection,
     doc,
     getDoc,
