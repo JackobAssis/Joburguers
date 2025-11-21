@@ -200,39 +200,6 @@ const COLLECTIONS = {
 // Real-time listeners
 let listeners = {};
 
-// Initialize real-time listeners
-function initializeRealtimeListeners(callbacks = {}) {
-    // Clients listener
-    listeners.clients = onSnapshot(collection(db, COLLECTIONS.CLIENTS), (snapshot) => {
-        const clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (callbacks.onClientsUpdate) callbacks.onClientsUpdate(clients);
-    });
-
-    // Products listener
-    listeners.products = onSnapshot(collection(db, COLLECTIONS.PRODUCTS), (snapshot) => {
-        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (callbacks.onProductsUpdate) callbacks.onProductsUpdate(products);
-    });
-
-    // Promotions listener
-    listeners.promotions = onSnapshot(collection(db, COLLECTIONS.PROMOTIONS), (snapshot) => {
-        const promotions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (callbacks.onPromotionsUpdate) callbacks.onPromotionsUpdate(promotions);
-    });
-
-    // Redeems listener
-    listeners.redeems = onSnapshot(collection(db, COLLECTIONS.REDEEMS), (snapshot) => {
-        const redeems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (callbacks.onRedeemsUpdate) callbacks.onRedeemsUpdate(redeems);
-    });
-
-    // Transactions listener
-    listeners.transactions = onSnapshot(collection(db, COLLECTIONS.TRANSACTIONS), (snapshot) => {
-        const transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (callbacks.onTransactionsUpdate) callbacks.onTransactionsUpdate(transactions);
-    });
-}
-
 // Cleanup listeners
 function cleanupListeners() {
     Object.values(listeners).forEach(unsubscribe => unsubscribe());
