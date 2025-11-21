@@ -71,7 +71,7 @@
 
   /**
    * renderPromocoes
-   * - promotions: array de objetos de promoção (com photo e instagramLink)
+   * - promotions: array de objetos de promoção (com photo, name, price, description e instagramLink)
    * - containerId: id do grid (default 'promocoes-grid')
    */
   async function renderPromocoes(promotions, containerId = 'promocoes-grid') {
@@ -100,10 +100,16 @@
     const section = container.closest('section');
     if (section) section.style.display = 'block';
 
-    // Para cada promoção, criar um card
-    promotions.forEach(promo => {
+    // Para cada promoção, criar um card clicável
+    promotions.forEach((promo, index) => {
       const card = document.createElement('div');
-      card.className = 'promo-card';
+      card.className = 'promo-card clickable-promo';
+      card.setAttribute('data-promo-id', promo.id || index);
+      card.style.cursor = 'pointer';
+
+      // Container do conteúdo visual
+      const visualContent = document.createElement('div');
+      visualContent.className = 'promo-visual';
 
       // Se tem foto (URL do Storage), mostrar imagem
       if (promo.photo) {
@@ -114,35 +120,86 @@
         img.onerror = () => {
           img.src = 'https://via.placeholder.com/400x300?text=Imagem+Indisponivel';
         };
-        card.appendChild(img);
+        visualContent.appendChild(img);
       }
       // Se tem instagramLink, mostrar embed do Instagram
       else if (promo.instagramLink) {
         const block = createInstagramBlockquote(promo.instagramLink);
-        card.appendChild(block);
+        visualContent.appendChild(block);
       }
-      // Fallback: mostrar nome e descrição
+      // Fallback: placeholder
       else {
-        const title = document.createElement('h3');
-        title.textContent = promo.name || 'Promoção';
-        card.appendChild(title);
-
-        if (promo.description) {
-          const desc = document.createElement('p');
-          desc.textContent = promo.description;
-          card.appendChild(desc);
-        }
-
-        if (promo.value) {
-          const value = document.createElement('div');
-          value.className = 'promo-value';
-          value.textContent = promo.value;
-          card.appendChild(value);
-        }
+        const placeholder = document.createElement('div');
+        placeholder.className = 'promo-placeholder';
+        placeholder.innerHTML = '<span>🎉</span>';
+        visualContent.appendChild(placeholder);
       }
+
+      card.appendChild(visualContent);
+
+      // Informações da promoção (nome e preço)
+      const infoContent = document.createElement('div');
+      infoContent.className = 'promo-info';
+
+      if (promo.name) {
+        const title = document.createElement('h3');
+        title.className = 'promo-title';
+        title.textContent = promo.name;
+        infoContent.appendChild(title);
+      }
+
+      if (promo.price !== undefined && promo.price !== null) {
+        const priceElement = document.createElement('div');
+        priceElement.className = 'promo-price';
+        priceElement.textContent = typeof promo.price === 'number' 
+          ? `R$ ${promo.price.toFixed(2).replace('.', ',')}` 
+          : promo.price;
+        infoContent.appendChild(priceElement);
+      }
+
+      // Descrição curta (truncada)
+      if (promo.description) {
+        const desc = document.createElement('p');
+        desc.className = 'promo-description-short';
+        desc.textContent = promo.description.length > 80 
+          ? promo.description.substring(0, 80) + '...'
+          : promo.description;
+        infoContent.appendChild(desc);
+      }
+
+      // Indicador de clique
+      const clickIndicator = document.createElement('div');
+      clickIndicator.className = 'promo-click-indicator';
+      clickIndicator.innerHTML = '<span>👆 Clique para ver detalhes</span>';
+      infoContent.appendChild(clickIndicator);
+
+      card.appendChild(infoContent);
+
+      // Event listener para abrir modal
+      card.addEventListener('click', () => openPromoModal(promo));
 
       container.appendChild(card);
     });
+
+    // Carregar (ou reutilizar) o script do Instagram e processar os embeds (apenas se há links do Instagram)
+    const hasInstagramLinks = promotions.some(p => p.instagramLink);
+    if (hasInstagramLinks) {
+      const instgrm = await loadInstagramEmbedScript();
+      if (instgrm && typeof instgrm.Embeds === 'object' && typeof instgrm.Embeds.process === 'function') {
+        try {
+          instgrm.Embeds.process();
+        } catch (err) {
+          // Em algumas circunstâncias o process pode falhar primeiro; tentar novamente
+          setTimeout(() => {
+            try { instgrm.Embeds.process(); } catch (e) { console.warn('instgrm process falhou', e); }
+          }, 500);
+        }
+      } else {
+        // Se não foi possível carregar a API, deixar os links clicáveis (fallback)
+        console.warn('Instagram embed script não disponível. As cards mostram link simples como fallback.');
+      }
+    }
+  }
 
     // Carregar (ou reutilizar) o script do Instagram e processar os embeds (apenas se há links do Instagram)
     const hasInstagramLinks = promotions.some(p => p.instagramLink);

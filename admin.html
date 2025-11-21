@@ -137,31 +137,119 @@
 
     <!-- Configurações -->
     <section id="configuracoes" class="admin-section">
-      <h2>Configurações</h2>
-      <div class="settings-group">
-        <form id="pointsSettingsForm" class="settings-form">
-          <label>Pontos por R$ <input id="pointsPerReal" type="number" step="0.1" min="0.1"></label>
-          <label>Pontos por cadastro <input id="bonusRegistration" type="number"></label>
-          <label>Pontos por indicação <input id="referralBonus" type="number"></label>
-          <button type="submit" class="btn btn--primary">Salvar</button>
-        </form>
-      </div>
+      <h2>Configurações do Sistema</h2>
+      
+      <div class="settings-container">
+        <!-- Configurações de Pontos -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <div class="settings-card__icon">⭐</div>
+            <div>
+              <h3>Sistema de Pontos</h3>
+              <p>Configure como os pontos são distribuídos</p>
+            </div>
+          </div>
+          <form id="pointsSettingsForm" class="settings-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pointsPerReal">Pontos por R$</label>
+                <input id="pointsPerReal" type="number" step="0.1" min="0.1" placeholder="0.1">
+                <small>Quantos pontos o cliente ganha por real gasto</small>
+              </div>
+              <div class="form-group">
+                <label for="bonusRegistration">Bônus de Cadastro</label>
+                <input id="bonusRegistration" type="number" min="0" placeholder="50">
+                <small>Pontos ganhos ao criar uma conta</small>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="referralBonus">Bônus de Indicação</label>
+                <input id="referralBonus" type="number" min="0" placeholder="50">
+                <small>Pontos ganhos ao indicar um amigo</small>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary">
+                <span>💾</span> Salvar Configurações
+              </button>
+            </div>
+          </form>
+        </div>
 
-      <div class="settings-group">
-        <form id="storeInfoForm" class="settings-form">
-          <label>Nome da loja <input id="storeName" type="text"></label>
-          <label>Endereço <input id="storeAddress" type="text"></label>
-          <label>Telefone <input id="storePhone" type="tel"></label>
-          <label>Horário <input id="storeHours" type="text"></label>
-          <button type="submit" class="btn btn--primary">Salvar</button>
-        </form>
-      </div>
+        <!-- Informações da Loja -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <div class="settings-card__icon">🏪</div>
+            <div>
+              <h3>Informações da Loja</h3>
+              <p>Dados que aparecem no app e comunicações</p>
+            </div>
+          </div>
+          <form id="storeInfoForm" class="settings-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="storeName">Nome da Loja</label>
+                <input id="storeName" type="text" placeholder="Joburguers">
+              </div>
+              <div class="form-group">
+                <label for="storePhone">Telefone/WhatsApp</label>
+                <input id="storePhone" type="tel" placeholder="(81) 98933-4497">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="storeAddress">Endereço Completo</label>
+                <input id="storeAddress" type="text" placeholder="Rua Pasárgada, Três Marias - Carpina, PE">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="storeHours">Horário de Funcionamento</label>
+                <input id="storeHours" type="text" placeholder="Seg-Dom: 6:30h às 22h">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary">
+                <span>💾</span> Salvar Informações
+              </button>
+            </div>
+          </form>
+        </div>
 
-      <div class="settings-group">
-        <button id="exportDataBtn" class="btn">Exportar JSON</button>
-        <button id="importDataBtn" class="btn">Importar JSON</button>
-        <input id="importFile" type="file" accept=".json" style="display:none;">
-        <button id="resetDataBtn" class="btn btn--danger">Limpar dados</button>
+        <!-- Gerenciamento de Dados -->
+        <div class="settings-card">
+          <div class="settings-card__header">
+            <div class="settings-card__icon">🗃️</div>
+            <div>
+              <h3>Gerenciamento de Dados</h3>
+              <p>Backup, importação e limpeza do sistema</p>
+            </div>
+          </div>
+          <div class="settings-actions">
+            <div class="action-group">
+              <h4>Backup e Restore</h4>
+              <div class="button-group">
+                <button id="exportDataBtn" class="btn btn--secondary">
+                  <span>📥</span> Exportar Dados
+                </button>
+                <button id="importDataBtn" class="btn btn--secondary">
+                  <span>📤</span> Importar Dados
+                </button>
+                <input id="importFile" type="file" accept=".json" style="display:none;">
+              </div>
+              <small>Faça backup dos dados ou restaure de um arquivo JSON</small>
+            </div>
+            
+            <div class="action-group action-group--danger">
+              <h4>Zona de Perigo</h4>
+              <button id="resetDataBtn" class="btn btn--danger">
+                <span>🗑️</span> Limpar Todos os Dados
+              </button>
+              <small>⚠️ Esta ação não pode ser desfeita!</small>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>

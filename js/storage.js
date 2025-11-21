@@ -211,7 +211,48 @@ export async function initializeStorage() {
         // Fallback to localStorage initialization
         if ((await readLocal(KEY_PRODUCTS)) === null) await writeLocal(KEY_PRODUCTS, []);
         if ((await readLocal(KEY_CLIENTS)) === null) await writeLocal(KEY_CLIENTS, []);
-        if ((await readLocal(KEY_PROMOTIONS)) === null) await writeLocal(KEY_PROMOTIONS, []);
+        if ((await readLocal(KEY_PROMOTIONS)) === null) {
+            // Criar promoções de exemplo
+            const examplePromotions = [
+                {
+                    id: generateId('promotion'),
+                    name: 'Combo Mega Burguer',
+                    description: 'Hambúrguer artesanal de 200g com queijo, alface, tomate, cebola roxa e molho especial + Batata frita + Refrigerante 350ml. Uma refeição completa para matar a fome!',
+                    price: 18.90,
+                    photo: null,
+                    instagramLink: null,
+                    active: true,
+                    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    terms: 'Válido apenas para delivery. Não cumulativo com outras promoções.',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: generateId('promotion'),
+                    name: 'Terça do X-Tudo',
+                    description: 'Toda terça-feira: X-Tudo completo com hamburger, ovo, bacon, queijo, presunto, alface, tomate e molho especial por um preço especial!',
+                    price: 15.50,
+                    photo: null,
+                    instagramLink: null,
+                    active: true,
+                    validUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+                    terms: 'Promoção válida apenas às terças-feiras. Disponível para balcão e delivery.',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: generateId('promotion'),
+                    name: 'Família Feliz',
+                    description: '4 Hamburguers + 1 Porção grande de batata frita + 2 Refrigerantes 600ml. Perfeito para compartilhar!',
+                    price: 45.00,
+                    photo: null,
+                    instagramLink: null,
+                    active: true,
+                    validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+                    terms: 'Promoção válida para pedidos acima de R$ 40,00. Disponível para delivery e retirada.',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            await writeLocal(KEY_PROMOTIONS, examplePromotions);
+        }
         if ((await readLocal(KEY_REDEEMS)) === null) await writeLocal(KEY_REDEEMS, []);
         if ((await readLocal(KEY_SETTINGS)) === null) {
             await writeLocal(KEY_SETTINGS, {
