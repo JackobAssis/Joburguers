@@ -201,6 +201,85 @@
     }
   }
 
+  // Função para abrir modal de detalhes da promoção
+  function openPromoModal(promo) {
+    const modal = document.getElementById('promoModal');
+    const title = document.getElementById('promoModalTitle');
+    const image = document.getElementById('promoModalImage');
+    const price = document.getElementById('promoModalPrice');
+    const description = document.getElementById('promoModalDescription');
+    const whatsappBtn = document.getElementById('promoModalWhatsApp');
+
+    if (!modal) {
+      console.error('Modal de promoção não encontrado');
+      return;
+    }
+
+    // Preencher informações
+    title.textContent = promo.name || 'Promoção';
+    
+    // Imagem
+    if (promo.photo) {
+      image.innerHTML = `<img src="${promo.photo}" alt="${promo.name || 'Promoção'}" onerror="this.style.display='none'">`;
+    } else {
+      image.innerHTML = '<div class="modal-placeholder">🎉</div>';
+    }
+    
+    // Preço
+    if (promo.price !== undefined && promo.price !== null) {
+      price.textContent = typeof promo.price === 'number' 
+        ? `R$ ${promo.price.toFixed(2).replace('.', ',')}` 
+        : promo.price;
+      price.style.display = 'block';
+    } else {
+      price.style.display = 'none';
+    }
+    
+    // Descrição
+    description.textContent = promo.description || 'Sem descrição disponível.';
+    
+    // Configurar WhatsApp
+    whatsappBtn.onclick = () => {
+      const message = `Olá! Gostaria de saber mais sobre a promoção: ${promo.name}`;
+      const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    };
+    
+    // Mostrar modal
+    modal.style.display = 'flex';
+    
+    // Prevenir scroll do body
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Função para fechar modal
+  function closePromoModal() {
+    const modal = document.getElementById('promoModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  // Fechar modal clicando no fundo
+  document.addEventListener('click', (e) => {
+    const modal = document.getElementById('promoModal');
+    if (e.target === modal) {
+      closePromoModal();
+    }
+  });
+
+  // Fechar modal com ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closePromoModal();
+    }
+  });
+
+  // Expor as funções globalmente
+  global.openPromoModal = openPromoModal;
+  global.closePromoModal = closePromoModal;
+
   // Expor a função globalmente para uso direto em páginas que não usam módulos.
   global.renderPromocoes = renderPromocoes;
 
