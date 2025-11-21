@@ -610,6 +610,17 @@ export async function addPointsToClient(id, amount, reason = '') {
     return { client: await getClientById(id), transaction };
 }
 
+// ------------------- Redeems -------------------
+export async function getAllRedeems() {
+    try {
+        return await firebaseGet(COLLECTIONS.REDEEMS) || [];
+    } catch (err) {
+        console.error('getAllRedeems Firebase error, falling back to localStorage', err);
+        const arr = await readLocal(KEY_REDEEMS);
+        return Array.isArray(arr) ? arr : [];
+    }
+}
+
 export async function addRedeem(redeem) {
     try {
         const created = { ...redeem, createdAt: new Date().toISOString() };
