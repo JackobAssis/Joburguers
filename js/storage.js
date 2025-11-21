@@ -92,6 +92,21 @@ export async function recordTransaction(transactionData) {
 import { firebaseGet, firebaseAdd, firebaseUpdate, firebaseDelete, firebaseSet } from './firebase.js';
 import { sanitizePhone } from './utils.js';
 
+// Performance logging wrapper
+async function withPerformanceLog(operation, operationName = 'Unknown') {
+    const startTime = performance.now();
+    try {
+        const result = await operation();
+        const duration = performance.now() - startTime;
+        console.info(`[Performance] ${operationName} completed in ${duration.toFixed(2)}ms`);
+        return result;
+    } catch (error) {
+        const duration = performance.now() - startTime;
+        console.error(`[Performance] ${operationName} failed after ${duration.toFixed(2)}ms:`, error);
+        throw error;
+    }
+}
+
 const COLLECTIONS = {
     PRODUCTS: 'products',
     CLIENTS: 'clients',
