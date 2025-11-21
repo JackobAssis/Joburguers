@@ -508,6 +508,108 @@ export async function getAllClients() {
     }, 'getAllClients');
 }
 
+export async function getClientById(id) {
+    try {
+        return await firebaseGet(COLLECTIONS.CLIENTS, id);
+    } catch (err) {
+        console.error('getClientById Firebase error, falling back to localStorage', err);
+        const all = await getAllClients();
+        return all.find(c => c.id === id) || null;
+    }
+}
+
+export async function addClient(client) {
+    try {
+        const created = {
+            name: client.name || '',
+            phone: client.phone || '',
+            email: client.email || '',
+            password: client.password || null,
+            points: client.points || 0,
+            level: client.level || 'bronze',
+            active: client.active !== undefined ? client.active : true,
+            createdAt: new Date().toISOString()
+        };
+        const result = await firebaseAdd(COLLECTIONS.CLIENTS, created);
+        return result;
+    } catch (err) {
+        console.warn('addClient Firebase error, falling back to localStorage', err);
+        const all = await getAllClients();
+        const id = generateId('client');
+        const created = {
+            id,
+            name: client.name || '',
+            phone: client.phone || '',
+            email: client.email || '',
+            password: client.password || null,
+            points: client.points || 0,
+            level: client.level || 'bronze',
+            active: client.active !== undefined ? client.active : true,
+            createdAt: new Date().toISOString()
+        };
+        all.push(created);
+        await writeLocal(KEY_CLIENTS, all);
+        return created;
+    }
+}
+
+export async function updateClient(id, updatedData) {
+    try {
+        const success = await firebaseUpdate(COLLECTIONS.CLIENTS, id, updatedData);
+        if (success) {
+            return await getClientById(id);
+        }
+        return null;
+    } catch (err) {
+        console.error('updateClient Firebase error, falling back to localStorage', err);
+        const all = await getAllClients();
+        const idx = all.findIndex(c => c.id === id);
+        if (idx === -1) return null;
+        all[idx] = { ...all[idx], ...updatedData, updatedAt: new Date().toISOString() };
+        await writeLocal(KEY_CLIENTS, all);
+        return all[idx];
+    }
+}
+
+export async function deleteClient(id) {
+    try {
+        return await firebaseDelete(COLLECTIONS.CLIENTS, id);
+    } catch (err) {
+        console.error('deleteClient Firebase error, falling back to localStorage', err);
+        let all = await getAllClients();
+        const before = all.length;
+        all = all.filter(c => c.id !== id);
+        await writeLocal(KEY_CLIENTS, all);
+        return all.length !== before;
+    }
+}
+
+export async function addPointsToClient(id, amount, reason = '') {
+    const client = await getClientById(id);
+    if (!client) return null;
+    
+    const newPoints = (client.points || 0) + (amount || 0);
+    client.points = Math.max(0, newPoints); // Não permitir pontos negativos
+    
+    // Create transaction record
+    const transaction = {
+        id: generateId('tx'),
+        clientId: id,
+        type: amount >= 0 ? 'ganho' : 'gasto',
+        points: amount,
+        reason: reason,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Record transaction
+    await recordTransaction(transaction);
+    
+    // Update client points
+    await updateClient(id, { points: client.points });
+    
+    return { client: await getClientById(id), transaction };
+}
+
 export async function addRedeem(redeem) {
     try {
         const created = { ...redeem, createdAt: new Date().toISOString() };
