@@ -37,6 +37,102 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Firebase Storage functions for images
+async function uploadImage(file, path) {
+    try {
+        if (!file) throw new Error('No file provided');
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            throw new Error('File must be an image');
+        }
+        
+        // Validate file size (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            throw new Error('Image size must be less than 5MB');
+        }
+        
+        // Create reference with timestamp to avoid conflicts
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const storageRef = ref(storage, `${path}/${fileName}`);
+        
+        console.info(`[Firebase] Uploading image: ${fileName}`);
+        
+        // Upload file
+        const snapshot = await uploadBytes(storageRef, file);
+        
+        // Get download URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        console.info(`[Firebase] Image uploaded successfully: ${downloadURL}`);
+        
+        return {
+            url: downloadURL,
+            path: snapshot.ref.fullPath,
+            size: file.size,
+            type: file.type,
+            name: fileName
+        };
+        
+    } catch (error) {
+        console.error('[Firebase] Image upload failed:', error);
+        throw error;
+    }
+}
+
+async function deleteImage(imagePath) {
+    try {
+        if (!imagePath) return true;
+        
+        // Extract path from URL if needed
+        let path = imagePath;
+        if (path.includes('firebase')) {
+            // Extract path from Firebase URL
+            const pathMatch = path.match(/\/o\/(.*?)\?/);
+            if (pathMatch) {
+                path = decodeURIComponent(pathMatch[1]);
+            }
+        }
+        
+        const storageRef = ref(storage, path);
+        await deleteObject(storageRef);
+        
+        console.info(`[Firebase] Image deleted: ${path}`);
+        return true;
+        
+    } catch (error) {
+        console.warn('[Firebase] Image deletion failed:', error);
+        return false;
+    }
+}
+
+// Helper function to compress images before upload
+async function compressImage(file, maxWidth = 800, quality = 0.8) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Calculate dimensions
+            const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            
+            // Draw compressed image
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to blob
+            canvas.toBlob(resolve, 'image/jpeg', quality);
+        };
+        
+        img.src = URL.createObjectURL(file);
+    });
+}
 
 // Performance and timeout configurations
 const OPERATION_TIMEOUT = 10000; // 10 seconds
@@ -342,6 +438,7 @@ function initializeRealtimeListeners(callbacks = {}) {
 
 export {
     db,
+    storage,
     COLLECTIONS,
     cache,
     isOnline,
@@ -349,6 +446,9 @@ export {
     cleanupListeners,
     withTimeout,
     withRetry,
+    uploadImage,
+    deleteImage,
+    compressImage,
     collection,
     doc,
     getDoc,

@@ -40,9 +40,16 @@ import {
   readJSONFile
 } from './utils.js';
 
+import {
+  uploadImage,
+  deleteImage,
+  compressImage
+} from './firebase.js';
+
 // Placeholders
 const DEFAULT_THUMB = 'https://via.placeholder.com/60?text=Sem+Imagem';
 const DEFAULT_PROMO_IMG = 'https://via.placeholder.com/100x60?text=Sem+Imagem';
+const PRODUCT_IMAGE_PATH = 'products'; // Firebase Storage path
 
 // helper
 const $id = id => document.getElementById(id);
@@ -197,40 +204,107 @@ async function setupProductsSection() {
 
   productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // gather data
-    const fileInput = $id('productImageFile');
-    let imageValue = ($id('productImage') && $id('productImage').value) ? $id('productImage').value.trim() : '';
-    if (fileInput && fileInput.files && fileInput.files[0]) {
-      try {
-        imageValue = await fileToDataURL(fileInput.files[0]);
-      } catch (err) {
-        console.warn('image read failed', err);
-        showNotification('Erro ao ler imagem, produto será salvo sem imagem.', 'warning');
+    
+    try {
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]') || 
+                       e.target.querySelector('input[type="submit"]') ||
+                       document.querySelector('#productModal button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.textContent = 'Salvando...';
+        submitBtn.disabled = true;
+      }
+
+      // Handle image upload
+      const fileInput = $id('productImageFile');
+      let imageURL = ($id('productImage') && $id('productImage').value) ? $id('productImage').value.trim() : '';
+      let imagePath = null; // Store Firebase Storage path for deletion
+      
+      // If user selected a new file, upload to Firebase Storage
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        try {
+          showNotification('Fazendo upload da imagem...', 'info');
+          
+          // Compress image before upload
+          const compressedFile = await compressImage(fileInput.files[0]);
+          
+          // Upload to Firebase Storage
+          const uploadResult = await uploadImage(compressedFile, PRODUCT_IMAGE_PATH);
+          imageURL = uploadResult.url;
+          imagePath = uploadResult.path;
+          
+          showNotification('Imagem enviada com sucesso!', 'success');
+        } catch (err) {
+          console.error('Image upload failed:', err);
+          showNotification(`Erro no upload da imagem: ${err.message}. Produto será salvo sem imagem.`, 'warning');
+          imageURL = '';
+          imagePath = null;
+        }
+      }
+
+      // Prepare product data
+      const productData = {
+        name: $id('productName').value.trim(),
+        category: $id('productCategory').value,
+        price: parseFloat($id('productPrice').value) || 0,
+        image: imageURL,
+        imagePath: imagePath, // Store path for future deletion
+        description: $id('productDescription').value.trim(),
+        ingredients: ($id('productIngredients').value || '').split(',').map(i => i.trim()).filter(Boolean),
+        available: !!$id('productAvailable').checked
+      };
+
+      const pid = productForm.dataset.productId;
+      
+      if (pid) {
+        // Update existing product
+        const existingProduct = await getProductById(pid);
+        
+        // If image changed, delete old image from Storage
+        if (existingProduct && existingProduct.imagePath && imagePath && existingProduct.imagePath !== imagePath) {
+          try {
+            await deleteImage(existingProduct.imagePath);
+            console.info('Old product image deleted successfully');
+          } catch (err) {
+            console.warn('Failed to delete old image:', err);
+          }
+        }
+        
+        await updateProduct(pid, productData);
+        showNotification('✓ Produto atualizado!', 'success');
+      } else {
+        // Create new product
+        await addProduct(productData);
+        showNotification('✓ Produto criado!', 'success');
+      }
+
+      // Reset form and UI
+      if (fileInput) fileInput.value = '';
+      if (submitBtn) {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+      
+      closeModal('productModal');
+      await loadProductsTable();
+      await loadRedeemOptions();
+      await loadDashboard();
+      
+    } catch (error) {
+      console.error('Error saving product:', error);
+      showNotification(`Erro ao salvar produto: ${error.message}`, 'error');
+      
+      // Reset button state
+      const submitBtn = e.target.querySelector('button[type="submit"]') || 
+                       e.target.querySelector('input[type="submit"]') ||
+                       document.querySelector('#productModal button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = 'Salvar';
+        submitBtn.disabled = false;
       }
     }
-    // keep image optional
-    if (!imageValue) imageValue = '';
-
-    const productData = {
-      name: $id('productName').value.trim(),
-      category: $id('productCategory').value,
-      price: parseFloat($id('productPrice').value) || 0,
-      image: imageValue,
-      description: $id('productDescription').value.trim(),
-      ingredients: ($id('productIngredients').value || '').split(',').map(i => i.trim()).filter(Boolean),
-      available: !!$id('productAvailable').checked
-    };
-
-    const pid = productForm.dataset.productId;
-    if (pid) {
-      await updateProduct(pid, productData);
-      showNotification('✓ Produto atualizado!', 'success');
-    } else {
-      await addProduct(productData);
-      showNotification('✓ Produto criado!', 'success');
-    }
-
-    if (fileInput) fileInput.value = '';
+  });
     closeModal('productModal');
     await loadProductsTable();
     await loadRedeemOptions();
@@ -288,11 +362,31 @@ async function loadProductsTable() {
     if (btn.dataset.action === 'delete') btn.onclick = (e) => {
       e.stopPropagation();
       showConfirmDialog('Deletar Produto?', 'Esta ação não pode ser desfeita.', async () => {
-        await deleteProduct(id);
-        showNotification('✓ Produto deletado!', 'success');
-        await loadProductsTable();
-        await loadRedeemOptions();
-        await loadDashboard();
+        try {
+          // Get product data to delete associated image
+          const product = await getProductById(id);
+          
+          // Delete from database first
+          await deleteProduct(id);
+          
+          // Then try to delete image from Storage if exists
+          if (product && product.imagePath) {
+            try {
+              await deleteImage(product.imagePath);
+              console.info('Product image deleted from Storage');
+            } catch (err) {
+              console.warn('Failed to delete product image:', err);
+            }
+          }
+          
+          showNotification('✓ Produto deletado!', 'success');
+          await loadProductsTable();
+          await loadRedeemOptions();
+          await loadDashboard();
+        } catch (error) {
+          console.error('Error deleting product:', error);
+          showNotification(`Erro ao deletar produto: ${error.message}`, 'error');
+        }
       });
     };
   });
