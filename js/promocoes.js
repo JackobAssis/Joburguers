@@ -148,12 +148,17 @@
         infoContent.appendChild(title);
       }
 
-      if (promo.price !== undefined && promo.price !== null) {
+      // Exibir preço - verifica tanto price quanto value
+      const priceValue = promo.price || promo.value;
+      if (priceValue !== undefined && priceValue !== null && priceValue !== '') {
         const priceElement = document.createElement('div');
         priceElement.className = 'promo-price';
-        priceElement.textContent = typeof promo.price === 'number' 
-          ? `R$ ${promo.price.toFixed(2).replace('.', ',')}` 
-          : promo.price;
+        const numPrice = parseFloat(priceValue);
+        if (!isNaN(numPrice)) {
+          priceElement.textContent = `R$ ${numPrice.toFixed(2).replace('.', ',')}`;
+        } else {
+          priceElement.textContent = priceValue;
+        }
         infoContent.appendChild(priceElement);
       }
 
@@ -225,11 +230,15 @@
       image.innerHTML = '<div class="modal-placeholder">🎉</div>';
     }
     
-    // Preço
-    if (promo.price !== undefined && promo.price !== null) {
-      price.textContent = typeof promo.price === 'number' 
-        ? `R$ ${promo.price.toFixed(2).replace('.', ',')}` 
-        : promo.price;
+    // Preço - verifica tanto price quanto value
+    const priceValue = promo.price || promo.value;
+    if (priceValue !== undefined && priceValue !== null && priceValue !== '') {
+      const numPrice = parseFloat(priceValue);
+      if (!isNaN(numPrice)) {
+        price.textContent = `R$ ${numPrice.toFixed(2).replace('.', ',')}`;
+      } else {
+        price.textContent = priceValue;
+      }
       price.style.display = 'block';
     } else {
       price.style.display = 'none';
