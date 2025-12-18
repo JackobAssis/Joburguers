@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// ============================================
+// REGRAS DE SEGURANÇA FIRESTORE - PRODUÇÃO
+// ============================================
+// Estas regras usam Firebase Authentication Anônima
+// Todos os usuários são autenticados anonimamente ao acessar o site
+// Isso permite acesso controlado sem necessidade de cadastro
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===== PRODUTOS =====
+    // Leitura pública, escrita apenas autenticado
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // ===== PROMOÇÕES =====
+    // Leitura pública, escrita apenas autenticado
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // ===== CONFIGURAÇÕES =====
+    // Leitura pública, escrita apenas autenticado
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // ===== CLIENTES =====
+    // Requer autenticação (anônima ou real)
+    match /clients/{clientId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ===== TRANSAÇÕES =====
+    // Requer autenticação
+    match /transactions/{transactionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ===== RESGATES =====
+    // Requer autenticação
+    match /redeems/{redeemId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ===== ADMIN =====
+    // Requer autenticação
+    match /admin/{adminId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}

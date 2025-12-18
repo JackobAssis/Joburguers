@@ -1,5 +1,5 @@
 // Firebase configuration and initialization
-// Updated: Fixed duplicate function declarations
+// Updated: Fixed duplicate function declarations + Firebase Authentication
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
     getFirestore,
@@ -25,6 +25,11 @@ import {
     getDownloadURL,
     deleteObject
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import {
+    getAuth,
+    signInAnonymously,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBNWi28sZ1UfooqOE1XHeoWsMJQ74G-egw",
@@ -39,6 +44,49 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
+
+// Authentication state
+let isAuthenticated = false;
+let authInitialized = false;
+
+// Initialize anonymous authentication
+async function initializeAuth() {
+    if (authInitialized) return isAuthenticated;
+    
+    return new Promise((resolve) => {
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.info('[Firebase Auth] User authenticated:', user.uid);
+                isAuthenticated = true;
+                authInitialized = true;
+                resolve(true);
+            } else {
+                console.info('[Firebase Auth] No user, signing in anonymously...');
+                try {
+                    await signInAnonymously(auth);
+                    isAuthenticated = true;
+                    authInitialized = true;
+                    console.info('[Firebase Auth] Anonymous sign-in successful');
+                    resolve(true);
+                } catch (error) {
+                    console.error('[Firebase Auth] Anonymous sign-in failed:', error);
+                    isAuthenticated = false;
+                    authInitialized = true;
+                    resolve(false);
+                }
+            }
+        });
+    });
+}
+
+// Ensure authentication before operations
+async function ensureAuth() {
+    if (!authInitialized) {
+        await initializeAuth();
+    }
+    return isAuthenticated;
+}
 
 // Firebase Storage functions for images
 async function uploadImage(file, path) {
@@ -266,6 +314,8 @@ async function withRetry(operation, attempts = RETRY_ATTEMPTS) {
 
 // Enhanced CRUD operations with performance improvements
 async function firebaseAdd(collectionName, data) {
+    await ensureAuth(); // Ensure authenticated
+    
     if (!isOnline) {
         throw new Error('Offline - cannot perform write operations');
     }
@@ -290,6 +340,8 @@ async function firebaseAdd(collectionName, data) {
 }
 
 async function firebaseGet(collectionName, id = null) {
+    await ensureAuth(); // Ensure authenticated
+    
     const cacheKey = id ? `${collectionName}:${id}` : collectionName;
     
     // Check cache first
@@ -331,6 +383,8 @@ async function firebaseGet(collectionName, id = null) {
 }
 
 async function firebaseUpdate(collectionName, id, data) {
+    await ensureAuth(); // Ensure authenticated
+    
     if (!isOnline) {
         throw new Error('Offline - cannot perform write operations');
     }
@@ -353,6 +407,8 @@ async function firebaseUpdate(collectionName, id, data) {
 }
 
 async function firebaseDelete(collectionName, id) {
+    await ensureAuth(); // Ensure authenticated
+    
     if (!isOnline) {
         throw new Error('Offline - cannot perform write operations');
     }
@@ -372,6 +428,8 @@ async function firebaseDelete(collectionName, id) {
 }
 
 async function firebaseSet(collectionName, id, data) {
+    await ensureAuth(); // Ensure authenticated
+    
     if (!isOnline) {
         throw new Error('Offline - cannot perform write operations');
     }
@@ -441,9 +499,12 @@ function initializeRealtimeListeners(callbacks = {}) {
 export {
     db,
     storage,
+    auth,
     COLLECTIONS,
     cache,
     isOnline,
+    initializeAuth,
+    ensureAuth,
     initializeRealtimeListeners,
     cleanupListeners,
     withTimeout,
